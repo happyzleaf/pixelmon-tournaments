@@ -1,0 +1,20 @@
+[
+    {
+        "modid": "tournaments",
+        "name": "Tournaments",
+        "version": "2.7.2",
+        "description": "Advanced platform for Pixelmon tournaments",
+        "authorList": [
+            "Hiroku"
+        ],
+        "dependencies": [
+            "placeholderapi",
+            "spongeapi@7.1.0-SNAPSHOT",
+            "pixelmon"
+        ],
+        "requiredMods": [
+            "spongeapi@7.1.0-SNAPSHOT",
+            "pixelmon"
+        ]
+    }
+]
