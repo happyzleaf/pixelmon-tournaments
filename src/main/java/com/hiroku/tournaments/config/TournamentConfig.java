@@ -1,38 +1,34 @@
 package com.hiroku.tournaments.config;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.hiroku.tournaments.util.GsonUtils;
 
+import java.io.*;
+import java.util.ArrayList;
+
 /**
  * JSON object for storing all configurable elements for tournaments
- * 
+ *
  * @author Hiroku
  */
-public class TournamentConfig
-{
+public class TournamentConfig {
 	public static final String PATH = "config/tournaments/tournaments.json";
 	public static TournamentConfig INSTANCE;
-	
+
 	public ArrayList<String> baseCommandAliases = Lists.newArrayList("tournaments", "tournament", "tourneys", "tourney");
 	public ArrayList<String> baseEloCommandAliases = Lists.newArrayList("elo");
 	public boolean overrideForceEndBattleOption = true;
 	public int timeBeforeMatch = 30;
-	
+
 	private int nextZoneID = 0;
-	
+
 	public int eloFactor = 400;
-	/** The number of people on the elo leaderboard by default when using /elo list. */
+	/**
+	 * The number of people on the elo leaderboard by default when using /elo list.
+	 */
 	public int defaultEloTopNumber = 5;
-	
+
 	// All tournament messages
 	public String prefix = "&l&dTournament &6\u00BB &r";
 	public String joinMessage = "{{team}} &2joined the tournament!";
@@ -56,48 +52,38 @@ public class TournamentConfig
 	public String ignorePromptMessage = "&7Click here to ignore all tournament messages";
 	public String ignoreToggleOnMessage = "&7Tournament messages: &2on";
 	public String ignoreToggleOffMessage = "&7Tournament messages: &coff";
-	
-	
-	public static void load()
-	{
+
+
+	public static void load() {
 		INSTANCE = new TournamentConfig();
-		
+
 		File file = new File(PATH);
 		if (!file.exists())
 			INSTANCE.save();
-		else
-		{
-			try (InputStreamReader isr = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8))
-			{
+		else {
+			try (InputStreamReader isr = new InputStreamReader(new FileInputStream(file), Charsets.UTF_8)) {
 				INSTANCE = GsonUtils.prettyGson.fromJson(isr, TournamentConfig.class);
 				isr.close();
 				// Save for when new options have been added
 				INSTANCE.save();
-			}
-			catch (IOException ioe)
-			{
+			} catch (IOException ioe) {
 				ioe.printStackTrace();
 			}
 		}
 	}
-	
-	public void save()
-	{
+
+	public void save() {
 		File file = new File(PATH);
-		try(OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8))
-		{
+		try (OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(file), Charsets.UTF_8)) {
 			String json = GsonUtils.prettyGson.toJson(this);
 			osw.write(json);
 			osw.flush();
-		}
-		catch (IOException ioe)
-		{
+		} catch (IOException ioe) {
 			ioe.printStackTrace();
 		}
 	}
-	
-	public int getNextZoneID()
-	{
+
+	public int getNextZoneID() {
 		nextZoneID++;
 		save();
 		return nextZoneID;

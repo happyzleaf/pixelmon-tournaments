@@ -1,25 +1,20 @@
 package com.hiroku.tournaments.listeners;
 
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.network.ClientConnectionEvent;
-
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.rules.general.SetParty;
 import com.hiroku.tournaments.rules.player.RandomPokemon;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.network.ClientConnectionEvent;
 
-public class LoginListener
-{
+public class LoginListener {
 	@Listener
-	public void onLogin(ClientConnectionEvent.Join event)
-	{
-		if (Tournament.instance() == null 
+	public void onLogin(ClientConnectionEvent.Join event) {
+		if (Tournament.instance() == null
 				|| Tournament.instance().getTeam(event.getTargetEntity().getUniqueId()) == null
-				|| !Tournament.instance().getTeam(event.getTargetEntity().getUniqueId()).alive)
-		{
+				|| !Tournament.instance().getTeam(event.getTargetEntity().getUniqueId()).alive) {
 			RandomPokemon.removeRentalPokemon(event.getTargetEntity(), true);
 			SetParty.restoreLevels(event.getTargetEntity());
-		}
-		else
+		} else
 			Tournament.instance().getTeam(event.getTargetEntity().getUniqueId()).refreshUser(event.getTargetEntity());
 	}
 }

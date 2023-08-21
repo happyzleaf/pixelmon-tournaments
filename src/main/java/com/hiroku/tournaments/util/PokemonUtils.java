@@ -1,19 +1,17 @@
 package com.hiroku.tournaments.util;
 
-import org.spongepowered.api.entity.living.player.User;
-
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 import com.pixelmonmod.pixelmon.api.pokemon.PokemonSpec;
-
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.entity.living.player.User;
 
-public class PokemonUtils
-{
+public class PokemonUtils {
 	public static final String FORGE_KEY = "ForgeData";
 
-	/** Converts a {@link PokemonSpec} to a string */
-	public static String serializePokemonSpec(PokemonSpec spec)
-	{
+	/**
+	 * Converts a {@link PokemonSpec} to a string
+	 */
+	public static String serializePokemonSpec(PokemonSpec spec) {
 		String line = "";
 		if (spec.name != null)
 			line += spec.name;
@@ -37,11 +35,10 @@ public class PokemonUtils
 			line += "nature:" + spec.nature;
 		return line;
 	}
-	
-	public static void stripHeldItem(User user, Pokemon pokemon)
-	{
+
+	public static void stripHeldItem(User user, Pokemon pokemon) {
 		ItemStack heldItem = pokemon.getHeldItem();
 		if (heldItem != ItemStack.EMPTY)
-			user.getInventory().offer((org.spongepowered.api.item.inventory.ItemStack)(Object)heldItem);
+			user.getInventory().offer((org.spongepowered.api.item.inventory.ItemStack) (Object) heldItem);
 	}
 }

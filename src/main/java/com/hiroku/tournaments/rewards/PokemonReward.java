@@ -15,40 +15,38 @@ import org.spongepowered.api.text.format.TextColors;
 
 /**
  * Reward which gives the player a Pokémon as described by the PokemonSpec standard.
- * 
+ *
  * @author Hiroku
  */
-public class PokemonReward extends RewardBase
-{
-	/** The specification of the Pokémon to give */
+public class PokemonReward extends RewardBase {
+	/**
+	 * The specification of the Pokémon to give
+	 */
 	public final PokemonSpec spec;
-	
-	public PokemonReward(String arg) throws Exception
-	{
+
+	public PokemonReward(String arg) throws Exception {
 		super(arg);
-		
+
 		this.spec = PokemonSpec.from(arg.split(","));
 		if (spec.name == null)
 			throw new Exception("No Pokemon!");
 	}
 
 	@Override
-	public void give(Player player)
-	{
-		EntityPixelmon pokemon = (EntityPixelmon) PixelmonEntityList.createEntityByName(spec.name, (World)player.getWorld());
+	public void give(Player player) {
+		EntityPixelmon pokemon = (EntityPixelmon) PixelmonEntityList.createEntityByName(spec.name, (World) player.getWorld());
 		spec.apply(pokemon);
-		
+
 		PlayerPartyStorage storage = Pixelmon.storageManager.getParty((EntityPlayerMP) player);//.pokeBallManager.getPlayerStorage((EntityPlayerMP)player).get();
 		storage.add(pokemon.getPokemonData());//.addToParty(pokemon);
 
-		player.sendMessage(Text.of(TextColors.DARK_GREEN, "You received a ", 
+		player.sendMessage(Text.of(TextColors.DARK_GREEN, "You received a ",
 				(pokemon.getPokemonData().isShiny() ? Text.of(TextColors.YELLOW, "shiny ") : ""), TextColors.DARK_AQUA, pokemon.getName(),
 				TextColors.DARK_GREEN, " as a reward!"));
 	}
 
 	@Override
-	public Text getDisplayText()
-	{
+	public Text getDisplayText() {
 		Text.Builder builder = Text.builder().append(Text.of(TextColors.GOLD, "Pokémon: "));
 		if (spec.shiny != null && spec.shiny)
 			builder.append(Text.of(TextColors.YELLOW, "Shiny", TextColors.GOLD, ", "));
@@ -58,14 +56,12 @@ public class PokemonReward extends RewardBase
 	}
 
 	@Override
-	public boolean visibleToAll()
-	{
+	public boolean visibleToAll() {
 		return true;
 	}
 
 	@Override
-	public String getSerializationString()
-	{
+	public String getSerializationString() {
 		return "pokemon:" + PokemonUtils.serializePokemonSpec(spec);
 	}
 }
