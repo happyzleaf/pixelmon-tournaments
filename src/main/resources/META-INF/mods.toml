@@ -1,0 +1,27 @@
+modLoader="javafml"
+loaderVersion="[36,)"
+license="GNU General Public License v3.0"
+[[mods]]
+modId="tournaments"
+version="${file.jarVersion}"
+displayName="Tournaments"
+authors="Hiroku, happyz"
+description="Advanced tournaments platform for reforged.gg"
+[[dependencies.tournaments]]
+   modId="forge"
+   mandatory=true
+   versionRange="[36,)"
+   ordering="NONE"
+   side="BOTH"
+[[dependencies.tournaments]]
+   modId="minecraft"
+   mandatory=true
+   versionRange="[1.16.5,1.17)"
+   ordering="NONE"
+   side="BOTH"
+[[dependencies.tournaments]]
+modId = "pixelmon"
+mandatory = true
+versionRange = "[9.1.6,)"
+ordering = "AFTER"
+side = "SERVER"

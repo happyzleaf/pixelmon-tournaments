@@ -62,10 +62,10 @@ import net.minecraftforge.fml.common.eventhandler.EventBus;
  * 
  * @author Hiroku
  */
-@Plugin(id = Tournaments.ID, 
-		name = Tournaments.NAME, 
-		version = Tournaments.VERSION, 
-		description = Tournaments.DESCRIPTION, 
+@Plugin(id = Tournaments.ID,
+		name = Tournaments.NAME,
+		version = Tournaments.VERSION,
+		description = Tournaments.DESCRIPTION,
 		authors = Tournaments.AUTHORS,
 		dependencies = {@Dependency(id = Pixelmon.MODID), @Dependency(id = "placeholderapi", optional = true)})
 public class Tournaments
@@ -79,7 +79,7 @@ public class Tournaments
 	public static final PluginLogger LOGGER = new PluginLogger(ID);
 	
 	public static Tournaments INSTANCE;
-	
+
 	// Pixelmon listeners
 	public static final BattleListener battleListener = new BattleListener();
 	public static final ExperienceListener experienceListener = new ExperienceListener();
