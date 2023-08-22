@@ -1,28 +1,30 @@
 package com.hiroku.tournaments.obj;
 
-import com.flowpowered.math.vector.Vector3d;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-
-import java.util.UUID;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.math.vector.Vector2f;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.World;
 
 public class LocationWrapper {
-	public UUID worldUUID;
+	public RegistryKey<World> dimensionKey;
 	public Vector3d position;
-	public Vector3d rotation;
+	public Vector2f rotation;
 
 	public LocationWrapper() {
 	}
 
-	public LocationWrapper(Location<World> location, Vector3d rotation) {
-		this.worldUUID = location.getExtent().getUniqueId();
-		this.position = location.getPosition();
+	public LocationWrapper(World world, Vector3d position, Vector2f rotation) {
+		this.dimensionKey = world.getDimensionKey();
+		this.position = position;
 		this.rotation = rotation;
 	}
 
-	public void sendPlayer(Player player) {
-		player.setLocationAndRotation(new Location<>(Sponge.getServer().getWorld(worldUUID).get(), position), rotation);
+	public void sendPlayer(PlayerEntity player) {
+		if (!player.getEntityWorld().getDimensionKey().equals(dimensionKey)) {
+			player.setWorld(player.getServer().getWorld(dimensionKey));
+		}
+
+		player.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), rotation.x, rotation.y);
 	}
 }

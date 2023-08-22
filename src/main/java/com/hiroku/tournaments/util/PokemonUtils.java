@@ -1,17 +1,16 @@
 package com.hiroku.tournaments.util;
 
+import com.pixelmonmod.api.pokemon.PokemonSpecification;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
-import com.pixelmonmod.pixelmon.api.pokemon.PokemonSpec;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.entity.living.player.User;
 
 public class PokemonUtils {
 	public static final String FORGE_KEY = "ForgeData";
 
 	/**
-	 * Converts a {@link PokemonSpec} to a string
+	 * Converts a {@link PokemonSpecification} to a string
 	 */
-	public static String serializePokemonSpec(PokemonSpec spec) {
+	public static String serializePokemonSpec(PokemonSpecification spec) {
 		String line = "";
 		if (spec.name != null)
 			line += spec.name;

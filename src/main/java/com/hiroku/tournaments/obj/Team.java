@@ -1,25 +1,29 @@
 package com.hiroku.tournaments.obj;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.commands.JoinCommand;
-import net.minecraft.entity.player.EntityPlayerMP;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Util;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Representation of a team, whether it be a single player or several.
  *
  * @author Hiroku
+ * @author happyz
  */
 public class Team {
 	/**
 	 * The list of {@link User}s in the team.
 	 */
-	public List<User> users = new ArrayList<User>();
+	public List<User> users = new ArrayList<>();
 	/**
 	 * Whether the team is alive or knocked out.
 	 */
@@ -36,23 +40,26 @@ public class Team {
 	 * @return - true if the given UUID matches a member of this team, otherwise false/
 	 */
 	public boolean hasPlayer(UUID uuid) {
-		for (User user : users)
-			if (user.getUniqueId().equals(uuid))
+		for (User user : users) {
+			if (user.id.equals(uuid)) {
 				return true;
+			}
+		}
+
 		return false;
 	}
 
 	/**
-	 * Creates a Team based off a list of {@link Player}s.
+	 * Creates a Team based off a list of {@link PlayerEntity}s.
 	 *
-	 * @param players - An array of {@link Player}s.
+	 * @param players - An array of {@link PlayerEntity}s.
 	 * @return - The newly created {@link Team}.
 	 */
-	public static Team of(Player... players) {
+	public static Team of(PlayerEntity... players) {
 		Team team = new Team();
-		for (User user : players) {
-			team.users.add(user);
-			JoinCommand.teamInvitations.remove(user.getUniqueId());
+		for (PlayerEntity player : players) {
+			team.users.add(new User(player));
+			JoinCommand.teamInvitations.remove(player.getUniqueID());
 		}
 		return team;
 	}
@@ -65,21 +72,7 @@ public class Team {
 	 */
 	public static Team of(User... users) {
 		Team team = new Team();
-		team.users.addAll(Collections.singletonList(users));
-		return team;
-	}
-
-	/**
-	 * Creates a Team based off a list of {@link EntityPlayerMP}s.
-	 *
-	 * @param players - An array of {@link EntityPlayerMP}s.
-	 * @return - The newly created {@link Team}.
-	 */
-	public static Team of(EntityPlayerMP... players) {
-		Team team = new Team();
-		for (EntityPlayerMP player : players)
-			// I'm actually not entirely sure if a cast from EntityPlayerMP->User would work, so I'll play it safe
-			team.users.add(Sponge.getServer().getPlayer(player.getUniqueID()).get());
+		team.users.addAll(Arrays.asList(users));
 		return team;
 	}
 
@@ -91,9 +84,12 @@ public class Team {
 	 */
 	public int getNumPlayers(boolean countOffline) {
 		int count = 0;
-		for (User user : users)
-			if (user.isOnline() || countOffline)
+		for (User user : users) {
+			if (user.isOnline() || countOffline) {
 				count++;
+			}
+		}
+
 		return count;
 	}
 
@@ -102,21 +98,23 @@ public class Team {
 	 */
 	public ArrayList<UUID> getUUIDs() {
 		ArrayList<UUID> uuids = new ArrayList<>();
-		for (User user : users)
-			uuids.add(user.getUniqueId());
+		for (User user : users) {
+			uuids.add(user.id);
+		}
+
 		return uuids;
 	}
 
 	/**
 	 * Gets the display text for this team.
 	 *
-	 * @return - The {@link Text} to display to represent this team.
+	 * @return - The {@link ITextComponent} to display to represent this team.
 	 */
 	public Text getDisplayText() {
 		if (users.size() == 1)
-			return Text.of(TextColors.DARK_AQUA, users.get(0).getName());
+			return Text.of(TextFormatting.DARK_AQUA, users.get(0).getName());
 		else
-			return Text.of(TextColors.DARK_AQUA, users.get(0).getName(), TextColors.GOLD, " & ", TextColors.DARK_AQUA, users.get(1).getName());
+			return Text.of(TextFormatting.DARK_AQUA, users.get(0).getName(), TextFormatting.GOLD, " & ", TextFormatting.DARK_AQUA, users.get(1).getName());
 	}
 
 	/**
@@ -125,7 +123,7 @@ public class Team {
 	public void sendMessage(Text text) {
 		for (User user : users)
 			if (user.isOnline())
-				user.getPlayer().get().sendMessage(text);
+				user.getPlayer().sendMessage(text, Util.DUMMY_UUID);
 	}
 
 	/**
@@ -133,7 +131,7 @@ public class Team {
 	 */
 	public void refreshUser(User user) {
 		for (int i = 0; i < users.size(); i++) {
-			if (users.get(i).getUniqueId().equals(user.getUniqueId())) {
+			if (users.get(i).id.equals(user.id)) {
 				users.remove(i);
 				users.add(i, user);
 				return;

@@ -1,5 +1,7 @@
 package com.hiroku.tournaments;
 
+import com.happyzleaf.tournaments.Scheduler;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.Match;
 import com.hiroku.tournaments.api.Preset;
 import com.hiroku.tournaments.config.TournamentConfig;
@@ -8,13 +10,13 @@ import com.hiroku.tournaments.obj.Side;
 import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.obj.Zone;
 import com.hiroku.tournaments.util.GsonUtils;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.User;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -23,6 +25,7 @@ import java.util.Map.Entry;
  * Managing object for all the teleport zones.
  *
  * @author Hiroku
+ * @author happyz
  */
 public class Zones {
 	public static final String PATH = "config/tournaments/zones.json";
@@ -90,17 +93,17 @@ public class Zones {
 		}
 
 		if (this.leaveZone != null) {
-			Sponge.getScheduler().createTaskBuilder()
-					.delayTicks(60)
-					.execute(t -> {
-						for (Side side : match.sides)
-							for (Team team : side.teams)
-								for (User user : team.users)
-									if (user.isOnline())
-										leaveZone.sendPlayer(user.getPlayer().get());
-						t.cancel();
-					})
-					.submit(Tournaments.INSTANCE);
+			Scheduler.delayTicks(60, () -> {
+				for (Side side : match.sides) {
+					for (Team team : side.teams) {
+						for (User user : team.users) {
+							if (user.isOnline()) {
+								leaveZone.sendPlayer(user.getPlayer());
+							}
+						}
+					}
+				}
+			});
 		}
 	}
 
@@ -142,14 +145,7 @@ public class Zones {
 
 	public void save() {
 		try {
-			// This could be done more directly with toJson(pw, this) but for whatever reason I've seen this fail
-			// to write anything. No idea why but I never did work it out. Weird stuff, but this way DOES work, so.
-			// - Roku
-			PrintWriter pw = new PrintWriter(PATH);
-			String json = GsonUtils.prettyGson.toJson(this);
-			pw.print(json);
-			pw.flush();
-			pw.close();
+			Files.write(Paths.get(PATH), GsonUtils.prettyGson.toJson(this).getBytes(StandardCharsets.UTF_8));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

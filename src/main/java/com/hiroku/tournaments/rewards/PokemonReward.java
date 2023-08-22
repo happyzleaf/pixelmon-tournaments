@@ -1,17 +1,16 @@
 package com.hiroku.tournaments.rewards;
 
+import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.reward.RewardBase;
 import com.hiroku.tournaments.util.PokemonUtils;
+import com.pixelmonmod.api.pokemon.PokemonSpecification;
+import com.pixelmonmod.api.pokemon.PokemonSpecificationProxy;
+import com.pixelmonmod.api.pokemon.requirement.impl.SpeciesRequirement;
+import com.pixelmonmod.api.registry.RegistryValue;
+import com.pixelmonmod.api.requirement.Requirement;
 import com.pixelmonmod.pixelmon.Pixelmon;
-import com.pixelmonmod.pixelmon.api.pokemon.PokemonSpec;
-import com.pixelmonmod.pixelmon.config.PixelmonEntityList;
-import com.pixelmonmod.pixelmon.entities.pixelmon.EntityPixelmon;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
 
 /**
  * Reward which gives the player a Pokémon as described by the PokemonSpec standard.
@@ -22,18 +21,20 @@ public class PokemonReward extends RewardBase {
 	/**
 	 * The specification of the Pokémon to give
 	 */
-	public final PokemonSpec spec;
+	public final PokemonSpecification spec;
 
 	public PokemonReward(String arg) throws Exception {
 		super(arg);
 
-		this.spec = PokemonSpec.from(arg.split(","));
-		if (spec.name == null)
+		this.spec = PokemonSpecificationProxy.create(arg.split(","));
+		// TODO: move this to an utility? vvvv
+		if (!this.spec.getRequirement(SpeciesRequirement.class).map(Requirement::getValue).flatMap(RegistryValue::getValue).isPresent()) {
 			throw new Exception("No Pokemon!");
+		}
 	}
 
 	@Override
-	public void give(Player player) {
+	public void give(PlayerEntity player) {
 		EntityPixelmon pokemon = (EntityPixelmon) PixelmonEntityList.createEntityByName(spec.name, (World) player.getWorld());
 		spec.apply(pokemon);
 
@@ -47,12 +48,14 @@ public class PokemonReward extends RewardBase {
 
 	@Override
 	public Text getDisplayText() {
-		Text.Builder builder = Text.builder().append(Text.of(TextColors.GOLD, "Pokémon: "));
-		if (spec.shiny != null && spec.shiny)
-			builder.append(Text.of(TextColors.YELLOW, "Shiny", TextColors.GOLD, ", "));
-		if (spec.level != null)
-			builder.append(Text.of(TextColors.DARK_AQUA, "Level ", spec.level, " "));
-		return builder.append(Text.of(TextColors.DARK_AQUA, spec.name)).build();
+		// TODO: Text.Builder????
+//		Text.Builder builder = Text.builder().append(Text.of(TextColors.GOLD, "Pokémon: "));
+//		if (spec.shiny != null && spec.shiny)
+//			builder.append(Text.of(TextColors.YELLOW, "Shiny", TextColors.GOLD, ", "));
+//		if (spec.level != null)
+//			builder.append(Text.of(TextColors.DARK_AQUA, "Level ", spec.level, " "));
+//		return builder.append(Text.of(TextColors.DARK_AQUA, spec.name)).build();
+		return Text.WIP;
 	}
 
 	@Override
@@ -62,6 +65,8 @@ public class PokemonReward extends RewardBase {
 
 	@Override
 	public String getSerializationString() {
+//		spec.write TODO: write to tag then serialize
+
 		return "pokemon:" + PokemonUtils.serializePokemonSpec(spec);
 	}
 }

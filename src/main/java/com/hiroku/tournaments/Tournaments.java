@@ -3,10 +3,7 @@ package com.hiroku.tournaments;
 import com.hiroku.tournaments.api.reward.RewardTypeRegistrar;
 import com.hiroku.tournaments.api.rule.RuleTypeRegistrar;
 import com.hiroku.tournaments.api.tiers.TierLoader;
-import com.hiroku.tournaments.commands.TournamentsExecutor;
-import com.hiroku.tournaments.commands.elo.EloExecutor;
 import com.hiroku.tournaments.config.TournamentConfig;
-import com.hiroku.tournaments.elo.EloPlaceholder;
 import com.hiroku.tournaments.elo.EloStorage;
 import com.hiroku.tournaments.listeners.*;
 import com.hiroku.tournaments.rewards.CommandReward;
@@ -26,18 +23,18 @@ import com.hiroku.tournaments.rules.team.PartyMax;
 import com.hiroku.tournaments.rules.team.PartyMin;
 import com.hiroku.tournaments.util.PluginLogger;
 import com.hiroku.tournaments.util.TournamentUtils;
+import com.pixelmonmod.api.pokemon.PokemonSpecificationProxy;
+import com.pixelmonmod.api.pokemon.requirement.impl.HasSpecFlagRequirement;
 import com.pixelmonmod.pixelmon.Pixelmon;
-import com.pixelmonmod.pixelmon.api.pokemon.PokemonSpec;
-import com.pixelmonmod.pixelmon.api.pokemon.SpecFlag;
-import com.pixelmonmod.pixelmon.config.EnumForceBattleResult;
-import com.pixelmonmod.pixelmon.config.PixelmonConfig;
-import net.minecraftforge.fml.common.eventhandler.EventBus;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.game.state.GameInitializationEvent;
-import org.spongepowered.api.event.game.state.GamePostInitializationEvent;
-import org.spongepowered.api.plugin.Dependency;
-import org.spongepowered.api.plugin.Plugin;
+import com.pixelmonmod.pixelmon.api.config.ForceBattleEndResult;
+import com.pixelmonmod.pixelmon.api.config.PixelmonConfigProxy;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.BusBuilder;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,53 +43,51 @@ import java.util.Collections;
  * Base plugin class for the Tournaments plugin/API
  *
  * @author Hiroku
+ * @author happyz
  */
-@Plugin(id = Tournaments.ID,
-		name = Tournaments.NAME,
-		version = Tournaments.VERSION,
-		description = Tournaments.DESCRIPTION,
-		authors = Tournaments.AUTHORS,
-		dependencies = {@Dependency(id = Pixelmon.MODID), @Dependency(id = "placeholderapi", optional = true)})
+@Mod("tournaments")
 public class Tournaments {
-	public static final String ID = "tournaments";
-	public static final String NAME = "Tournaments";
-	public static final String VERSION = "2.7.0";
-	public static final String DESCRIPTION = "Advanced platform for Pixelmon tournaments";
-	public static final String AUTHORS = "Hiroku";
-	public static final EventBus EVENT_BUS = new EventBus();
-	public static final PluginLogger LOGGER = new PluginLogger(ID);
+	public static final String VERSION = "3.0.0";
 
 	public static Tournaments INSTANCE;
+	public static final PluginLogger LOGGER = new PluginLogger("tournaments");
+	public static final IEventBus EVENT_BUS = BusBuilder.builder().build();
 
-	// Pixelmon listeners
-	public static final BattleListener battleListener = new BattleListener();
-	public static final ExperienceListener experienceListener = new ExperienceListener();
-	public static final BreedListener breedListener = new BreedListener();
-	public static final TradeListener tradeListener = new TradeListener();
-
-	// Sponge listeners
-	public static final LoginListener loginListener = new LoginListener();
+	public static final BattleListener BATTLE_LISTENER = new BattleListener();
+	public static final ExperienceListener EXPERIENCE_LISTENER = new ExperienceListener();
+	public static final BreedListener BREED_LISTENER = new BreedListener();
+	public static final TradeListener TRADE_LISTENER = new TradeListener();
+	public static final LoginListener LOGIN_LISTENER = new LoginListener();
 
 	public static void log(String msg) {
 		LOGGER.log("Tournaments \u00BB " + msg);
 	}
 
-	@Listener
-	public void onGameInit(GameInitializationEvent event) {
+	public Tournaments() {
 		INSTANCE = this;
 
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onSetup);
+	}
+
+	private void onSetup(FMLCommonSetupEvent event) {
+		MinecraftForge.EVENT_BUS.addListener(this::onStart);
+//		MinecraftForge.EVENT_BUS.addListener(this::onRegisterCommands);
+	}
+
+	private void onStart(FMLServerAboutToStartEvent event) {
 		log("Initializing Tournaments version " + VERSION + ", last updated for Pixelmon " + Pixelmon.VERSION + "...");
 		log("This platform was written by Hiroku!");
 
 		TournamentUtils.createDir("config/tournaments");
 		TournamentUtils.createDir("data/tournaments");
 
-		Pixelmon.EVENT_BUS.register(battleListener);
-		Pixelmon.EVENT_BUS.register(experienceListener);
-		Pixelmon.EVENT_BUS.register(breedListener);
-		Pixelmon.EVENT_BUS.register(tradeListener);
+		Pixelmon.EVENT_BUS.register(BATTLE_LISTENER);
+		Pixelmon.EVENT_BUS.register(EXPERIENCE_LISTENER);
+		Pixelmon.EVENT_BUS.register(BREED_LISTENER);
+		Pixelmon.EVENT_BUS.register(TRADE_LISTENER);
 
-		Sponge.getEventManager().registerListeners(this, loginListener);
+		// TODO: login listener
+//		Sponge.getEventManager().registerListeners(this, loginListener);
 
 		registerDefaultRules();
 		registerDefaultRewards();
@@ -103,24 +98,23 @@ public class Tournaments {
 		Presets.load();
 		EloStorage.load();
 
-		if (PixelmonConfig.forceEndBattleResult != EnumForceBattleResult.ABNORMAL) {
-			if (TournamentConfig.INSTANCE.overrideForceEndBattleOption)
-				PixelmonConfig.forceEndBattleResult = EnumForceBattleResult.ABNORMAL;
-			else
-				log("WARNING: forceEndBattleResult in pixelmon.hocon should be set to 2. Ending bugged tournament battles will not go well!");
+		if (PixelmonConfigProxy.getBattle().getForceEndBattleResult() != ForceBattleEndResult.ABNORMAL) {
+			// TODO: check if this is still in pixelmon.hocon
+			log("WARNING: forceEndBattleResult in pixelmon.hocon should be set to 2. Ending bugged tournament battles will not go well!");
 		}
 
-		if (Sponge.getPluginManager().isLoaded("placeholderapi"))
-			EloPlaceholder.addPlaceholder();
+//		if (Sponge.getPluginManager().isLoaded("placeholderapi"))
+//			EloPlaceholder.addPlaceholder();
 
-		PokemonSpec.extraSpecTypes.add(new SpecFlag("rental"));
+		PokemonSpecificationProxy.register(new HasSpecFlagRequirement("rental"));
 	}
 
-	@Listener
-	public void onGameStart(GamePostInitializationEvent event) {
-		Sponge.getCommandManager().register(this, TournamentsExecutor.getSpec(), TournamentConfig.INSTANCE.baseCommandAliases);
-		Sponge.getCommandManager().register(this, EloExecutor.getSpec(), TournamentConfig.INSTANCE.baseEloCommandAliases);
-	}
+	// TODO: commands
+//	@Listener
+//	public void onGameStart(GamePostInitializationEvent event) {
+//		Sponge.getCommandManager().register(this, TournamentsExecutor.getSpec(), TournamentConfig.INSTANCE.baseCommandAliases);
+//		Sponge.getCommandManager().register(this, EloExecutor.getSpec(), TournamentConfig.INSTANCE.baseEloCommandAliases);
+//	}
 
 	public void registerDefaultRules() {
 		RuleTypeRegistrar.registerRuleType(Arrays.asList("setparty", "setlevel"), SetParty.class);

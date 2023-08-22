@@ -2,10 +2,10 @@ package com.hiroku.tournaments.util;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTPrimitive;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.NumberNBT;
+import net.minecraft.nbt.StringNBT;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,30 +20,30 @@ public class GsonUtils {
 	 */
 	public static final Gson uglyGson = new GsonBuilder().create();
 
-	public static String serialize(NBTTagCompound nbt) {
+	public static String serialize(CompoundNBT nbt) {
 		Map<String, Object> map = nbtToMap(nbt);
 		return uglyGson.toJson(map);
 	}
 
 	@SuppressWarnings("unchecked")
-	public static NBTTagCompound deserialize(String json) {
+	public static CompoundNBT deserialize(String json) {
 		Map<String, Object> map = uglyGson.fromJson(json, Map.class);
 		return nbtFromMap(map);
 	}
 
-	public static Map<String, Object> nbtToMap(NBTTagCompound nbt) {
+	public static Map<String, Object> nbtToMap(CompoundNBT nbt) {
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		for (String key : nbt.getKeySet()) {
+		for (String key : nbt.keySet()) {
 			try {
-				NBTBase base = nbt.getTag(key);
+				INBT base = nbt.get(key);
 
-				if (base instanceof NBTTagString)
-					map.put(key, ((NBTTagString) base).getString());
-				else if (base instanceof NBTPrimitive)
-					map.put(key, ((NBTPrimitive) base).getDouble());
-				else if (base instanceof NBTTagCompound)
-					map.put(key, nbtToMap((NBTTagCompound) base));
+				if (base instanceof StringNBT)
+					map.put(key, base.getString());
+				else if (base instanceof NumberNBT)
+					map.put(key, ((NumberNBT) base).getDouble());
+				else if (base instanceof CompoundNBT)
+					map.put(key, nbtToMap((CompoundNBT) base));
 			} catch (Exception exc) {}
 		}
 
@@ -51,17 +51,18 @@ public class GsonUtils {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static NBTTagCompound nbtFromMap(Map<String, Object> map) {
-		NBTTagCompound nbt = new NBTTagCompound();
+	public static CompoundNBT nbtFromMap(Map<String, Object> map) {
+		CompoundNBT nbt = new CompoundNBT();
 
 		for (String key : map.keySet()) {
 			try {
-				if (map.get(key) instanceof String)
-					nbt.setString(key, (String) map.get(key));
-				else if (map.get(key) instanceof Map)
-					nbt.setTag(key, nbtFromMap((Map<String, Object>) map.get(key)));
-				else
-					nbt.setDouble(key, (Double) map.get(key));
+				if (map.get(key) instanceof String) {
+					nbt.putString(key, (String) map.get(key));
+				} else if (map.get(key) instanceof Map) {
+					nbt.put(key, nbtFromMap((Map<String, Object>) map.get(key)));
+				} else {
+					nbt.putDouble(key, (Double) map.get(key));
+				}
 			} catch (Exception exc) {}
 		}
 

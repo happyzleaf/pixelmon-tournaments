@@ -18,7 +18,6 @@ public class TournamentConfig {
 
 	public ArrayList<String> baseCommandAliases = Lists.newArrayList("tournaments", "tournament", "tourneys", "tourney");
 	public ArrayList<String> baseEloCommandAliases = Lists.newArrayList("elo");
-	public boolean overrideForceEndBattleOption = true;
 	public int timeBeforeMatch = 30;
 
 	private int nextZoneID = 0;
