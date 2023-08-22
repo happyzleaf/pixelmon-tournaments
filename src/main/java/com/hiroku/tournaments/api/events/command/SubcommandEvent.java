@@ -15,5 +15,5 @@ public class SubcommandEvent extends Event {
 	/**
 	 * The subcommands to register under /tournament
 	 */
-	public ArrayList<TournamentCommandWrapper> subcommands = new ArrayList<TournamentCommandWrapper>();
+	public ArrayList<TournamentCommandWrapper> subcommands = new ArrayList<>();
 }

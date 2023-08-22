@@ -36,7 +36,7 @@ public class Healing extends PlayerRule {
 	/**
 	 * A mapping from player UUID to a list of the previously saved states of a player's party. This is updated after each battle.
 	 */
-	public HashMap<UUID, ArrayList<PokemonState>> states = new HashMap<UUID, ArrayList<PokemonState>>();
+	public HashMap<UUID, ArrayList<PokemonState>> states = new HashMap<>();
 
 	public Healing(String arg) throws Exception {
 		super(arg);
@@ -80,7 +80,7 @@ public class Healing extends PlayerRule {
 				for (User user : team.users) {
 					try {
 						PlayerPartyStorage storage = Pixelmon.storageManager.getParty(user.getUniqueId());
-						ArrayList<PokemonState> playerStates = new ArrayList<PokemonState>();
+						ArrayList<PokemonState> playerStates = new ArrayList<>();
 						for (Pokemon pokemon : storage.getTeam())
 							playerStates.add(new PokemonState(pokemon));
 						this.states.put(user.getUniqueId(), playerStates);

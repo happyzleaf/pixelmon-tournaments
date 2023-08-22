@@ -1,10 +1,7 @@
 package com.hiroku.tournaments.rewards;
 
+import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.reward.RewardBase;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 
 /**
  * Reward which executes a command with the player's username inserted in place of {{player}}

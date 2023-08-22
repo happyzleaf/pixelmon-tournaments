@@ -1,7 +1,7 @@
 package com.hiroku.tournaments.api.reward;
 
 import com.hiroku.tournaments.api.Mode;
-import org.spongepowered.api.entity.living.player.Player;
+import net.minecraft.entity.player.PlayerEntity;
 
 /**
  * Abstract representation of a reward for winning a match in a tournament
@@ -20,11 +20,11 @@ public abstract class RewardBase extends Mode {
 
 	/**
 	 * e
-	 * Describes how to give a {@link Player} this reward.
+	 * Describes how to give a {@link PlayerEntity} this reward.
 	 *
-	 * @param player - The {@link Player} to give this reward to.
+	 * @param player - The {@link PlayerEntity} to give this reward to.
 	 */
-	public abstract void give(Player player);
+	public abstract void give(PlayerEntity player);
 
 	/**
 	 * Gets the string form of this rule for serializing. This is effectively how the mode would be added. eg. 'levelmax:50'.

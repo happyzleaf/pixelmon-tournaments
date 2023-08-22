@@ -13,7 +13,7 @@ import org.spongepowered.api.text.format.TextColors;
 import java.util.ArrayList;
 
 public class DisallowedMove extends PlayerRule {
-	public ArrayList<String> moves = new ArrayList<String>();
+	public ArrayList<String> moves = new ArrayList<>();
 
 	public DisallowedMove(String arg) throws Exception {
 		super(arg);

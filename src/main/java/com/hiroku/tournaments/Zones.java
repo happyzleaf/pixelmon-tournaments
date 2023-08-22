@@ -30,9 +30,9 @@ import java.util.Map.Entry;
 public class Zones {
 	public static final String PATH = "config/tournaments/zones.json";
 	public static Zones INSTANCE = new Zones();
-	private static final HashMap<Zone, Match> zoneMatches = new HashMap<Zone, Match>();
+	private static final HashMap<Zone, Match> zoneMatches = new HashMap<>();
 
-	private final ArrayList<Zone> zones = new ArrayList<Zone>();
+	private final ArrayList<Zone> zones = new ArrayList<>();
 
 	public LocationWrapper leaveZone = null;
 
@@ -69,7 +69,7 @@ public class Zones {
 	}
 
 	public ArrayList<Zone> getEngagedZones() {
-		ArrayList<Zone> engagedZones = new ArrayList<Zone>();
+		ArrayList<Zone> engagedZones = new ArrayList<>();
 		for (Zone zone : zones)
 			if (zone.engaged)
 				engagedZones.add(zone);

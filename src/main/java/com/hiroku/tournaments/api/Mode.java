@@ -1,25 +1,25 @@
 package com.hiroku.tournaments.api;
 
 import com.google.common.collect.ImmutableList;
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.obj.Side;
 import com.hiroku.tournaments.obj.Team;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.Text;
+import net.minecraft.entity.player.PlayerEntity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Abstract base for objects that may function as some form of mode for a tournament. This includes rules and rewards.
  *
  * @author Hiroku
+ * @author happyz
  */
 public abstract class Mode {
 	/**
 	 * Used when no matches remain. Returning null is default (implies this mode does not calculate winners),
-	 * otherwise provided <code>winners</code> ArrayList should be returned, empty if there were no winners.
+	 * otherwise provided <code>winners</code> List should be returned, empty if there were no winners.
 	 *
 	 * @param tournament - The tournament to calculate winners for
 	 * @param teams      - The teams of the tournament (includes teams with alive = false)
@@ -27,7 +27,7 @@ public abstract class Mode {
 	 * @return - The winners list either as it was or with {@link Team}s added. Returns null when this mode does
 	 * not calculate winners.
 	 */
-	public ArrayList<Team> calculateWinners(Tournament tournament, ArrayList<Team> teams, ArrayList<Team> winners) {
+	public List<Team> calculateWinners(Tournament tournament, List<Team> teams, List<Team> winners) {
 		return null;
 	}
 
@@ -36,10 +36,10 @@ public abstract class Mode {
 	 * indicate the end of a tournament. If this returns null, this mode does not do matchmaking.
 	 *
 	 * @param tournament - The tournament to create matches for
-	 * @return - An ArrayList of Match either empty or filled with a round of matches. Returning
+	 * @return - A List of Match either empty or filled with a round of matches. Returning
 	 * null means this mode does not do matchmaking.
 	 */
-	public ArrayList<Match> createMatches(Tournament tournament) {
+	public List<Match> createMatches(Tournament tournament) {
 		return null;
 	}
 
@@ -231,7 +231,7 @@ public abstract class Mode {
 	}
 
 	/**
-	 * Whether or not this will appear to everyone or only to those with permission
+	 * Whether this will appear to everyone or only to those with permission
 	 * node <code>tournaments.commands.rules.modify</code>
 	 *
 	 * @return true if everyone can see it, false if they require the modify node.
@@ -247,7 +247,7 @@ public abstract class Mode {
 	 *
 	 * @return true if they can see this rule, false if they can't
 	 */
-	public boolean canShow(Player player) {
+	public boolean canShow(PlayerEntity player) {
 		return getDisplayText() != null && (visibleToAll() || player == null);
 	}
 }

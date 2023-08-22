@@ -13,7 +13,7 @@ import java.util.List;
  * @author Hiroku
  */
 public final class RuleTypeRegistrar {
-	private static final HashMap<List<String>, Class<? extends RuleBase>> ruleTypes = new HashMap<List<String>, Class<? extends RuleBase>>();
+	private static final HashMap<List<String>, Class<? extends RuleBase>> ruleTypes = new HashMap<>();
 
 	/**
 	 * Registers a particular rule for the given set of keys. If there exists a rule that has a key that also exists
@@ -33,7 +33,7 @@ public final class RuleTypeRegistrar {
 		if (duplicate != null)
 			ruleTypes.remove(duplicate);
 
-		List<String> sanitizedKeys = new ArrayList<String>();
+		List<String> sanitizedKeys = new ArrayList<>();
 
 		for (int i = 0; i < keys.size(); i++) {
 			String key = keys.get(i);

@@ -29,7 +29,7 @@ import java.util.Optional;
  */
 public class PresetsCommand implements CommandExecutor {
 	public static CommandSpec getSpec() {
-		HashMap<String, String> choices = new HashMap<String, String>();
+		HashMap<String, String> choices = new HashMap<>();
 		choices.put("save", "save");
 		choices.put("load", "load");
 		choices.put("delete", "delete");

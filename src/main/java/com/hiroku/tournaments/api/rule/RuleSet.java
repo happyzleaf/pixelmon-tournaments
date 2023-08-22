@@ -36,7 +36,7 @@ public class RuleSet {
 	/**
 	 * The rules contained within this {@link RuleSet}.
 	 */
-	public final ArrayList<RuleBase> rules = new ArrayList<RuleBase>();
+	public final ArrayList<RuleBase> rules = new ArrayList<>();
 
 	/**
 	 * Creates a RuleSet based off an array of various rule arguments. E.g. {"levelmin:50" , "levelmax:100"}
@@ -111,7 +111,7 @@ public class RuleSet {
 	 * @return - A list of all the {@link RuleBase}s of this class in the set. This list may be empty.
 	 */
 	public <T extends RuleBase> List<T> getRules(Class<T> clazz) {
-		ArrayList<T> matchingRules = new ArrayList<T>();
+		ArrayList<T> matchingRules = new ArrayList<>();
 		for (RuleBase rule : rules) {
 			try {
 				matchingRules.add(clazz.cast(rule));
@@ -142,7 +142,7 @@ public class RuleSet {
 	 * @param ruleType - The type of rules to remove.
 	 */
 	public void removeRuleType(Class<? extends RuleBase> ruleType) {
-		ArrayList<RuleBase> matchingRules = new ArrayList<RuleBase>();
+		ArrayList<RuleBase> matchingRules = new ArrayList<>();
 		for (RuleBase rule : rules) {
 			try {
 				ruleType.cast(rule);
@@ -211,7 +211,7 @@ public class RuleSet {
 	 * @return - A list of {@link DeciderRule}s that apply to draws.
 	 */
 	public ArrayList<DeciderRule> getDrawDeciderRules() {
-		ArrayList<DeciderRule> deciders = new ArrayList<DeciderRule>();
+		ArrayList<DeciderRule> deciders = new ArrayList<>();
 		for (DeciderRule rule : this.getRules(DeciderRule.class))
 			if (rule.applyToDraws())
 				deciders.add(rule);
@@ -225,7 +225,7 @@ public class RuleSet {
 	 * @return - A list of {@link DeciderRule}s that apply to crash/error battles in descending order of weight.
 	 */
 	public ArrayList<DeciderRule> getCrashDeciderRules() {
-		ArrayList<DeciderRule> deciders = new ArrayList<DeciderRule>();
+		ArrayList<DeciderRule> deciders = new ArrayList<>();
 		for (DeciderRule rule : this.getRules(DeciderRule.class))
 			if (rule.applyToCrashes())
 				deciders.add(rule);

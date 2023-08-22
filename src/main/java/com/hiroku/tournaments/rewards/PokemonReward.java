@@ -10,6 +10,7 @@ import com.pixelmonmod.api.registry.RegistryValue;
 import com.pixelmonmod.api.requirement.Requirement;
 import com.pixelmonmod.pixelmon.Pixelmon;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.World;
 
 /**
@@ -48,14 +49,12 @@ public class PokemonReward extends RewardBase {
 
 	@Override
 	public Text getDisplayText() {
-		// TODO: Text.Builder????
-//		Text.Builder builder = Text.builder().append(Text.of(TextColors.GOLD, "Pokémon: "));
-//		if (spec.shiny != null && spec.shiny)
-//			builder.append(Text.of(TextColors.YELLOW, "Shiny", TextColors.GOLD, ", "));
-//		if (spec.level != null)
-//			builder.append(Text.of(TextColors.DARK_AQUA, "Level ", spec.level, " "));
-//		return builder.append(Text.of(TextColors.DARK_AQUA, spec.name)).build();
-		return Text.WIP;
+		Text.Builder builder = Text.builder().append(Text.of(TextFormatting.GOLD, "Pokémon: "));
+		if (spec.shiny != null && spec.shiny)
+			builder.append(Text.of(TextFormatting.YELLOW, "Shiny", TextFormatting.GOLD, ", "));
+		if (spec.level != null)
+			builder.append(Text.of(TextFormatting.DARK_AQUA, "Level ", spec.level, " "));
+		return builder.append(Text.of(TextFormatting.DARK_AQUA, spec.name)).build();
 	}
 
 	@Override

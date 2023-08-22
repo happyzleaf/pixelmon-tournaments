@@ -48,7 +48,7 @@ public class TournamentsExecutor implements CommandExecutor {
 		for (TournamentCommandWrapper tcw : event.subcommands)
 			children.put(tcw.aliases, tcw.spec);
 
-		HashMap<String, String> choices = new HashMap<String, String>();
+		HashMap<String, String> choices = new HashMap<>();
 		choices.put("open", "open");
 		choices.put("close", "close");
 		choices.put("start", "start");

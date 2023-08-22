@@ -1,7 +1,7 @@
 package com.hiroku.tournaments.obj;
 
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.happyzleaf.tournaments.Text;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -83,7 +83,7 @@ public class Side {
 		Text.Builder builder = Text.builder();
 		builder.append(teams[0].getDisplayText());
 		if (teams.length == 2)
-			builder.append(Text.of(TextColors.GOLD, " & ", teams[1].getDisplayText()));
+			builder.append(Text.of(TextFormatting.GOLD, " & ", teams[1].getDisplayText()));
 		return builder.build();
 	}
 

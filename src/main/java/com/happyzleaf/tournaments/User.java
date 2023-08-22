@@ -2,6 +2,7 @@ package com.happyzleaf.tournaments;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Util;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 import java.util.UUID;
@@ -42,5 +43,12 @@ public class User {
 
 	public String getName() {
 		return profile.getName();
+	}
+
+	public void sendMessage(Text text) {
+		PlayerEntity player = getPlayer();
+		if (player != null) {
+			player.sendMessage(text, Util.DUMMY_UUID);
+		}
 	}
 }

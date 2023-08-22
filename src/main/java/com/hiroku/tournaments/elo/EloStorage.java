@@ -66,7 +66,7 @@ public class EloStorage {
 		if (eloType == null)
 			return getAverageElo(uuid);
 
-		return INSTANCE.data.getOrDefault(uuid, new HashMap<String, EloData>()).getOrDefault(eloType.toLowerCase(), new EloData()).getElo();
+		return INSTANCE.data.getOrDefault(uuid, new HashMap<>()).getOrDefault(eloType.toLowerCase(), new EloData()).getElo();
 	}
 
 	public static void registerBattle(UUID winner, UUID loser, String eloType, boolean draw) {
@@ -82,7 +82,7 @@ public class EloStorage {
 		HashMap<UUID, EloData> previousElos = new HashMap<>();
 		for (UUID uuid : allUUIDs) {
 			if (!INSTANCE.data.containsKey(uuid))
-				INSTANCE.data.put(uuid, new HashMap<String, EloData>());
+				INSTANCE.data.put(uuid, new HashMap<>());
 			if (!INSTANCE.data.get(uuid).containsKey(eloType))
 				INSTANCE.data.get(uuid).put(eloType, new EloData());
 			previousElos.put(uuid, INSTANCE.data.get(uuid).get(eloType));

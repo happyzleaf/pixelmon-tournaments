@@ -169,8 +169,8 @@ public class PokemonMatch extends Match {
 
 			int neededPokemon = composition.neededPokemon;
 
-			ArrayList<BattleParticipant> side1Participants = new ArrayList<BattleParticipant>();
-			ArrayList<BattleParticipant> side2Participants = new ArrayList<BattleParticipant>();
+			ArrayList<BattleParticipant> side1Participants = new ArrayList<>();
+			ArrayList<BattleParticipant> side2Participants = new ArrayList<>();
 
 			BattleRules br = new BattleRules(Tournament.instance().getRuleSet().br.exportText());
 			br.battleType = composition == TeamsComposition.SINGLE ? EnumBattleType.Single : EnumBattleType.Double;

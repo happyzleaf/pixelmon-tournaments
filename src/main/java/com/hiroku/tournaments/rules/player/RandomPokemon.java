@@ -36,9 +36,9 @@ public class RandomPokemon extends PlayerRule {
 	public static Executor removeRentalExecutor = Executors.newSingleThreadExecutor();
 
 	public ArrayList<EnumSpecies> globalPool = new ArrayList<EnumSpecies>();
-	public HashMap<UUID, Integer> rerollsRemaining = new HashMap<UUID, Integer>();
+	public HashMap<UUID, Integer> rerollsRemaining = new HashMap<>();
 
-	public ArrayList<Tier> tiers = new ArrayList<Tier>();
+	public ArrayList<Tier> tiers = new ArrayList<>();
 	public PokemonSpec spec = new PokemonSpec();
 	public boolean rentalOnly = false;
 	public boolean localDuplicates = false;
@@ -212,7 +212,7 @@ public class RandomPokemon extends PlayerRule {
 				removeRentalPokemon(user.getPlayer().get(), true);
 
 		globalPool = new ArrayList<EnumSpecies>();
-		rerollsRemaining = new HashMap<UUID, Integer>();
+		rerollsRemaining = new HashMap<>();
 	}
 
 	public static void removeRentalPokemon(User user, boolean validateParty) {

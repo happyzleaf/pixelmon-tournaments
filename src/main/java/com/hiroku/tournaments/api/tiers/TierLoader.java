@@ -33,7 +33,7 @@ public class TierLoader {
 		File dir = new File(PATH);
 		if (!dir.exists())
 			dir.mkdir();
-		ArrayList<File> tierFiles = new ArrayList<File>();
+		ArrayList<File> tierFiles = new ArrayList<>();
 		getFiles(PATH, tierFiles);
 		for (File file : tierFiles) {
 			try {

@@ -21,7 +21,7 @@ public class Tiers extends PlayerRule {
 	/**
 	 * The list of {@link Tier} that define the Pokémon allowed in the tournament.
 	 */
-	public ArrayList<Tier> tiers = new ArrayList<Tier>();
+	public ArrayList<Tier> tiers = new ArrayList<>();
 
 	public Tiers(String arg) throws Exception {
 		super(arg);
@@ -92,7 +92,7 @@ public class Tiers extends PlayerRule {
 	}
 
 	public void synchronize(RandomPokemon other) {
-		ArrayList<Tier> combined = new ArrayList<Tier>();
+		ArrayList<Tier> combined = new ArrayList<>();
 		for (Tier tier : other.tiers)
 			if (!combined.contains(tier))
 				combined.add(tier);

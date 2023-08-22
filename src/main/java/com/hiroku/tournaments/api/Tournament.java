@@ -1,6 +1,9 @@
 package com.hiroku.tournaments.api;
 
 import com.google.common.collect.ImmutableList;
+import com.happyzleaf.tournaments.Serializers;
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.Tournaments;
 import com.hiroku.tournaments.Zones;
 import com.hiroku.tournaments.api.archetypes.pokemon.PokemonMatch;
@@ -21,17 +24,9 @@ import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.obj.Zone;
 import com.hiroku.tournaments.rules.general.EloType;
 import com.hiroku.tournaments.util.TournamentUtils;
-import com.pixelmonmod.pixelmon.RandomHelper;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.service.pagination.PaginationService;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.serializer.TextSerializers;
+import com.pixelmonmod.pixelmon.api.util.helpers.RandomHelper;
+import net.minecraft.util.Util;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -66,7 +61,7 @@ public class Tournament extends Mode {
 	/**
 	 * The prefix for all global tournament messages.
 	 */
-	private Text prefix = TextSerializers.FORMATTING_CODE.deserialize(TournamentConfig.INSTANCE.prefix);
+	private Text prefix = Serializers.FORMATTING_CODE.deserialize(TournamentConfig.INSTANCE.prefix);
 
 	/**
 	 * The {@link RuleSet} specification of all {@link RuleBase}s relevant to this tournament.
@@ -75,24 +70,24 @@ public class Tournament extends Mode {
 	/**
 	 * The list of {@link RewardBase}s to be given to the winner/s of the Tournament.
 	 */
-	public final ArrayList<RewardBase> rewards = new ArrayList<RewardBase>();
+	public final List<RewardBase> rewards = new ArrayList<>();
 	/**
 	 * Extra modes that will not display anywhere (for programmers only)
 	 */
-	public ArrayList<Mode> extraModes = new ArrayList<Mode>();
+	public List<Mode> extraModes = new ArrayList<>();
 
 	/**
 	 * The {@link Team}s of the tournament.
 	 */
-	public ArrayList<Team> teams = new ArrayList<Team>();
+	public List<Team> teams = new ArrayList<>();
 	/**
 	 * The {@link Match} list to be executed in the current round.
 	 */
-	public ArrayList<Match> round = new ArrayList<Match>();
+	public List<Match> round = new ArrayList<>();
 	/**
 	 * The list of UUIDs representing players who don't want any tournament messages.
 	 */
-	public ArrayList<UUID> ignoreList = new ArrayList<UUID>();
+	public List<UUID> ignoreList = new ArrayList<>();
 
 	/**
 	 * Which round it is. The first round is 1, etc.
@@ -155,13 +150,13 @@ public class Tournament extends Mode {
 	 * Sends the given {@link Text} to all players that aren't ignoring the tournament.
 	 */
 	public void sendMessage(Text text) {
-		if (text == null || text.toPlain().equals(""))
+		if (text == null || text.toPlain().equals("")) {
 			return;
+		}
 
-		Sponge.getServer().getOnlinePlayers().stream().filter(p -> !ignoreList.contains(p.getUniqueId())).forEach(p ->
-		{
-			p.sendMessage(Text.of(getPrefix(), text));
-		});
+		ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers().stream()
+				.filter(p -> !ignoreList.contains(p.getUniqueId()))
+				.forEach(p -> p.sendMessage(Text.of(getPrefix(), text)));
 	}
 
 	/**
@@ -393,7 +388,7 @@ public class Tournament extends Mode {
 	public void startRound() {
 		round.clear();
 
-		round = new ArrayList<Match>();
+		round = new ArrayList<>();
 
 		List<Mode> modes = this.getModes();
 		for (Mode mode : modes)
@@ -406,7 +401,7 @@ public class Tournament extends Mode {
 			round = createMatches();
 
 		if (!round.isEmpty()) {
-			Tournaments.EVENT_BUS.post(new RoundStartEvent(round == null ? (round = new ArrayList<Match>()) : round));
+			Tournaments.EVENT_BUS.post(new RoundStartEvent(round == null ? (round = new ArrayList<>()) : round));
 			getModes().forEach(mode -> mode.onRoundStart(this, ImmutableList.copyOf(round)));
 
 			sendMessage(messageProvider.getUpcomingRoundMessage(roundNum, round));
@@ -427,15 +422,15 @@ public class Tournament extends Mode {
 	 *
 	 * @return - The list of winners, or empty if there were no winners.
 	 */
-	public ArrayList<Team> getWinners() {
-		ArrayList<Team> winners = new ArrayList<Team>();
+	public List<Team> getWinners() {
+		List<Team> winners = new ArrayList<>();
 
 		List<Mode> modes = this.getModes();
 		for (Mode mode : modes)
 			if ((winners = mode.calculateWinners(this, teams, winners)) != null)
 				return winners;
 
-		winners = new ArrayList<Team>();
+		winners = new ArrayList<>();
 		for (Team team : teams)
 			if (team.alive)
 				winners.add(team);
@@ -450,8 +445,8 @@ public class Tournament extends Mode {
 	 * @return - The collection of matches for the next round. Empty if there are no matches to be had
 	 * which renders the tournament complete and ready for winners.
 	 */
-	public ArrayList<Match> createMatches() {
-		ArrayList<Match> matches = new ArrayList<Match>();
+	public List<Match> createMatches() {
+		List<Match> matches = new ArrayList<>();
 
 		// Check the other modes first
 		List<Mode> modes = this.getModes();
@@ -459,9 +454,9 @@ public class Tournament extends Mode {
 			if (mode != this && (matches = mode.createMatches(this)) != null)
 				return matches;
 
-		matches = new ArrayList<Match>();
+		matches = new ArrayList<>();
 
-		ArrayList<Team> teams = new ArrayList<Team>(this.teams);
+		List<Team> teams = new ArrayList<>(this.teams);
 		teams.removeIf(team -> !team.alive);
 		while (teams.size() > 1) {
 			Team team1 = teams.get(RandomHelper.getRandomNumberBetween(0, teams.size() - 1));
@@ -480,7 +475,7 @@ public class Tournament extends Mode {
 			for (User user : teams.get(0).users)
 				if (user.isOnline())
 					if (getMessageProvider().getByeMessage() != null)
-						user.getPlayer().get().sendMessage(getMessageProvider().getByeMessage());
+						user.getPlayer().sendMessage(getMessageProvider().getByeMessage(), Util.DUMMY_UUID);
 
 		return matches;
 	}
@@ -492,7 +487,7 @@ public class Tournament extends Mode {
 	 * @return - true if there are still waiting battles in this round. False if not.
 	 */
 	public boolean checkForMoreBattles() {
-		ArrayList<Match> waitingMatches = new ArrayList<Match>(round);
+		ArrayList<Match> waitingMatches = new ArrayList<>(round);
 		waitingMatches.removeIf(match -> match.matchActive);
 
 		boolean matchExists = waitingMatches.size() > 0;
@@ -560,7 +555,7 @@ public class Tournament extends Mode {
 	 */
 	public void end(ArrayList<Team> winners) {
 		if (winners == null)
-			winners = new ArrayList<Team>();
+			winners = new ArrayList<>();
 
 		ArrayList<User> winnerUsers = new ArrayList<User>();
 		for (Team team : winners)
@@ -668,8 +663,8 @@ public class Tournament extends Mode {
 				{
 					ArrayList<Text> contents = new ArrayList<Text>();
 
-					ArrayList<Team> liveTeams = new ArrayList<Team>();
-					ArrayList<Team> deadTeams = new ArrayList<Team>();
+					ArrayList<Team> liveTeams = new ArrayList<>();
+					ArrayList<Team> deadTeams = new ArrayList<>();
 
 					for (Team team : teams) {
 						if (team.alive)
@@ -678,7 +673,7 @@ public class Tournament extends Mode {
 							deadTeams.add(team);
 					}
 
-					ArrayList<Team> orderedTeams = new ArrayList<Team>();
+					ArrayList<Team> orderedTeams = new ArrayList<>();
 					for (Team team : liveTeams)
 						orderedTeams.add(team);
 					for (Team team : deadTeams)
@@ -723,7 +718,7 @@ public class Tournament extends Mode {
 	}
 
 	public ImmutableList<Mode> getModes() {
-		ArrayList<Mode> modes = new ArrayList<Mode>();
+		ArrayList<Mode> modes = new ArrayList<>();
 		modes.addAll(rewards);
 		modes.addAll(getRuleSet().rules);
 		modes.addAll(extraModes);

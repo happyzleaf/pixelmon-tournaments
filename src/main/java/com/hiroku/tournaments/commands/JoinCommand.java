@@ -30,7 +30,7 @@ public class JoinCommand implements CommandExecutor {
 	/**
 	 * A static cache of all the invitations sent to other players for joining the tournament together. Held statically for easy access.
 	 */
-	public static HashMap<UUID, UUID> teamInvitations = new HashMap<UUID, UUID>();
+	public static HashMap<UUID, UUID> teamInvitations = new HashMap<>();
 
 	/**
 	 * Gets the UUID of the player who invited the given UUID, if someone did and is still waiting on a response.

@@ -14,7 +14,7 @@ import org.spongepowered.api.text.format.TextColors;
 import java.util.ArrayList;
 
 public class DisallowedPokemon extends PlayerRule {
-	public ArrayList<String> pokemons = new ArrayList<String>();
+	public ArrayList<String> pokemons = new ArrayList<>();
 	public ArrayList<Tier> tiers = new ArrayList<>();
 
 	public DisallowedPokemon(String arg) throws Exception {

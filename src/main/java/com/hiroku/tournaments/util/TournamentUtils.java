@@ -104,8 +104,8 @@ public class TournamentUtils {
 		if (tournament.teams.isEmpty())
 			builder.append(Text.of(TextColors.GRAY, "No teams."));
 		else {
-			ArrayList<Team> liveTeams = new ArrayList<Team>();
-			ArrayList<Team> deadTeams = new ArrayList<Team>();
+			ArrayList<Team> liveTeams = new ArrayList<>();
+			ArrayList<Team> deadTeams = new ArrayList<>();
 
 			for (Team team : tournament.teams) {
 				if (team.alive)
@@ -114,7 +114,7 @@ public class TournamentUtils {
 					deadTeams.add(team);
 			}
 
-			ArrayList<Team> orderedTeams = new ArrayList<Team>(liveTeams);
+			ArrayList<Team> orderedTeams = new ArrayList<>(liveTeams);
 			orderedTeams.addAll(deadTeams);
 
 			builder.append(Text.of(orderedTeams.get(0).alive ? Text.of(TextColors.GREEN, "*") : "", orderedTeams.get(0).getDisplayText()));
@@ -156,7 +156,7 @@ public class TournamentUtils {
 
 		Text.Builder builder = Text.builder();
 		builder.append(Text.of(TextColors.GOLD, TextStyles.UNDERLINE, "Rewards:\n"));
-		ArrayList<RewardBase> visibleRewards = new ArrayList<RewardBase>(tournament.rewards);
+		ArrayList<RewardBase> visibleRewards = new ArrayList<>(tournament.rewards);
 		visibleRewards.removeIf(reward -> !reward.canShow(player));
 		if (visibleRewards.isEmpty())
 			builder.append(Text.of(TextColors.GRAY, "No rewards in tournament"));

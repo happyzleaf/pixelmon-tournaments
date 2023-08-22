@@ -32,7 +32,7 @@ public class GsonUtils {
 	}
 
 	public static Map<String, Object> nbtToMap(CompoundNBT nbt) {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 
 		for (String key : nbt.keySet()) {
 			try {

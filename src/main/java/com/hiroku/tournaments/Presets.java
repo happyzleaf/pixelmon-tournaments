@@ -29,7 +29,7 @@ public class Presets {
 	/**
 	 * The mapping from preset name to the {@link Preset}
 	 */
-	private static final HashMap<String, Preset> presets = new HashMap<String, Preset>();
+	private static final HashMap<String, Preset> presets = new HashMap<>();
 
 	/**
 	 * Saves the preset with the given name. This will save into ./config/tournaments/presets/{name}.txt.
@@ -79,7 +79,7 @@ public class Presets {
 
 		Preset standard = new Preset(
 				new RuleSet("legendaries:false", "partycount:3", "healthtotal:2", "battletype:single", "levelmax:50"),
-				new ArrayList<RewardBase>(), new ArrayList<Zone>());
+				new ArrayList<>(), new ArrayList<>());
 
 		presets.put("Standard", standard);
 		Tournaments.log("Loaded default preset: Standard");
@@ -96,7 +96,7 @@ public class Presets {
 
 					BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(dir, fileName)), StandardCharsets.UTF_8));
 
-					ArrayList<String> linesList = new ArrayList<String>();
+					ArrayList<String> linesList = new ArrayList<>();
 					String s = null;
 					while ((s = br.readLine()) != null) {
 						if (s.trim().startsWith("//") || s.trim().equals("") || s.trim().equals("{") || s.trim().equals("}"))
@@ -112,8 +112,8 @@ public class Presets {
 					else {
 						int ruleRewardZone = -1;
 						RuleSet ruleset = new RuleSet();
-						ArrayList<RewardBase> rewards = new ArrayList<RewardBase>();
-						ArrayList<Zone> zones = new ArrayList<Zone>();
+						ArrayList<RewardBase> rewards = new ArrayList<>();
+						ArrayList<Zone> zones = new ArrayList<>();
 						BattleRules battleRules = new BattleRules();
 
 						for (String line : linesList) {

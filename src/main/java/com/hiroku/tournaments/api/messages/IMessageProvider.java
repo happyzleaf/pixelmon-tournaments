@@ -1,5 +1,7 @@
 package com.hiroku.tournaments.api.messages;
 
+import com.happyzleaf.tournaments.Serializers;
+import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.Match;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.rule.types.PlayerRule;
@@ -11,9 +13,7 @@ import com.hiroku.tournaments.enums.EnumTournamentState;
 import com.hiroku.tournaments.obj.MatchStartResult;
 import com.hiroku.tournaments.obj.Side;
 import com.hiroku.tournaments.obj.Team;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.serializer.TextSerializers;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
 
@@ -35,11 +35,11 @@ public interface IMessageProvider {
 	}
 
 	default String textToString(Text text) {
-		return TextSerializers.FORMATTING_CODE.serialize(text);
+		return Serializers.FORMATTING_CODE.serialize(text);
 	}
 
 	default Text stringToText(String string) {
-		return TextSerializers.FORMATTING_CODE.deserialize(string);
+		return Serializers.FORMATTING_CODE.deserialize(string);
 	}
 
 	default Text getJoinMessage(Team team, boolean forced) {
@@ -76,7 +76,7 @@ public interface IMessageProvider {
 		Text.Builder builder = Text.builder();
 		builder.append(winners.get(0).getDisplayText());
 		for (int i = 1; i < winners.size(); i++)
-			builder.append(Text.of(TextColors.GOLD, ", ", winners.get(i).getDisplayText()));
+			builder.append(Text.of(TextFormatting.GOLD, ", ", winners.get(i).getDisplayText()));
 
 		return stringToText(TournamentConfig.INSTANCE.winnerMessage.replaceAll("\\{\\{\\winners\\}\\}", textToString(builder.build())));
 	}
