@@ -1,7 +1,7 @@
 package com.hiroku.tournaments.api.rule.types;
 
+import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.obj.Side;
-import org.spongepowered.api.text.Text;
 
 /**
  * Abstract representation of all {@link RuleBase}s that apply specifically to {@link Side}s. These will be
@@ -17,7 +17,7 @@ public abstract class SideRule extends RuleBase {
 	/**
 	 * Checks whether the given {@link Side} passes the rule.
 	 *
-	 * @param team - The {@link Side} being checked
+	 * @param side - The {@link Side} being checked
 	 * @return - false if the {@link Side} is breaking this rule, otherwise true
 	 */
 	public abstract boolean passes(Side side);

@@ -2,7 +2,7 @@ package com.hiroku.tournaments.api.events.match;
 
 import com.hiroku.tournaments.api.Match;
 import com.hiroku.tournaments.obj.Zone;
-import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.eventbus.api.Event;
 
 /**
  * Event fired when a {@link Match} starts.

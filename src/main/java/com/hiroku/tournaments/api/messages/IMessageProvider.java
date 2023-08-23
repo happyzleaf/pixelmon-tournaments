@@ -15,7 +15,7 @@ import com.hiroku.tournaments.obj.Side;
 import com.hiroku.tournaments.obj.Team;
 import net.minecraft.util.text.TextFormatting;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Interface for objects that provide the messages of a tournament. All methods
@@ -72,7 +72,7 @@ public interface IMessageProvider {
 		return stringToText(TournamentConfig.INSTANCE.noWinnerMessage);
 	}
 
-	default Text getWinnerMessage(ArrayList<Team> winners) {
+	default Text getWinnerMessage(List<Team> winners) {
 		Text.Builder builder = Text.builder();
 		builder.append(winners.get(0).getDisplayText());
 		for (int i = 1; i < winners.size(); i++)
@@ -99,7 +99,7 @@ public interface IMessageProvider {
 				.replaceAll("\\{\\{time\\}\\}", String.valueOf(TournamentConfig.INSTANCE.timeBeforeMatch)));
 	}
 
-	default Text getUpcomingRoundMessage(int roundNum, ArrayList<Match> round) {
+	default Text getUpcomingRoundMessage(int roundNum, List<Match> round) {
 		Text.Builder builder = Text.builder();
 		builder.append(round.get(0).getDisplayText());
 		for (int i = 1; i < round.size(); i++)
@@ -126,15 +126,17 @@ public interface IMessageProvider {
 	default Text getRuleBreakMessage(MatchStartResult.RuleBroken ruleResult) {
 		RuleBase rule = ruleResult.rule;
 		Text breakMessage = null;
-		if (rule instanceof PlayerRule)
-			breakMessage = ((PlayerRule) rule).getBrokenRuleText(ruleResult.user.getPlayer().get());
-		else if (rule instanceof TeamRule)
+		if (rule instanceof PlayerRule) {
+			breakMessage = ((PlayerRule) rule).getBrokenRuleText(ruleResult.user.getPlayer());
+		} else if (rule instanceof TeamRule) {
 			breakMessage = ((TeamRule) rule).getBrokenRuleText(ruleResult.team);
-		else if (rule instanceof SideRule)
+		} else if (rule instanceof SideRule) {
 			breakMessage = ((SideRule) rule).getBrokenRuleText(ruleResult.side);
+		}
 
-		if (breakMessage == null)
+		if (breakMessage == null) {
 			return null;
+		}
 
 		return stringToText(TournamentConfig.INSTANCE.ruleBreakMessage
 				.replaceAll("\\{\\{ruleerror\\}\\}", textToString(breakMessage)));

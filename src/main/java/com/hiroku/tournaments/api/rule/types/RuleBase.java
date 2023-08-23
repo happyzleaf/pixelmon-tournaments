@@ -2,7 +2,8 @@ package com.hiroku.tournaments.api.rule.types;
 
 import com.hiroku.tournaments.api.Mode;
 import com.hiroku.tournaments.api.rule.RuleTypeRegistrar;
-import org.spongepowered.api.entity.living.player.Player;
+import com.pixelmonmod.pixelmon.api.command.PixelmonCommandUtils;
+import net.minecraft.entity.player.PlayerEntity;
 
 /**
  * Abstract representation of all rules. Implementing the required methods will ensure
@@ -38,7 +39,7 @@ public abstract class RuleBase extends Mode {
 	public abstract String getSerializationString();
 
 	@Override
-	public boolean canShow(Player player) {
-		return super.canShow(player) || (getDisplayText() != null && player.hasPermission("tournaments.command.rules.modify"));
+	public boolean canShow(PlayerEntity player) {
+		return super.canShow(player) || (getDisplayText() != null && PixelmonCommandUtils.hasPermission(player.getCommandSource(), "tournaments.command.rules.modify"));
 	}
 }

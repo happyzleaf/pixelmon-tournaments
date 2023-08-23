@@ -1,5 +1,8 @@
 package com.hiroku.tournaments.api.archetypes.pokemon;
 
+import com.happyzleaf.tournaments.Scheduler;
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.Tournaments;
 import com.hiroku.tournaments.Zones;
 import com.hiroku.tournaments.api.Match;
@@ -14,23 +17,18 @@ import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.obj.Zone;
 import com.hiroku.tournaments.rules.general.BattleType;
 import com.hiroku.tournaments.rules.general.BattleType.TeamsComposition;
-import com.pixelmonmod.pixelmon.Pixelmon;
+import com.pixelmonmod.pixelmon.api.battles.BattleEndCause;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
+import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
 import com.pixelmonmod.pixelmon.battles.BattleRegistry;
-import com.pixelmonmod.pixelmon.battles.controller.BattleControllerBase;
+import com.pixelmonmod.pixelmon.battles.api.rules.BattleRuleRegistry;
+import com.pixelmonmod.pixelmon.battles.api.rules.BattleRules;
+import com.pixelmonmod.pixelmon.battles.controller.BattleController;
 import com.pixelmonmod.pixelmon.battles.controller.participants.BattleParticipant;
 import com.pixelmonmod.pixelmon.battles.controller.participants.PlayerParticipant;
-import com.pixelmonmod.pixelmon.battles.rules.BattleRules;
-import com.pixelmonmod.pixelmon.entities.pixelmon.EntityPixelmon;
-import com.pixelmonmod.pixelmon.enums.battle.EnumBattleEndCause;
-import com.pixelmonmod.pixelmon.enums.battle.EnumBattleType;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayerMP;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,9 +40,9 @@ public class PokemonMatch extends Match {
 	}
 
 	/**
-	 * The BattleControllerBase for the battle (if the match battle is active)
+	 * The BattleController for the battle (if the match battle is active)
 	 */
-	public BattleControllerBase bcb;
+	public BattleController battle;
 
 	/**
 	 * Whether side 1 has flagged the battle as being bugged.
@@ -64,9 +62,9 @@ public class PokemonMatch extends Match {
 	 * Heals a particular user
 	 */
 	public void heal(User user) {
+		// if not necessary anymore but I don't want to change the logic
 		if (user.isOnline()) {
-			PlayerPartyStorage storage = Pixelmon.storageManager.getParty((EntityPlayerMP) user.getPlayer().get());//PixelmonStorage.pokeBallManager.getPlayerStorage((EntityPlayerMP)user.getPlayer().get()).get();
-			storage.heal();//.healAllPokemon((World) user.getPlayer().get().getWorld());
+			user.getParty().heal();
 		}
 	}
 
@@ -88,42 +86,44 @@ public class PokemonMatch extends Match {
 	 */
 	@Override
 	public void start(Tournament tournament, boolean rematch) {
-		matchActive = true;
-		bcb = null;
+		this.matchActive = true;
+		this.battle = null;
 
 		for (Side side : sides) {
 			for (Team team : side.teams) {
 				for (User user : team.users) {
-					EntityPlayerMP player = (EntityPlayerMP) user.getPlayer().get();
+					PlayerEntity player = user.getPlayer();
+					BattleController spectatedBattle = BattleRegistry.getSpectatedBattle(player);
+					if (spectatedBattle != null) {
+						spectatedBattle.removeSpectator((ServerPlayerEntity) player);
+					}
 
-					BattleControllerBase bcb = BattleRegistry.getSpectatedBattle(player);
-					if (bcb != null)
-						bcb.removeSpectator(player);
-					bcb = BattleRegistry.getBattle(player);
-					if (bcb != null)
-						bcb.endBattle(EnumBattleEndCause.FORCE);
+					BattleController battle = BattleRegistry.getBattle(player);
+					if (battle != null) {
+						battle.endBattle(BattleEndCause.FORCE);
+					}
 				}
 			}
 		}
 
 		Zone zone = Zones.INSTANCE.getZone(this);
-		if (zone != null)
+		if (zone != null) {
 			zone.sendPlayersToZone(this);
+		}
 
-		Sponge.getScheduler().createSyncExecutor(Tournaments.INSTANCE).schedule(() ->
-		{
+		Scheduler.delayTime(5, TimeUnit.SECONDS, () -> {
 			tournament.getModes().forEach(mode -> mode.onMatchStart(tournament, this));
 			MatchStartResult result = start(rematch);
 			if (result instanceof MatchStartResult.Success)
 				Tournaments.EVENT_BUS.post(new MatchStartEvent(this, zone));
 			else if (result instanceof MatchStartResult.InsufficientPokemon) {
 				Zones.INSTANCE.matchEnded(this);
-				Side side = this.getSide(((MatchStartResult.InsufficientPokemon) result).user.getUniqueId());
+				Side side = this.getSide(((MatchStartResult.InsufficientPokemon) result).user.id);
 				sendMessage(tournament.getMessageProvider().getInsufficientPokemonMessage(side));
 				tournament.matchEnds(this, this.getOtherSide(side), side);
 			} else if (result instanceof MatchStartResult.PlayerOffline) {
 				Zones.INSTANCE.matchEnded(this);
-				Side side = getSide(((MatchStartResult.PlayerOffline) result).user.getUniqueId());
+				Side side = getSide(((MatchStartResult.PlayerOffline) result).user.id);
 				sendMessage(tournament.getMessageProvider().getPlayersOfflineMessage(side));
 				tournament.matchEnds(this, getOtherSide(side), side);
 			} else if (result instanceof MatchStartResult.RuleBroken) {
@@ -148,7 +148,7 @@ public class PokemonMatch extends Match {
 				((MatchStartResult.Error) result).exception.printStackTrace();
 				handleCrashedBattle();
 			}
-		}, 5, TimeUnit.SECONDS);
+		});
 	}
 
 	// The contents of this function may seem unnecessarily complicated, but I am both trying to plan for every possibility and 
@@ -173,7 +173,7 @@ public class PokemonMatch extends Match {
 			ArrayList<BattleParticipant> side2Participants = new ArrayList<>();
 
 			BattleRules br = new BattleRules(Tournament.instance().getRuleSet().br.exportText());
-			br.battleType = composition == TeamsComposition.SINGLE ? EnumBattleType.Single : EnumBattleType.Double;
+			br.set(BattleRuleRegistry.BATTLE_TYPE, composition == TeamsComposition.SINGLE ? com.pixelmonmod.pixelmon.api.battles.BattleType.SINGLE : com.pixelmonmod.pixelmon.api.battles.BattleType.DOUBLE);
 
 			for (int sideIndex = 0; sideIndex < 2; sideIndex++) {
 				Side side = sides[sideIndex];
@@ -184,7 +184,7 @@ public class PokemonMatch extends Match {
 
 				int numOnline = side.getNumPlayers(false);
 				int membersRemaining = numOnline;
-				ArrayList<EntityPixelmon> sidePokemon = new ArrayList<EntityPixelmon>();
+				List<Pokemon> sidePokemon = new ArrayList<>();
 
 				teamloop:
 				for (Team team : side.teams) {
@@ -197,12 +197,12 @@ public class PokemonMatch extends Match {
 						if (numOnline == 0)
 							return new MatchStartResult.PlayerOffline(team, user);
 
-						if (!user.isOnline())
-							continue;
+						PlayerEntity player = user.getPlayer();
+						if (player == null) continue;
 
-						PlayerPartyStorage storage = Pixelmon.storageManager.getParty((EntityPlayerMP) user.getPlayer().get());
+						PlayerPartyStorage storage = user.getParty();
 
-						RuleBase brokenPlayerRule = Tournament.instance().getRuleSet().getBrokenRule(user.getPlayer().get(), storage);
+						RuleBase brokenPlayerRule = Tournament.instance().getRuleSet().getBrokenRule(player, storage);
 						if (brokenPlayerRule != null)
 							return new MatchStartResult.RuleBroken(side, team, user, brokenPlayerRule);
 
@@ -210,16 +210,14 @@ public class PokemonMatch extends Match {
 						if (validateBR != null)
 							return new MatchStartResult.BattleRuleBroken(side, team, user, validateBR);
 
-						EntityPixelmon firstPokemon = storage.getAndSendOutFirstAblePokemon((Entity) user.getPlayer().get());
-						EntityPixelmon secondPokemon = null;
+						Pokemon firstPokemon = storage.getFirstAblePokemon();
+						Pokemon secondPokemon = null;
 						if (numOnline == 1 || (sidePokemon.size() - neededPokemon > 1 && membersRemaining == 1)) {
 							// Having a side with 1 person with 0 Pokémon is always insufficient.
 							if (firstPokemon == null)
 								return new MatchStartResult.InsufficientPokemon(team, user);
 							else if (neededPokemon == 2) {
-								Pokemon secondPk = storage.findOne(pokemon -> pokemon.canBattle() && firstPokemon.getPokemonData() != pokemon);
-								if (secondPk != null)
-									secondPokemon = secondPk.getOrSpawnPixelmon((Entity) user.getPlayer().get());
+								secondPokemon = storage.findOne(pokemon -> pokemon.canBattle() && firstPokemon != pokemon);
 								if (secondPokemon == null)
 									return new MatchStartResult.InsufficientPokemon(team, user);
 								sidePokemon.add(secondPokemon);
@@ -229,9 +227,9 @@ public class PokemonMatch extends Match {
 							sidePokemon.add(firstPokemon);
 							BattleParticipant bp;
 							if (secondPokemon != null)
-								bp = new PlayerParticipant((EntityPlayerMP) user, firstPokemon, secondPokemon);
+								bp = new PlayerParticipant((ServerPlayerEntity) player, firstPokemon, secondPokemon);
 							else
-								bp = new PlayerParticipant((EntityPlayerMP) user, firstPokemon);
+								bp = new PlayerParticipant((ServerPlayerEntity) player, firstPokemon);
 							if (sideIndex == 0)
 								side1Participants.add(bp);
 							else
@@ -251,8 +249,8 @@ public class PokemonMatch extends Match {
 			for (int i = 0; i < side2ParticipantsArr.length; i++)
 				side2ParticipantsArr[i] = side2Participants.get(i);
 
-			this.bcb = new BattleControllerBase(side1ParticipantsArr, side2ParticipantsArr, br);
-			BattleRegistry.registerBattle(bcb);
+			this.battle = new BattleController(side1ParticipantsArr, side2ParticipantsArr, br);
+			BattleRegistry.registerBattle(battle);
 
 			this.side1BugFlag = this.side2BugFlag = false;
 
@@ -265,12 +263,12 @@ public class PokemonMatch extends Match {
 	@Override
 	public void forceEnd() {
 		this.listenToBattleEnd = false;
-		if (this.bcb != null && !this.bcb.battleEnded) {
+		if (this.battle != null && !this.battle.battleEnded) {
 			try {
-				bcb.endBattle(EnumBattleEndCause.FORCE);
+				battle.endBattle(BattleEndCause.FORCE);
 			} catch (Exception e) {
 				Tournaments.log("Couldn't force end battle properly due to some Pixelmon issue. Let's hope it doesn't break anything");
-				BattleRegistry.deRegisterBattle(this.bcb);
+				BattleRegistry.deRegisterBattle(this.battle);
 			}
 		}
 		this.listenToBattleEnd = true;
@@ -278,8 +276,8 @@ public class PokemonMatch extends Match {
 
 	@Override
 	public Text getStateText() {
-		if (bcb != null)
-			return Text.of(TextColors.YELLOW, "*");
+		if (battle != null)
+			return Text.of(TextFormatting.YELLOW, "*");
 		return super.getStateText();
 	}
 
@@ -297,24 +295,25 @@ public class PokemonMatch extends Match {
 
 		if (winningSide == null) {
 			sendMessage(Tournament.instance().getMessageProvider().getMatchErrorMessage(this));
-			Sponge.getScheduler().createSyncExecutor(Tournaments.INSTANCE).schedule(() ->
-			{
+
+			Scheduler.delayTime(TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS, () -> {
 				if (Tournament.instance().round.contains(this))
 					start(Tournament.instance(), true);
-			}, TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS);
-		} else
+			});
+		} else {
 			Tournament.instance().matchEnds(this, winningSide, getOtherSide(winningSide));
+		}
 	}
 
 	/**
-	 * Gets the {@link PokemonMatch} for the given {@link BattleControllerBase}, if one exists.
+	 * Gets the {@link PokemonMatch} for the given {@link BattleController}, if one exists.
 	 */
-	public static PokemonMatch getMatch(BattleControllerBase bcb) {
+	public static PokemonMatch getMatch(BattleController bc) {
 		if (Tournament.instance() == null)
 			return null;
 		for (Match match : Tournament.instance().round)
 			if (match instanceof PokemonMatch)
-				if (((PokemonMatch) match).bcb == bcb)
+				if (((PokemonMatch) match).battle == bc)
 					return (PokemonMatch) match;
 		return null;
 	}

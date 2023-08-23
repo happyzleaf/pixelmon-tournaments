@@ -1,5 +1,6 @@
 package com.hiroku.tournaments.api.rule;
 
+import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.Mode;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.rule.types.*;
@@ -8,17 +9,14 @@ import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.rules.general.EloType;
 import com.hiroku.tournaments.rules.player.Healing;
 import com.hiroku.tournaments.util.TournamentUtils;
-import com.pixelmonmod.pixelmon.battles.rules.BattleRules;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.service.pagination.PaginationService;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageReceiver;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyles;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
+import com.pixelmonmod.pixelmon.battles.api.rules.BattleRules;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.ICommandSource;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Util;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,18 +47,18 @@ public class RuleSet {
 
 	/**
 	 * Creates a {@link RuleSet} based on an array of various rule arguments e.g. {"levelmin:50" , "levelmax:100"} with a
-	 * {@link CommandSource} to refer errors to.
+	 * {@link ICommandSource} to refer errors to.
 	 *
 	 * @param ruleStrings - An array of various rule arguments. E.g. {"levelmin:50", "levelmax:100"}
-	 * @param src         - A {@link CommandSource} to refer errors to. (null if not relevant)
+	 * @param src         - A {@link ICommandSource} to refer errors to. (null if not relevant)
 	 */
-	public RuleSet(String[] ruleStrings, CommandSource src) {
+	public RuleSet(String[] ruleStrings, ICommandSource src) {
 		for (String ruleString : ruleStrings) {
 			try {
 				addRule(RuleTypeRegistrar.parse(ruleString.split(":")[0], ruleString.substring(ruleString.indexOf(":") + 1)));
 			} catch (Exception e) {
 				if (src != null)
-					src.sendMessage(Text.of(TextColors.RED, "Error with rule: ", ruleString, " ", e.getMessage()));
+					src.sendMessage(Text.of(TextFormatting.RED, "Error with rule: ", ruleString, " ", e.getMessage()), Util.DUMMY_UUID);
 			}
 		}
 	}
@@ -164,14 +162,14 @@ public class RuleSet {
 	}
 
 	/**
-	 * Gets the rule that the given {@link Player} currently breaks (if they are breaking a rule) given the {@link }
+	 * Gets the rule that the given {@link PlayerEntity} currently breaks (if they are breaking a rule) given the {@link }
 	 * and {@link Team}.
 	 *
-	 * @param player  - The {@link Player} being examined
-	 * @param storage - The {@link } for the player (for convenience).
+	 * @param player  - The {@link PlayerEntity} being examined
+	 * @param storage - The {@link PlayerPartyStorage} for the player (for convenience).
 	 * @return - The {@link PlayerRule} for the broken rule, or null if they pass all the rules.
 	 */
-	public PlayerRule getBrokenRule(Player player, PlayerPartyStorage storage) {
+	public PlayerRule getBrokenRule(PlayerEntity player, PlayerPartyStorage storage) {
 		for (PlayerRule rule : this.getRules(PlayerRule.class))
 			if (!rule.passes(player, storage))
 				return rule;
@@ -257,9 +255,9 @@ public class RuleSet {
 	/**
 	 * Shows the rules of the tournament to a {@link CommandSource}.
 	 *
-	 * @param - The {@link MessageReceiver}s (normally just {@link Player}s) that the rules will be shown to.
+	 * @param - The {@link CommandSource} that the rules will be shown to.
 	 */
-	public void showRules(CommandSource src) {
+	public void showRules(CommandSource src) throws CommandSyntaxException {
 		//Order: General rules, 
 		//       descending weight draw deciding rules, 
 		//       descending weight crash deciding rules, 
@@ -267,7 +265,7 @@ public class RuleSet {
 
 		ArrayList<Text> contents = new ArrayList<Text>();
 
-		Player player = src instanceof Player ? (Player) src : null;
+		PlayerEntity player = src.getEntity() instanceof PlayerEntity ? src.asPlayer() : null;
 
 		for (RuleBase rule : rules)
 			if (rule instanceof GeneralRule && rule.canShow(player))
@@ -282,12 +280,13 @@ public class RuleSet {
 			if ((rule instanceof PlayerRule || rule instanceof TeamRule || rule instanceof SideRule) && rule.canShow(player))
 				contents.add(rule.getDisplayText());
 
-		PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
-		pagination.contents(contents)
-				.padding(Text.of(TextColors.GOLD, "-"))
-				.linesPerPage(10)
-				.title(Text.of(TextColors.GOLD, "Rules"));
-		pagination.sendTo(src);
+		// TODO: omg paginations........ I might do a gui here instead.
+//		PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
+//		pagination.contents(contents)
+//				.padding(Text.of(TextColors.GOLD, "-"))
+//				.linesPerPage(10)
+//				.title(Text.of(TextColors.GOLD, "Rules"));
+//		pagination.sendTo(src);
 	}
 
 	/**
@@ -296,11 +295,11 @@ public class RuleSet {
 	 */
 	public Text getDisplayText() {
 		Text.Builder builder = Text.builder();
-		builder.append(Text.of(TextColors.GOLD, TextStyles.UNDERLINE, "Rules:\n"));
+		builder.append(Text.of(TextFormatting.GOLD, TextFormatting.UNDERLINE, "Rules:\n"));
 		if (!rules.isEmpty() && rules.get(0).getDisplayText() != null)
 			builder.append(rules.get(0).getDisplayText());
 		else if (rules.isEmpty())
-			builder.append(Text.of(TextColors.RED, "None."));
+			builder.append(Text.of(TextFormatting.RED, "None."));
 		for (int i = 1; i < rules.size(); i++)
 			if (rules.get(i).getDisplayText() != null)
 				builder.append(Text.of("\n", rules.get(i).getDisplayText()));

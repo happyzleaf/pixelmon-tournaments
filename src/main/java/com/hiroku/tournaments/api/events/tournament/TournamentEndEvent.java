@@ -1,7 +1,7 @@
 package com.hiroku.tournaments.api.events.tournament;
 
-import net.minecraftforge.fml.common.eventhandler.Event;
-import org.spongepowered.api.entity.living.player.User;
+import com.happyzleaf.tournaments.User;
+import net.minecraftforge.eventbus.api.Event;
 
 import java.util.List;
 

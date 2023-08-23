@@ -1,10 +1,10 @@
 package com.hiroku.tournaments.api;
 
+import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.obj.MatchStartResult;
 import com.hiroku.tournaments.obj.Side;
 import com.hiroku.tournaments.obj.Team;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.UUID;
 
@@ -100,7 +100,7 @@ public abstract class Match {
 	/**
 	 * Gets the number of players in the entire match. If the parameter is false, only online players will be counted.
 	 *
-	 * @param countOffline - Whether or not offline players should be counted.
+	 * @param countOffline - Whether offline players should be counted.
 	 * @return - The number of players in the match (excluding offline players if the parameter is false)
 	 */
 	public int getNumPlayers(boolean countOffline) {
@@ -116,10 +116,10 @@ public abstract class Match {
 	 * @return - The {@link Text} that will display in summary of this match.
 	 */
 	public Text getDisplayText() {
-		return Text.of(sides[0].getDisplayText(), TextColors.RED, " vs ", sides[1].getDisplayText());
+		return Text.of(sides[0].getDisplayText(), TextFormatting.RED, " vs ", sides[1].getDisplayText());
 	}
 
 	public Text getStateText() {
-		return Text.of((matchActive ? TextColors.RED : TextColors.GRAY), "*");
+		return Text.of((matchActive ? TextFormatting.RED : TextFormatting.GRAY), "*");
 	}
 }

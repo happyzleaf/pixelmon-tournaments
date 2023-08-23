@@ -1,7 +1,7 @@
 package com.hiroku.tournaments.api.rule.types;
 
+import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.obj.Team;
-import org.spongepowered.api.text.Text;
 
 /**
  * Abstract representation of all {@link RuleBase}s that apply specifically to {@link Team}s. These will be

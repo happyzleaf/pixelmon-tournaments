@@ -1,6 +1,7 @@
 package com.hiroku.tournaments.api;
 
 import com.google.common.collect.ImmutableList;
+import com.happyzleaf.tournaments.Scheduler;
 import com.happyzleaf.tournaments.Serializers;
 import com.happyzleaf.tournaments.Text;
 import com.happyzleaf.tournaments.User;
@@ -371,13 +372,14 @@ public class Tournament extends Mode {
 				getRuleSet().getRule(EloType.class).eloMatches.add(new EloMatch(match.sides[0].getUUIDs(), match.sides[1].getUUIDs(), true));
 
 			sendMessage(getMessageProvider().getMatchDrawMessage(match));
-			Sponge.getScheduler().createSyncExecutor(Tournaments.INSTANCE).schedule(() ->
-			{
-				if (round.contains(match))
+			Scheduler.delayTime(TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS, () -> {
+				if (round.contains(match)) {
 					match.start(this, true);
-			}, TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS);
-		} else
+				}
+			});
+		} else {
 			this.matchEnds(match, winningSide, match.getOtherSide(winningSide));
+		}
 	}
 
 	/**
@@ -406,10 +408,7 @@ public class Tournament extends Mode {
 
 			sendMessage(messageProvider.getUpcomingRoundMessage(roundNum, round));
 
-			Sponge.getScheduler().createSyncExecutor(Tournaments.INSTANCE).schedule(() ->
-			{
-				checkForMoreBattles();
-			}, TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS);
+			Scheduler.delayTime(TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS, this::checkForMoreBattles);
 
 			return;
 		}

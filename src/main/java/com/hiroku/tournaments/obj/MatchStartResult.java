@@ -1,5 +1,6 @@
 package com.hiroku.tournaments.obj;
 
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;

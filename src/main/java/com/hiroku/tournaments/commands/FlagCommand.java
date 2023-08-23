@@ -50,7 +50,7 @@ public class FlagCommand implements CommandExecutor {
 		if (Tournament.instance() == null || Tournament.instance().state != EnumTournamentState.ACTIVE
 				|| (Tournament.instance().getMatch(player.getUniqueId())) == null
 				|| !(Tournament.instance().getMatch(player.getUniqueId()) instanceof PokemonMatch)
-				|| (match = (PokemonMatch) Tournament.instance().getMatch(player.getUniqueId())).bcb == null) {
+				|| (match = (PokemonMatch) Tournament.instance().getMatch(player.getUniqueId())).battle == null) {
 			src.sendMessage(Text.of(TextColors.RED, "No match to flag."));
 			return CommandResult.empty();
 		}
@@ -66,11 +66,11 @@ public class FlagCommand implements CommandExecutor {
 			Tournaments.log("Match " + match.getDisplayText().toPlain() + " signalled as bugged. Attempting to force restart");
 			match.listenToBattleEnd = false;
 			try {
-				match.bcb.endBattle(EnumBattleEndCause.FORCE);
+				match.battle.endBattle(EnumBattleEndCause.FORCE);
 			} catch (Exception e) {
-				match.bcb.spectators.forEach(spectator -> spectator.sendMessage(new EndSpectate()));
-				match.bcb.participants.forEach(p -> p.endBattle(EnumBattleEndCause.FORCE));
-				BattleRegistry.deRegisterBattle(match.bcb);
+				match.battle.spectators.forEach(spectator -> spectator.sendMessage(new EndSpectate()));
+				match.battle.participants.forEach(p -> p.endBattle(EnumBattleEndCause.FORCE));
+				BattleRegistry.deRegisterBattle(match.battle);
 			}
 
 			match.listenToBattleEnd = true;

@@ -1,7 +1,7 @@
 package com.hiroku.tournaments.api.events.tournament;
 
-import net.minecraftforge.fml.common.eventhandler.Cancelable;
-import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.eventbus.api.Cancelable;
+import net.minecraftforge.eventbus.api.Event;
 
 /**
  * Event fired when a tournament starts. Canceling this event will silently prevent it from starting.

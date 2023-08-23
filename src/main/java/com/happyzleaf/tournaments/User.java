@@ -1,6 +1,8 @@
 package com.happyzleaf.tournaments;
 
 import com.mojang.authlib.GameProfile;
+import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
+import com.pixelmonmod.pixelmon.api.storage.StorageProxy;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Util;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
@@ -50,5 +52,9 @@ public class User {
 		if (player != null) {
 			player.sendMessage(text, Util.DUMMY_UUID);
 		}
+	}
+
+	public PlayerPartyStorage getParty() {
+		return StorageProxy.getParty(id);
 	}
 }

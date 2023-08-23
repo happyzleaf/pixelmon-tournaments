@@ -5,6 +5,7 @@ import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -16,6 +17,15 @@ public class Scheduler {
 
 		UUID id = UUID.randomUUID();
 		Ticker ticker = new Ticker(id, ticks, task);
+		tickers.put(id, ticker);
+		return id;
+	}
+
+	public static UUID delayTime(long time, TimeUnit unit, Runnable task) {
+		checkArgument(time > 0, "time > 0");
+
+		UUID id = UUID.randomUUID();
+		Ticker ticker = new Ticker(id, unit.toSeconds(time) * 20, task);
 		tickers.put(id, ticker);
 		return id;
 	}

@@ -1,8 +1,8 @@
 package com.hiroku.tournaments.api.events.tournament;
 
 import com.hiroku.tournaments.obj.Team;
-import net.minecraftforge.fml.common.eventhandler.Cancelable;
-import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.eventbus.api.Cancelable;
+import net.minecraftforge.eventbus.api.Event;
 
 /**
  * Fired when a {@link Team} joins the tournament. Canceling this event silently prevents them from joining.

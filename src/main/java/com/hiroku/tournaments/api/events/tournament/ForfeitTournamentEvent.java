@@ -1,8 +1,8 @@
 package com.hiroku.tournaments.api.events.tournament;
 
 import com.hiroku.tournaments.obj.Team;
-import net.minecraftforge.fml.common.eventhandler.Cancelable;
-import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.eventbus.api.Cancelable;
+import net.minecraftforge.eventbus.api.Event;
 
 /**
  * Event fired when a {@link Team} forfeits (or is forced to forfeit). Canceling this event will silently prevent

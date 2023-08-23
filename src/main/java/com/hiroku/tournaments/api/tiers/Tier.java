@@ -2,10 +2,13 @@ package com.hiroku.tournaments.api.tiers;
 
 import com.pixelmonmod.pixelmon.Pixelmon;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
-import com.pixelmonmod.pixelmon.enums.EnumSpecies;
+import com.pixelmonmod.pixelmon.api.pokemon.PokemonFactory;
+import com.pixelmonmod.pixelmon.api.pokemon.species.Species;
+import com.pixelmonmod.pixelmon.api.registries.PixelmonSpecies;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
 
@@ -19,11 +22,11 @@ public class Tier {
 	/**
 	 * Absolutely no legendary Pokémon
 	 */
-	public static final Tier NO_LEGENDARIES = new Tier("NOLEGENDARIES", "No Legendaries", p -> !EnumSpecies.legendaries.contains(p.getSpecies()));
+	public static final Tier NO_LEGENDARIES = new Tier("NOLEGENDARIES", "No Legendaries", p -> !PixelmonSpecies.isLegendary(p.getSpecies()));
 	/**
 	 * Only legendary Pokémon
 	 */
-	public static final Tier LEGENDARIES = new Tier("LEGENDARIES", "Legendaries", p -> EnumSpecies.legendaries.contains(p.getSpecies()));
+	public static final Tier LEGENDARIES = new Tier("LEGENDARIES", "Legendaries", p -> PixelmonSpecies.isLegendary(p.getSpecies()));
 	/**
 	 * Generation 1 Pokémon
 	 */
@@ -59,23 +62,23 @@ public class Tier {
 	/**
 	 * Fully Evolved, including non-evolving Pokémon like Luvdisc
 	 */
-	public static final Tier FE = new Tier("FE", "Fully-Evolved", p -> p.getBaseStats().getEvolutions().isEmpty());
+	public static final Tier FE = new Tier("FE", "Fully-Evolved", p -> p.getForm().getEvolutions().isEmpty());
 	/**
 	 * Not-Fully Evolved, but including middle-evolutions like Ivysaur
 	 */
-	public static final Tier NFE = new Tier("NFE", "Not-Fully-Evolved", p -> !p.getBaseStats().getEvolutions().isEmpty());
+	public static final Tier NFE = new Tier("NFE", "Not-Fully-Evolved", p -> !p.getForm().getEvolutions().isEmpty());
 	/**
 	 * Little cup - not-evolved, but able to evolve. e.g. Bulbasaur is acceptable, Pachirisu is not
 	 */
-	public static final Tier LC = new Tier("LC", "Little Cup", p -> !p.getBaseStats().getEvolutions().isEmpty() && p.getBaseStats().preEvolutions.length == 0);
+	public static final Tier LC = new Tier("LC", "Little Cup", p -> !p.getForm().getEvolutions().isEmpty() && p.getForm().preEvolutions.length == 0);
 	/**
 	 * Has strictly 1 type
 	 */
-	public static final Tier MONOTYPE = new Tier("MONOTYPE", "Monotype", p -> p.getBaseStats().getTypeList().size() == 1);
+	public static final Tier MONOTYPE = new Tier("MONOTYPE", "Monotype", p -> p.getForm().getTypes().size() == 1);
 	/**
 	 * Has strictly 2 types
 	 */
-	public static final Tier DUALTYPE = new Tier("DUALTYPE", "Dualtype", p -> p.getBaseStats().getTypeList().size() == 2);
+	public static final Tier DUALTYPE = new Tier("DUALTYPE", "Dualtype", p -> p.getForm().getTypes().size() == 2);
 	//NU, RU, UU, OU, UBER - Waiting on lists of each
 
 	public static final ArrayList<Tier> tiers = new ArrayList<>();
@@ -115,7 +118,7 @@ public class Tier {
 	 */
 	public final String displayName;
 	/**
-	 * The {@link Predicate} condition, given {@link EnumSpecies}, for what qualifies a Pokémon for this tier.
+	 * The {@link Predicate} condition, given {@link Pokemon}, for what qualifies a Pokémon for this tier.
 	 */
 	public final Predicate<Pokemon> condition;
 
@@ -128,11 +131,11 @@ public class Tier {
 	/**
 	 * Filters out the Pokémon from the given pool based off this tier specification.
 	 */
-	public void filter(ArrayList<EnumSpecies> pool) {
+	public void filter(List<Species> pool) {
 		pool.removeIf(p ->
 		{
 			try {
-				return !condition.test(Pixelmon.pokemonFactory.create(p));
+				return !condition.test(PokemonFactory.create(p));
 			} catch (NoSuchElementException nsee) {
 				// This is for base stats returning empties. Not sure why.
 				return true;

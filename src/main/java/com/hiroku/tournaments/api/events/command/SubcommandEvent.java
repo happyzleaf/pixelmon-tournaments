@@ -1,7 +1,7 @@
 package com.hiroku.tournaments.api.events.command;
 
 import com.hiroku.tournaments.api.command.TournamentCommandWrapper;
-import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.eventbus.api.Event;
 
 import java.util.ArrayList;
 

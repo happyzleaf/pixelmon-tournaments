@@ -2,8 +2,8 @@ package com.hiroku.tournaments.api.events.tournament;
 
 import com.hiroku.tournaments.api.Match;
 import com.hiroku.tournaments.obj.Team;
-import net.minecraftforge.fml.common.eventhandler.Cancelable;
-import net.minecraftforge.fml.common.eventhandler.Event;
+import net.minecraftforge.eventbus.api.Cancelable;
+import net.minecraftforge.eventbus.api.Event;
 
 /**
  * Event fired when a team is about to be knocked out of the tournament. If this event is cancelled, they will not be knocked out
