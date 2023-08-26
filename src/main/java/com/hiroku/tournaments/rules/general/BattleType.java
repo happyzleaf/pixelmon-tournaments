@@ -1,11 +1,11 @@
 package com.hiroku.tournaments.rules.general;
 
+import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.rule.types.GeneralRule;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.obj.Team;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Rule representing the type of battles to take place in the tournament. Described using {@link TeamsComposition}.
@@ -75,12 +75,12 @@ public class BattleType extends GeneralRule {
 	@Override
 	public Text getDisplayText() {
 		if (composition == TeamsComposition.SINGLE)
-			return Text.of(TextColors.GOLD, "Battle Type: ", TextColors.DARK_AQUA, "Single");
+			return Text.of(TextFormatting.GOLD, "Battle Type: ", TextFormatting.DARK_AQUA, "Single");
 		if (composition == TeamsComposition.DOUBLE_1_PLAYER)
-			return Text.of(TextColors.GOLD, "Battle Type: ", TextColors.DARK_AQUA, "Double (1 Player Teams)");
+			return Text.of(TextFormatting.GOLD, "Battle Type: ", TextFormatting.DARK_AQUA, "Double (1 Player Teams)");
 		if (composition == TeamsComposition.DOUBLE_2_PLAYER)
-			return Text.of(TextColors.GOLD, "Battle Type: ", TextColors.DARK_AQUA, "Double (2 Player Teams)");
-		return Text.of(TextColors.GOLD, "Battle Type: ", TextColors.DARK_AQUA, "Double (1-2 Player Teams)");
+			return Text.of(TextFormatting.GOLD, "Battle Type: ", TextFormatting.DARK_AQUA, "Double (2 Player Teams)");
+		return Text.of(TextFormatting.GOLD, "Battle Type: ", TextFormatting.DARK_AQUA, "Double (1-2 Player Teams)");
 	}
 
 	@Override
@@ -101,12 +101,12 @@ public class BattleType extends GeneralRule {
 	@Override
 	public boolean canTeamJoin(Tournament tournament, Team team, boolean forced) {
 		if (this.composition == TeamsComposition.DOUBLE_2_PLAYER && team.users.size() != 2) {
-			team.sendMessage(Text.of(TextColors.RED, "This is a double battle tournament where you must bring a partner!"));
-			team.sendMessage(Text.of(TextColors.RED, "Use /tournament join <partner>"));
+			team.sendMessage(Text.of(TextFormatting.RED, "This is a double battle tournament where you must bring a partner!"));
+			team.sendMessage(Text.of(TextFormatting.RED, "Use /tournament join <partner>"));
 			return false;
 		}
 		if ((this.composition == TeamsComposition.SINGLE || this.composition == TeamsComposition.DOUBLE_1_PLAYER) && team.users.size() != 1) {
-			team.sendMessage(Text.of(TextColors.RED, "You must join this tournament alone!"));
+			team.sendMessage(Text.of(TextFormatting.RED, "You must join this tournament alone!"));
 			return false;
 		}
 

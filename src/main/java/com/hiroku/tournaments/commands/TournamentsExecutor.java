@@ -90,6 +90,8 @@ public class TournamentsExecutor implements CommandExecutor {
 					if (Tournament.instance().teams != null)
 						for (Team team : Tournament.instance().teams)
 							for (User user : team.users)
+								// TODO logic changed and now removeRentalPokemon only works with online players and does nothing.
+								//      make sure this logic is solid when player is offline
 								RandomPokemon.removeRentalPokemon(user, true);
 					Tournament.instance().close();
 					src.sendMessage(Text.of(TextColors.GRAY, "Tournament closed."));

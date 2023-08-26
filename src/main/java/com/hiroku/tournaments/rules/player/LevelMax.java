@@ -1,12 +1,12 @@
 package com.hiroku.tournaments.rules.player;
 
+import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.rule.types.PlayerRule;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
-import com.pixelmonmod.pixelmon.config.PixelmonConfig;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.pixelmonmod.pixelmon.api.config.PixelmonConfigProxy;
+import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Rule demanding that all Pokémon be below or equal to a particular level
@@ -24,18 +24,18 @@ public class LevelMax extends PlayerRule {
 
 		levelMax = Integer.parseInt(arg);
 
-		if (levelMax < 1 || levelMax > PixelmonConfig.maxLevel)
-			throw new Exception("Invalid level '" + arg + "'; must be between " + 1 + " and " + PixelmonConfig.maxLevel);
+		if (levelMax < 1 || levelMax > PixelmonConfigProxy.getGeneral().getMaxLevel())
+			throw new Exception("Invalid level '" + arg + "'; must be between " + 1 + " and " + PixelmonConfigProxy.getGeneral().getMaxLevel());
 	}
 
 	@Override
-	public boolean passes(Player player, PlayerPartyStorage storage) {
+	public boolean passes(PlayerEntity player, PlayerPartyStorage storage) {
 		return storage.getHighestLevel() <= levelMax;
 	}
 
 	@Override
 	public Text getDisplayText() {
-		return Text.of(TextColors.GOLD, "Level Maximum: ", TextColors.DARK_AQUA, levelMax);
+		return Text.of(TextFormatting.GOLD, "Level Maximum: ", TextFormatting.DARK_AQUA, levelMax);
 	}
 
 	@Override
@@ -49,8 +49,8 @@ public class LevelMax extends PlayerRule {
 	}
 
 	@Override
-	public Text getBrokenRuleText(Player player) {
-		return Text.of(TextColors.DARK_AQUA, player.getName(), TextColors.RED, " exceeded the level maximum!");
+	public Text getBrokenRuleText(PlayerEntity player) {
+		return Text.of(TextFormatting.DARK_AQUA, player.getName(), TextFormatting.RED, " exceeded the level maximum!");
 	}
 
 	@Override

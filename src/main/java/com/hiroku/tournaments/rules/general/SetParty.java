@@ -1,5 +1,7 @@
 package com.hiroku.tournaments.rules.general;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.Tournaments;
 import com.hiroku.tournaments.api.Match;
 import com.hiroku.tournaments.api.Tournament;
@@ -10,17 +12,16 @@ import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.rules.player.LevelMax;
 import com.hiroku.tournaments.rules.player.LevelMin;
 import com.hiroku.tournaments.rules.player.RandomPokemon;
-import com.pixelmonmod.pixelmon.Pixelmon;
+import com.pixelmonmod.api.pokemon.requirement.impl.LevelRequirement;
+import com.pixelmonmod.api.requirement.Requirement;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.List;
 
 public class SetParty extends GeneralRule {
-	public static final String OLD_LEVEL_KEY = "oldlevel";
+	public static final String OLD_LEVEL_KEY = "oldlevel"; // TODO: remove this nonsense?
 
 	public int specificLevel = -1;
 
@@ -36,7 +37,7 @@ public class SetParty extends GeneralRule {
 
 	@Override
 	public Text getDisplayText() {
-		return Text.of(TextColors.GOLD, "Party Pokémon will be temporarily set to level: ", TextColors.DARK_AQUA, specificLevel == -1 ? "Level max rule value" : specificLevel);
+		return Text.of(TextFormatting.GOLD, "Party Pokémon will be temporarily set to level: ", TextFormatting.DARK_AQUA, specificLevel == -1 ? "Level max rule value" : specificLevel);
 	}
 
 	@Override
@@ -65,8 +66,9 @@ public class SetParty extends GeneralRule {
 
 			if (maxRule == null && minRule == null) {
 				RandomPokemon randomRule = tournament.getRuleSet().getRule(RandomPokemon.class);
-				if (randomRule != null && randomRule.spec.level != null) {
-					targetLevel = randomRule.spec.level;
+				Integer randomRuleLevel = randomRule == null ? null : randomRule.spec.getRequirement(LevelRequirement.class).map(Requirement::getValue).orElse(null);
+				if (randomRuleLevel != null) {
+					targetLevel = randomRuleLevel;
 					underLevel = targetLevel - 1;
 					overLevel = targetLevel + 1;
 				}
@@ -94,14 +96,15 @@ public class SetParty extends GeneralRule {
 		for (Side side : match.sides) {
 			for (Team team : side.teams) {
 				for (User user : team.users) {
-					PlayerPartyStorage storage = Pixelmon.storageManager.getParty(user.getUniqueId());
-					for (Pokemon pokemon : storage.getTeam()) {
-						int level = pokemon.getLevel();
+					PlayerPartyStorage party = user.getParty();
+					for (Pokemon pokemon : party.getTeam()) {
+						int level = pokemon.getPokemonLevel();
 						if (level <= underLevel || level >= overLevel) {
-							Tournaments.log(user.getName() + "'s " + pokemon.getSpecies().getPokemonName() + " was not an acceptable level (" + level + "). Setting to " + targetLevel);
+							Tournaments.log(user.getName() + "'s " + pokemon.getSpecies().getName() + " was not an acceptable level (" + level + "). Setting to " + targetLevel);
 							pokemon.setLevel(targetLevel);
-							if (!pokemon.getPersistentData().hasKey(OLD_LEVEL_KEY))
-								pokemon.getPersistentData().setInteger(SetParty.OLD_LEVEL_KEY, level);
+							if (!pokemon.getPersistentData().contains(OLD_LEVEL_KEY)) {
+								pokemon.getPersistentData().putInt(SetParty.OLD_LEVEL_KEY, level);
+							}
 						}
 					}
 				}
@@ -126,12 +129,12 @@ public class SetParty extends GeneralRule {
 	}
 
 	public static void restoreLevels(User user) {
-		PlayerPartyStorage storage = Pixelmon.storageManager.getParty(user.getUniqueId());
+		PlayerPartyStorage storage = user.getParty();
 		for (Pokemon pokemon : storage.getTeam()) {
-			if (pokemon.getPersistentData().hasKey(SetParty.OLD_LEVEL_KEY)) {
-				int oldLevel = pokemon.getPersistentData().getInteger(SetParty.OLD_LEVEL_KEY);
+			if (pokemon.getPersistentData().contains(SetParty.OLD_LEVEL_KEY)) {
+				int oldLevel = pokemon.getPersistentData().getInt(SetParty.OLD_LEVEL_KEY);
 				pokemon.setLevel(oldLevel);
-				pokemon.getPersistentData().removeTag(SetParty.OLD_LEVEL_KEY);
+				pokemon.getPersistentData().remove(SetParty.OLD_LEVEL_KEY);
 			}
 		}
 	}

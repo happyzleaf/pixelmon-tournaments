@@ -1,15 +1,15 @@
 package com.hiroku.tournaments.rules.player;
 
+import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.rule.types.PlayerRule;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.api.tiers.Tier;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
-import com.pixelmonmod.pixelmon.enums.EnumSpecies;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
-import com.pixelmonmod.pixelmon.util.helpers.CollectionHelper;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.pixelmonmod.pixelmon.api.registries.PixelmonSpecies;
+import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
+import com.pixelmonmod.pixelmon.api.util.helpers.CollectionHelper;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ public class DisallowedPokemon extends PlayerRule {
 		String[] splits = arg.split(",");
 		for (String name : splits) {
 			String str = name.replace("_", " ");
-			if (EnumSpecies.hasPokemon(str))
+			if (PixelmonSpecies.has(str))
 				pokemons.add(str);
 			else if (Tier.parse(name) != null)
 				tiers.add(Tier.parse(name));
@@ -34,9 +34,9 @@ public class DisallowedPokemon extends PlayerRule {
 	}
 
 	@Override
-	public boolean passes(Player player, PlayerPartyStorage storage) {
+	public boolean passes(PlayerEntity player, PlayerPartyStorage storage) {
 		for (Pokemon pokemon : storage.getTeam())
-			if (pokemons.contains(pokemon.getSpecies().getPokemonName()) || pokemons.contains(pokemon.getSpecies().getLocalizedName()))
+			if (pokemons.contains(pokemon.getSpecies().getName()) || pokemons.contains(pokemon.getSpecies().getLocalizedName()))
 				return false;
 			else if (CollectionHelper.find(tiers, tier -> tier.condition.test(pokemon)) != null)
 				return false;
@@ -48,22 +48,22 @@ public class DisallowedPokemon extends PlayerRule {
 		Text.Builder builder = Text.builder();
 
 		if (pokemons.size() > 0)
-			builder.append(Text.of(TextColors.DARK_AQUA, pokemons.get(0)));
+			builder.append(Text.of(TextFormatting.DARK_AQUA, pokemons.get(0)));
 		if (tiers.size() > 0)
 			if (pokemons.isEmpty())
-				builder.append(Text.of(TextColors.DARK_AQUA, tiers.get(0).key));
+				builder.append(Text.of(TextFormatting.DARK_AQUA, tiers.get(0).key));
 			else
-				builder.append(Text.of(TextColors.GOLD, ", ", TextColors.DARK_AQUA, tiers.get(0).key));
+				builder.append(Text.of(TextFormatting.GOLD, ", ", TextFormatting.DARK_AQUA, tiers.get(0).key));
 		for (int i = 1; i < pokemons.size(); i++)
-			builder.append(Text.of(TextColors.GOLD, ", ", TextColors.DARK_AQUA, pokemons.get(i)));
+			builder.append(Text.of(TextFormatting.GOLD, ", ", TextFormatting.DARK_AQUA, pokemons.get(i)));
 		for (int i = 1; i < tiers.size(); i++)
-			builder.append(Text.of(TextColors.GOLD, ", ", TextColors.DARK_AQUA, tiers.get(i)));
-		return Text.of(TextColors.GOLD, "Disallowed Pokémon/tier(s): ", builder.build());
+			builder.append(Text.of(TextFormatting.GOLD, ", ", TextFormatting.DARK_AQUA, tiers.get(i)));
+		return Text.of(TextFormatting.GOLD, "Disallowed Pokémon/tier(s): ", builder.build());
 	}
 
 	@Override
-	public Text getBrokenRuleText(Player player) {
-		return Text.of(TextColors.DARK_AQUA, player.getName(), TextColors.RED, " has a disallowed Pokémon!");
+	public Text getBrokenRuleText(PlayerEntity player) {
+		return Text.of(TextFormatting.DARK_AQUA, player.getName(), TextFormatting.RED, " has a disallowed Pokémon!");
 	}
 
 	@Override
@@ -82,9 +82,9 @@ public class DisallowedPokemon extends PlayerRule {
 
 	@Override
 	public String getSerializationString() {
-		String serialize = pokemons.get(0);
+		StringBuilder serialize = new StringBuilder(pokemons.get(0));
 		for (int i = 1; i < pokemons.size(); i++)
-			serialize += "," + pokemons.get(i);
+			serialize.append(",").append(pokemons.get(i));
 		return "disallowedpokemon:" + serialize;
 	}
 

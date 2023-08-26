@@ -1,12 +1,12 @@
 package com.hiroku.tournaments.rules.player;
 
+import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.rule.types.PlayerRule;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Rule barring (or explicitly allowing) held items on Pokémon.
@@ -15,7 +15,7 @@ import org.spongepowered.api.text.format.TextColors;
  */
 public class HeldItems extends PlayerRule {
 	/**
-	 * Whether or not held items are allowed.
+	 * Whether held items are allowed.
 	 */
 	public boolean allowHeldItems;
 
@@ -26,7 +26,7 @@ public class HeldItems extends PlayerRule {
 	}
 
 	@Override
-	public boolean passes(Player player, PlayerPartyStorage storage) {
+	public boolean passes(PlayerEntity player, PlayerPartyStorage storage) {
 		if (allowHeldItems)
 			return true;
 		for (Pokemon pokemon : storage.getTeam())
@@ -37,13 +37,13 @@ public class HeldItems extends PlayerRule {
 	}
 
 	@Override
-	public Text getBrokenRuleText(Player player) {
-		return Text.of(TextColors.DARK_AQUA, player.getName(), TextColors.RED, " has at least one Pokémon with a held item!");
+	public Text getBrokenRuleText(PlayerEntity player) {
+		return Text.of(TextFormatting.DARK_AQUA, player.getName(), TextFormatting.RED, " has at least one Pokémon with a held item!");
 	}
 
 	@Override
 	public Text getDisplayText() {
-		return Text.of(TextColors.GOLD, "Held Items Allowed: ", this.allowHeldItems ? Text.of(TextColors.GREEN, "Yes") : Text.of(TextColors.RED, "No"));
+		return Text.of(TextFormatting.GOLD, "Held Items Allowed: ", this.allowHeldItems ? Text.of(TextFormatting.GREEN, "Yes") : Text.of(TextFormatting.RED, "No"));
 	}
 
 	@Override

@@ -13,7 +13,7 @@ public class Scheduler {
 	private static Map<UUID, Ticker> tickers = new HashMap<>();
 
 	public static UUID delayTicks(long ticks, Runnable task) {
-		checkArgument(ticks > 0, "ticks > 0");
+		checkArgument(ticks >= 0, "ticks >= 0");
 
 		UUID id = UUID.randomUUID();
 		Ticker ticker = new Ticker(id, ticks, task);
@@ -22,12 +22,7 @@ public class Scheduler {
 	}
 
 	public static UUID delayTime(long time, TimeUnit unit, Runnable task) {
-		checkArgument(time > 0, "time > 0");
-
-		UUID id = UUID.randomUUID();
-		Ticker ticker = new Ticker(id, unit.toSeconds(time) * 20, task);
-		tickers.put(id, ticker);
-		return id;
+		return delayTicks(unit.toSeconds(time) * 20, task);
 	}
 
 	public static boolean cancel(UUID id) {
@@ -48,7 +43,7 @@ public class Scheduler {
 
 		@Override
 		public void run() {
-			if (--ticks == 0) {
+			if (ticks-- == 0) {
 				task.run();
 				ServerLifecycleHooks.getCurrentServer().tickables.remove(this);
 				cancel(id);

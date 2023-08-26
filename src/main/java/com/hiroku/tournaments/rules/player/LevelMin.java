@@ -1,12 +1,12 @@
 package com.hiroku.tournaments.rules.player;
 
+import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.rule.types.PlayerRule;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
-import com.pixelmonmod.pixelmon.config.PixelmonConfig;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.pixelmonmod.pixelmon.api.config.PixelmonConfigProxy;
+import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Rule demanding that all Pokémon be above or equal to a particular level
@@ -24,18 +24,18 @@ public class LevelMin extends PlayerRule {
 
 		levelMin = Integer.parseInt(arg);
 
-		if (levelMin < 1 || levelMin > PixelmonConfig.maxLevel)
-			throw new Exception("Invalid level '" + arg + "'; must be between " + 1 + " and " + PixelmonConfig.maxLevel);
+		if (levelMin < 1 || levelMin > PixelmonConfigProxy.getGeneral().getMaxLevel())
+			throw new Exception("Invalid level '" + arg + "'; must be between " + 1 + " and " + PixelmonConfigProxy.getGeneral().getMaxLevel());
 	}
 
 	@Override
-	public boolean passes(Player player, PlayerPartyStorage storage) {
+	public boolean passes(PlayerEntity player, PlayerPartyStorage storage) {
 		return storage.getLowestLevel() >= levelMin;
 	}
 
 	@Override
 	public Text getDisplayText() {
-		return Text.of(TextColors.GOLD, "Level Minimum: ", TextColors.DARK_AQUA, levelMin);
+		return Text.of(TextFormatting.GOLD, "Level Minimum: ", TextFormatting.DARK_AQUA, levelMin);
 	}
 
 	@Override
@@ -49,8 +49,8 @@ public class LevelMin extends PlayerRule {
 	}
 
 	@Override
-	public Text getBrokenRuleText(Player player) {
-		return Text.of(TextColors.DARK_AQUA, player.getName(), TextColors.RED, " went below the level minimum!");
+	public Text getBrokenRuleText(PlayerEntity player) {
+		return Text.of(TextFormatting.DARK_AQUA, player.getName(), TextFormatting.RED, " went below the level minimum!");
 	}
 
 	@Override

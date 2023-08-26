@@ -1,16 +1,21 @@
 package com.hiroku.tournaments.rewards;
 
+import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.reward.RewardBase;
 import com.hiroku.tournaments.util.GsonUtils;
 import com.hiroku.tournaments.util.TournamentUtils;
-import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.Util;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * A reward that gives the player a set of items.
@@ -29,40 +34,33 @@ public class ItemsReward extends RewardBase {
 
 		items = new ArrayList<>();
 
-		Optional<Player> optPlayer;
-
-		try {
-			optPlayer = Sponge.getServer().getPlayer(arg);
-		} catch (Exception e) {
-			optPlayer = Optional.empty();
-		}
-		if (!optPlayer.isPresent()) {
+		// TODO: Since arg is a string and is passed right into Sponge.getServer().getPlayer(arg) I suppose it is the username
+		ServerPlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUsername(arg);
+		if (player == null) {
 			try {
 				Map<String, Object> map = GsonUtils.uglyGson.fromJson(arg, Map.class);
-				for (Object o : map.values())
-					items.add((ItemStack) (Object) new net.minecraft.item.ItemStack(GsonUtils.nbtFromMap((Map<String, Object>) o)));
+				for (Object o : map.values()) {
+					items.add(ItemStack.read(GsonUtils.nbtFromMap((Map<String, Object>) o)));
+				}
 			} catch (Exception e) {
 				throw new Exception("Invalid player name: " + arg);
 			}
 		} else {
-			Player player = optPlayer.get();
-
-			player.getInventory().slots().forEach(slot ->
-			{
-				Optional<ItemStack> stack = slot.poll();
-				if (stack.isPresent())
-					items.add(stack.get().copy());
-			});
+			for (ItemStack is : items) {
+				TournamentUtils.giveItemsToPlayer(player, is.copy());
+			}
 		}
 
-		if (items.isEmpty())
+		// Not sure why this is done so late, but I'll leave it there
+		if (items.isEmpty()) {
 			throw new IllegalArgumentException("No items in inventory!");
+		}
 	}
 
 	@Override
-	public void give(Player player) {
+	public void give(PlayerEntity player) {
 		if (!items.isEmpty()) {
-			player.sendMessage(Text.of(TextColors.DARK_GREEN, "You've received item rewards!"));
+			player.sendMessage(Text.of(TextFormatting.DARK_GREEN, "You've received item rewards!"), Util.DUMMY_UUID);
 			for (ItemStack stack : items)
 				TournamentUtils.giveItemsToPlayer(player, stack.copy());
 		}
@@ -73,12 +71,13 @@ public class ItemsReward extends RewardBase {
 		Text.Builder builder = Text.builder();
 		if (items.isEmpty())
 			return null;
-		builder.append(Text.of(TextColors.GOLD, "Items: "));
-		builder.append(Text.of(TextColors.DARK_AQUA, items.get(0).getQuantity() == 1 ? "" : (items.get(0).getQuantity() + " "), items.get(0).getTranslation().get(Locale.ENGLISH)));
+		builder.append(Text.of(TextFormatting.GOLD, "Items: "));
+		// TODO:                                                                            is this ok with the translation?  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+		builder.append(Text.of(TextFormatting.DARK_AQUA, items.get(0).getCount() == 1 ? "" : (items.get(0).getCount() + " "), items.get(0).getDisplayName().getString()));
 		for (int i = 1; i < items.size(); i++) {
-			builder.append(Text.of(TextColors.GOLD, ", "));
-			int q = items.get(i).getQuantity();
-			builder.append(Text.of(TextColors.DARK_AQUA, q == 1 ? "" : (q + " "), items.get(i).getTranslation().get(Locale.ENGLISH)));
+			builder.append(Text.of(TextFormatting.GOLD, ", "));
+			// TODO:                                                                                                  also this?  vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+			builder.append(Text.of(TextFormatting.DARK_AQUA, items.get(i).getCount() == 1 ? "" : (items.get(i).getCount() + " "), items.get(i).getDisplayName().getString()));
 		}
 		return builder.build();
 	}
@@ -90,9 +89,10 @@ public class ItemsReward extends RewardBase {
 
 	@Override
 	public String getSerializationString() {
-		NBTTagCompound superTag = new NBTTagCompound();
-		for (int i = 0; i < items.size(); i++)
-			superTag.setTag("itemstack-" + i, ((net.minecraft.item.ItemStack) (Object) items.get(i)).writeToNBT(new NBTTagCompound()));
+		CompoundNBT superTag = new CompoundNBT();
+		for (int i = 0; i < items.size(); i++) {
+			superTag.put("itemstack-" + i, items.get(i).write(new CompoundNBT()));
+		}
 
 		return "items:" + GsonUtils.uglyGson.toJson(GsonUtils.nbtToMap(superTag));
 	}

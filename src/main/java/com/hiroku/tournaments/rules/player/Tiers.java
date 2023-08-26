@@ -1,14 +1,14 @@
 package com.hiroku.tournaments.rules.player;
 
+import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.rule.types.PlayerRule;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.api.tiers.Tier;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class Tiers extends PlayerRule {
 	}
 
 	@Override
-	public boolean passes(Player player, PlayerPartyStorage storage) {
+	public boolean passes(PlayerEntity player, PlayerPartyStorage storage) {
 		for (Pokemon pokemon : storage.getTeam())
 			for (Tier tier : tiers)
 				if (!tier.condition.test(pokemon))
@@ -50,8 +50,8 @@ public class Tiers extends PlayerRule {
 	}
 
 	@Override
-	public Text getBrokenRuleText(Player player) {
-		return Text.of(TextColors.DARK_AQUA, player.getName(), TextColors.RED, " brought illegal Pokémon to the tournament!");
+	public Text getBrokenRuleText(PlayerEntity player) {
+		return Text.of(TextFormatting.DARK_AQUA, player.getName(), TextFormatting.RED, " brought illegal Pokémon to the tournament!");
 	}
 
 	@Override
@@ -64,18 +64,18 @@ public class Tiers extends PlayerRule {
 
 	@Override
 	public String getSerializationString() {
-		String line = "tiers:" + tiers.get(0).key;
+		StringBuilder line = new StringBuilder("tiers:" + tiers.get(0).key);
 		for (int i = 1; i < tiers.size(); i++)
-			line += "," + tiers.get(i).key;
-		return line;
+			line.append(",").append(tiers.get(i).key);
+		return line.toString();
 	}
 
 	@Override
 	public Text getDisplayText() {
-		Text.Builder builder = Text.builder().append(Text.of(TextColors.GOLD, "Allowed Pokémon Tiers: \n",
-				TextColors.DARK_AQUA, "    ", tiers.get(0).displayName));
+		Text.Builder builder = Text.builder().append(Text.of(TextFormatting.GOLD, "Allowed Pokémon Tiers: \n",
+				TextFormatting.DARK_AQUA, "    ", tiers.get(0).displayName));
 		for (int i = 1; i < tiers.size(); i++)
-			builder.append(Text.of("\n    ", TextColors.DARK_AQUA, tiers.get(i).displayName));
+			builder.append(Text.of("\n    ", TextFormatting.DARK_AQUA, tiers.get(i).displayName));
 		return builder.build();
 	}
 

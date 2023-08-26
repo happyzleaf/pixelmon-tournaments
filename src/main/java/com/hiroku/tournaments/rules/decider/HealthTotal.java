@@ -1,16 +1,14 @@
 package com.hiroku.tournaments.rules.decider;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.Match;
 import com.hiroku.tournaments.api.rule.types.DeciderRule;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.obj.Side;
 import com.hiroku.tournaments.obj.Team;
-import com.pixelmonmod.pixelmon.Pixelmon;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Decides the winner based on which team has the most health. Matching healths
@@ -35,8 +33,7 @@ public class HealthTotal extends DeciderRule {
 		for (int i = 0; i < 2; i++) {
 			for (Team team : match.sides[i].teams) {
 				for (User user : team.users) {
-					PlayerPartyStorage storage = Pixelmon.storageManager.getParty(user.getUniqueId());
-					for (Pokemon pokemon : storage.getTeam())
+					for (Pokemon pokemon : user.getParty().getTeam())
 						sidesHealths[i] += pokemon.getHealth();
 				}
 			}
@@ -67,7 +64,7 @@ public class HealthTotal extends DeciderRule {
 
 	@Override
 	public Text getDisplayText() {
-		return Text.of(TextColors.GOLD, "Decide crashes: ", TextColors.DARK_AQUA, "Health total [" + getWeight() + "]");
+		return Text.of(TextFormatting.GOLD, "Decide crashes: ", TextFormatting.DARK_AQUA, "Health total [" + getWeight() + "]");
 	}
 
 	@Override

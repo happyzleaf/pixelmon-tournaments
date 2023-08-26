@@ -1,15 +1,13 @@
 package com.hiroku.tournaments.rules.decider;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.Match;
 import com.hiroku.tournaments.api.rule.types.DeciderRule;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.obj.Side;
 import com.hiroku.tournaments.obj.Team;
-import com.pixelmonmod.pixelmon.Pixelmon;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Decides the winner based on who has the most living party Pokémon. Matching party counts
@@ -33,8 +31,7 @@ public class PartyCount extends DeciderRule {
 		for (int i = 0; i < 2; i++) {
 			for (Team team : match.sides[i].teams) {
 				for (User user : team.users) {
-					PlayerPartyStorage storage = Pixelmon.storageManager.getParty(user.getUniqueId());
-					sideCounts[i] += storage.findAll(pokemon -> !pokemon.isEgg() && pokemon.getHealth() > 0).size();
+					sideCounts[i] += user.getParty().findAll(pokemon -> !pokemon.isEgg() && pokemon.getHealth() > 0).size();
 				}
 			}
 		}
@@ -64,7 +61,7 @@ public class PartyCount extends DeciderRule {
 
 	@Override
 	public Text getDisplayText() {
-		return Text.of(TextColors.GOLD, "Decide crashes: ", TextColors.DARK_AQUA, "Party count [" + getWeight() + "]");
+		return Text.of(TextFormatting.GOLD, "Decide crashes: ", TextFormatting.DARK_AQUA, "Party count [" + getWeight() + "]");
 	}
 
 	@Override

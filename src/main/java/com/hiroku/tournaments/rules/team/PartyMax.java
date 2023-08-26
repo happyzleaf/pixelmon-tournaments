@@ -1,13 +1,11 @@
 package com.hiroku.tournaments.rules.team;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.api.rule.types.TeamRule;
 import com.hiroku.tournaments.obj.Team;
-import com.pixelmonmod.pixelmon.Pixelmon;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Rule demanding that teams have no more than a particular number of Pokémon in their combined party.
@@ -34,8 +32,7 @@ public class PartyMax extends TeamRule {
 
 		for (User user : team.users) {
 			if (user.isOnline()) {
-				PlayerPartyStorage storage = Pixelmon.storageManager.getParty(user.getUniqueId());
-				count += storage.getTeam().size();
+				count += user.getParty().getTeam().size();
 			}
 		}
 
@@ -44,7 +41,7 @@ public class PartyMax extends TeamRule {
 
 	@Override
 	public Text getDisplayText() {
-		return Text.of(TextColors.GOLD, "Maximum Party Size: ", TextColors.DARK_AQUA, partyMax);
+		return Text.of(TextFormatting.GOLD, "Maximum Party Size: ", TextFormatting.DARK_AQUA, partyMax);
 	}
 
 	@Override
@@ -59,7 +56,7 @@ public class PartyMax extends TeamRule {
 
 	@Override
 	public Text getBrokenRuleText(Team team) {
-		return Text.of(team.getDisplayText(), TextColors.RED, " exceeds the maximum party size!");
+		return Text.of(team.getDisplayText(), TextFormatting.RED, " exceeds the maximum party size!");
 	}
 
 	@Override

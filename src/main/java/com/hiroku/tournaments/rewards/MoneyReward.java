@@ -13,6 +13,7 @@ import java.math.BigDecimal;
  *
  * @author Hiroku
  */
+// TODO: economy
 public class MoneyReward extends RewardBase {
 	/**
 	 * How much money should be given
@@ -27,14 +28,14 @@ public class MoneyReward extends RewardBase {
 
 	@Override
 	public void give(PlayerEntity player) {
-		EconomyService economy = Sponge.getServiceManager().provide(EconomyService.class).get();
-		Optional<UniqueAccount> optAcc = economy.getOrCreateAccount(player.getUniqueId());
-
-		if (optAcc.isPresent()) {
-			optAcc.get().deposit(economy.getDefaultCurrency(), BigDecimal.valueOf(amount), Cause.builder().insert(0, Tournaments.INSTANCE).build(EventContext.empty()));
-			player.sendMessage(Text.of(TextFormatting.DARK_GREEN, "You were rewarded ", economy.getDefaultCurrency().getSymbol(), amount));
-		} else
-			player.sendMessage(Text.of(TextFormatting.RED, "There was an error giving you the cash reward of ", economy.getDefaultCurrency().getSymbol(), amount));
+//		EconomyService economy = Sponge.getServiceManager().provide(EconomyService.class).get();
+//		Optional<UniqueAccount> optAcc = economy.getOrCreateAccount(player.getUniqueId());
+//
+//		if (optAcc.isPresent()) {
+//			optAcc.get().deposit(economy.getDefaultCurrency(), BigDecimal.valueOf(amount), Cause.builder().insert(0, Tournaments.INSTANCE).build(EventContext.empty()));
+//			player.sendMessage(Text.of(TextFormatting.DARK_GREEN, "You were rewarded ", economy.getDefaultCurrency().getSymbol(), amount));
+//		} else
+//			player.sendMessage(Text.of(TextFormatting.RED, "There was an error giving you the cash reward of ", economy.getDefaultCurrency().getSymbol(), amount));
 	}
 
 	@Override

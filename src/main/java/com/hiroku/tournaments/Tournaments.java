@@ -22,6 +22,7 @@ import com.hiroku.tournaments.rules.team.MinTeamElo;
 import com.hiroku.tournaments.rules.team.PartyMax;
 import com.hiroku.tournaments.rules.team.PartyMin;
 import com.hiroku.tournaments.util.PluginLogger;
+import com.hiroku.tournaments.util.PokemonUtils;
 import com.hiroku.tournaments.util.TournamentUtils;
 import com.pixelmonmod.api.pokemon.PokemonSpecificationProxy;
 import com.pixelmonmod.api.pokemon.requirement.impl.HasSpecFlagRequirement;
@@ -107,6 +108,7 @@ public class Tournaments {
 //			EloPlaceholder.addPlaceholder();
 
 		PokemonSpecificationProxy.register(new HasSpecFlagRequirement("rental"));
+		PokemonUtils.isRental(null); // Loads rental refernce
 	}
 
 	// TODO: commands

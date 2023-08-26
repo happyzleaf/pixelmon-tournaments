@@ -4,8 +4,7 @@ import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.archetypes.pokemon.PokemonMatch;
 import com.hiroku.tournaments.obj.Side;
-import com.pixelmonmod.api.pokemon.PokemonSpecification;
-import com.pixelmonmod.api.pokemon.PokemonSpecificationProxy;
+import com.hiroku.tournaments.util.PokemonUtils;
 import com.pixelmonmod.pixelmon.api.battles.BattleResults;
 import com.pixelmonmod.pixelmon.api.events.battles.BattleEndEvent;
 import com.pixelmonmod.pixelmon.api.events.battles.BattleStartedEvent;
@@ -18,8 +17,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import java.util.UUID;
 
 public class BattleListener {
-	private static PokemonSpecification rental = null;
-
 	@SubscribeEvent
 	public void onBattleEnd(BattleEndEvent event) {
 		if (Tournament.instance() == null) return;
@@ -53,17 +50,13 @@ public class BattleListener {
 	public void onBattleStarted(BattleStartedEvent event) {
 		if (Tournament.instance() != null) return;
 
-		if (rental == null) {
-			rental = PokemonSpecificationProxy.create("rental");
-		}
-
 		boolean hadRentals = false;
 		for (BattleParticipant bp : event.getBattleController().participants) {
 			if (bp instanceof PlayerParticipant) {
 				boolean individualHadRentals = false;
 				PlayerParticipant pp = (PlayerParticipant) bp;
 				for (int i = 0; i < 6; i++) {
-					if (pp.getStorage().get(i) != null && rental.matches(pp.getStorage().get(i))) {
+					if (pp.getStorage().get(i) != null && PokemonUtils.isRental(pp.getStorage().get(i))) {
 						pp.getStorage().set(i, null);
 						individualHadRentals = hadRentals = true;
 					}

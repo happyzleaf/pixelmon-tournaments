@@ -1,11 +1,11 @@
 package com.hiroku.tournaments.rules.general;
 
+import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.rule.types.GeneralRule;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.obj.Team;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Rule representing how many teams are allowed into the tournament. If autostart is true, the tournament will begin once full.
@@ -40,7 +40,7 @@ public class TeamCap extends GeneralRule {
 
 	@Override
 	public Text getDisplayText() {
-		return Text.of(TextColors.GOLD, "Team Cap: ", TextColors.DARK_AQUA, count);
+		return Text.of(TextFormatting.GOLD, "Team Cap: ", TextFormatting.DARK_AQUA, count);
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class TeamCap extends GeneralRule {
 	public boolean canTeamJoin(Tournament tournament, Team team, boolean forced) {
 		if (tournament.teams.size() >= count) {
 			if (!forced)
-				team.sendMessage(Text.of(TextColors.RED, "The tournament is full."));
+				team.sendMessage(Text.of(TextFormatting.RED, "The tournament is full."));
 			return false;
 		}
 

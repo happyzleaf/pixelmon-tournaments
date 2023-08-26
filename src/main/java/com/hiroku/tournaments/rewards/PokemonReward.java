@@ -2,16 +2,21 @@ package com.hiroku.tournaments.rewards;
 
 import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.reward.RewardBase;
-import com.hiroku.tournaments.util.PokemonUtils;
 import com.pixelmonmod.api.pokemon.PokemonSpecification;
 import com.pixelmonmod.api.pokemon.PokemonSpecificationProxy;
+import com.pixelmonmod.api.pokemon.requirement.impl.LevelRequirement;
+import com.pixelmonmod.api.pokemon.requirement.impl.ShinyRequirement;
 import com.pixelmonmod.api.pokemon.requirement.impl.SpeciesRequirement;
 import com.pixelmonmod.api.registry.RegistryValue;
 import com.pixelmonmod.api.requirement.Requirement;
-import com.pixelmonmod.pixelmon.Pixelmon;
+import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
+import com.pixelmonmod.pixelmon.api.pokemon.species.Species;
+import com.pixelmonmod.pixelmon.api.registries.PixelmonSpecies;
+import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
+import com.pixelmonmod.pixelmon.api.storage.StorageProxy;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
 
 /**
  * Reward which gives the player a Pokémon as described by the PokemonSpec standard.
@@ -36,25 +41,32 @@ public class PokemonReward extends RewardBase {
 
 	@Override
 	public void give(PlayerEntity player) {
-		EntityPixelmon pokemon = (EntityPixelmon) PixelmonEntityList.createEntityByName(spec.name, (World) player.getWorld());
-		spec.apply(pokemon);
+		Pokemon pokemon = spec.create();
 
-		PlayerPartyStorage storage = Pixelmon.storageManager.getParty((EntityPlayerMP) player);//.pokeBallManager.getPlayerStorage((EntityPlayerMP)player).get();
-		storage.add(pokemon.getPokemonData());//.addToParty(pokemon);
+		PlayerPartyStorage storage = StorageProxy.getParty(player.getUniqueID());
+		storage.add(pokemon);
 
-		player.sendMessage(Text.of(TextColors.DARK_GREEN, "You received a ",
-				(pokemon.getPokemonData().isShiny() ? Text.of(TextColors.YELLOW, "shiny ") : ""), TextColors.DARK_AQUA, pokemon.getName(),
-				TextColors.DARK_GREEN, " as a reward!"));
+		player.sendMessage(Text.of(TextFormatting.DARK_GREEN, "You received a ",
+				(pokemon.isShiny() ? Text.of(TextFormatting.YELLOW, "shiny ") : ""), TextFormatting.DARK_AQUA, pokemon.getSpecies().getName(),
+				TextFormatting.DARK_GREEN, " as a reward!"), Util.DUMMY_UUID);
 	}
 
 	@Override
 	public Text getDisplayText() {
 		Text.Builder builder = Text.builder().append(Text.of(TextFormatting.GOLD, "Pokémon: "));
-		if (spec.shiny != null && spec.shiny)
+
+		Boolean shinySpec = spec.getRequirement(ShinyRequirement.class).map(Requirement::getValue).orElse(null);
+		if (shinySpec != null && shinySpec) {
 			builder.append(Text.of(TextFormatting.YELLOW, "Shiny", TextFormatting.GOLD, ", "));
-		if (spec.level != null)
-			builder.append(Text.of(TextFormatting.DARK_AQUA, "Level ", spec.level, " "));
-		return builder.append(Text.of(TextFormatting.DARK_AQUA, spec.name)).build();
+		}
+
+		Integer levelSpec = spec.getRequirement(LevelRequirement.class).map(Requirement::getValue).orElse(null);
+		if (levelSpec != null) {
+			builder.append(Text.of(TextFormatting.DARK_AQUA, "Level ", levelSpec, " "));
+		}
+
+		Species speciesSpec = spec.getRequirement(SpeciesRequirement.class).map(Requirement::getValue).flatMap(RegistryValue::getValue).orElse(PixelmonSpecies.MISSINGNO.getValueUnsafe());
+		return builder.append(Text.of(TextFormatting.DARK_AQUA, speciesSpec.getName())).build();
 	}
 
 	@Override
@@ -64,8 +76,6 @@ public class PokemonReward extends RewardBase {
 
 	@Override
 	public String getSerializationString() {
-//		spec.write TODO: write to tag then serialize
-
-		return "pokemon:" + PokemonUtils.serializePokemonSpec(spec);
+		return "pokemon:" + spec.toString();
 	}
 }

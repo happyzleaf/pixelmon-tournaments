@@ -2,6 +2,9 @@ package com.hiroku.tournaments.rewards;
 
 import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.reward.RewardBase;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 /**
  * Reward which executes a command with the player's username inserted in place of {{player}}
@@ -30,10 +33,12 @@ public class CommandReward extends RewardBase {
 	}
 
 	@Override
-	public void give(Player player) {
+	public void give(PlayerEntity player) {
 		if (command.startsWith("/"))
 			command = command.replace("/", "");
-		Sponge.getGame().getCommandManager().process(Sponge.getServer().getConsole(), command.replaceAll("\\{\\{player\\}\\}", player.getName()));
+
+		MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+		server.getCommandManager().handleCommand(server.getCommandSource(), command.replaceAll("\\{\\{player}}", player.getScoreboardName()));
 	}
 
 	@Override

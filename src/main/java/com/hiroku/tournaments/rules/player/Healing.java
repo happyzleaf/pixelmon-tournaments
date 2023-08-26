@@ -1,5 +1,7 @@
 package com.hiroku.tournaments.rules.player;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.Match;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.rule.types.PlayerRule;
@@ -7,15 +9,11 @@ import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.obj.Side;
 import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.util.PokemonState;
-import com.pixelmonmod.pixelmon.Pixelmon;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
-import com.pixelmonmod.pixelmon.util.helpers.CollectionHelper;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyles;
+import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
+import com.pixelmonmod.pixelmon.api.util.helpers.CollectionHelper;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.*;
 
@@ -42,11 +40,11 @@ public class Healing extends PlayerRule {
 	}
 
 	@Override
-	public boolean passes(Player player, PlayerPartyStorage storage) {
+	public boolean passes(PlayerEntity player, PlayerPartyStorage storage) {
 		if (healingAllowed)
 			return true;
 
-		List<PokemonState> playerStates = states.get(player.getUniqueId());
+		List<PokemonState> playerStates = states.get(player.getUniqueID());
 		if (playerStates != null) {
 			for (PokemonState state : playerStates) {
 				Pokemon pokemon = storage.find(state.id);
@@ -66,7 +64,7 @@ public class Healing extends PlayerRule {
 	}
 
 	/**
-	 * Saves all of the party state data for this match's players.
+	 * Saves all the party state data for this match's players.
 	 *
 	 * @param match - The match whose players are getting their party states saved.
 	 */
@@ -76,11 +74,11 @@ public class Healing extends PlayerRule {
 			for (Team team : side.teams) {
 				for (User user : team.users) {
 					try {
-						PlayerPartyStorage storage = Pixelmon.storageManager.getParty(user.getUniqueId());
+						PlayerPartyStorage storage = user.getParty();
 						List<PokemonState> playerStates = new ArrayList<>();
 						for (Pokemon pokemon : storage.getTeam())
 							playerStates.add(new PokemonState(pokemon));
-						this.states.put(user.getUniqueId(), playerStates);
+						this.states.put(user.id, playerStates);
 					} catch (NoSuchElementException nsee) {
 						nsee.printStackTrace();
 					}
@@ -91,7 +89,7 @@ public class Healing extends PlayerRule {
 
 	@Override
 	public Text getDisplayText() {
-		return Text.of(TextColors.GOLD, "Healing between battles: ", TextColors.DARK_AQUA, healingAllowed ? "Allowed." : "Not allowed.");
+		return Text.of(TextFormatting.GOLD, "Healing between battles: ", TextFormatting.DARK_AQUA, healingAllowed ? "Allowed." : "Not allowed.");
 	}
 
 	@Override
@@ -105,8 +103,8 @@ public class Healing extends PlayerRule {
 	}
 
 	@Override
-	public Text getBrokenRuleText(Player player) {
-		return Text.of(TextColors.DARK_AQUA, player.getName(), TextColors.RED, " has healed at least one of their Pokémon! ", TextStyles.ITALIC, "Disqualified!");
+	public Text getBrokenRuleText(PlayerEntity player) {
+		return Text.of(TextFormatting.DARK_AQUA, player.getName(), TextFormatting.RED, " has healed at least one of their Pokémon! ", TextFormatting.ITALIC, "Disqualified!");
 	}
 
 	@Override

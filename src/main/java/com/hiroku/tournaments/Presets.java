@@ -8,6 +8,7 @@ import com.hiroku.tournaments.api.rule.RuleSet;
 import com.hiroku.tournaments.api.rule.RuleTypeRegistrar;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.obj.Zone;
+import com.pixelmonmod.pixelmon.battles.api.rules.BattleRules;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

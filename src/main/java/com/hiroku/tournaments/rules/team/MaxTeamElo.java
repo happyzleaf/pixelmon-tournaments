@@ -1,14 +1,14 @@
 package com.hiroku.tournaments.rules.team;
 
+import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.api.rule.types.TeamRule;
 import com.hiroku.tournaments.elo.EloStorage;
 import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.rules.general.EloType;
-import com.pixelmonmod.pixelmon.util.helpers.CollectionHelper;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.pixelmonmod.pixelmon.api.util.helpers.CollectionHelper;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.UUID;
 
@@ -34,7 +34,7 @@ public class MaxTeamElo extends TeamRule {
 	public boolean canTeamJoin(Tournament tournament, Team team, boolean forced) {
 		if (!passes(team)) {
 			if (!forced)
-				team.sendMessage(Text.of(TextColors.RED, "Your Elo is too high to join this tournament. It must be less than " + maxTeamElo));
+				team.sendMessage(Text.of(TextFormatting.RED, "Your Elo is too high to join this tournament. It must be less than " + maxTeamElo));
 			return false;
 		}
 
@@ -43,7 +43,7 @@ public class MaxTeamElo extends TeamRule {
 
 	@Override
 	public Text getBrokenRuleText(Team team) {
-		return Text.of(team.getDisplayText(), TextColors.RED, " is above the maximum Elo!");
+		return Text.of(team.getDisplayText(), TextFormatting.RED, " is above the maximum Elo!");
 	}
 
 	@Override
@@ -58,7 +58,7 @@ public class MaxTeamElo extends TeamRule {
 
 	@Override
 	public Text getDisplayText() {
-		return Text.of(TextColors.GOLD, "Maximum Team-Average Elo: ", TextColors.DARK_AQUA, maxTeamElo);
+		return Text.of(TextFormatting.GOLD, "Maximum Team-Average Elo: ", TextFormatting.DARK_AQUA, maxTeamElo);
 	}
 
 	@Override

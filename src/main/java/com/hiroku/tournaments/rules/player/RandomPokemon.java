@@ -1,5 +1,7 @@
 package com.hiroku.tournaments.rules.player;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.Tournaments;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.rule.types.PlayerRule;
@@ -7,25 +9,21 @@ import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.api.tiers.Tier;
 import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.util.PokemonUtils;
-import com.pixelmonmod.pixelmon.Pixelmon;
+import com.hiroku.tournaments.util.TournamentUtils;
+import com.pixelmonmod.api.pokemon.PokemonSpecification;
+import com.pixelmonmod.api.pokemon.PokemonSpecificationProxy;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
-import com.pixelmonmod.pixelmon.api.pokemon.PokemonSpec;
-import com.pixelmonmod.pixelmon.api.pokemon.SpecFlag;
+import com.pixelmonmod.pixelmon.api.pokemon.PokemonFactory;
+import com.pixelmonmod.pixelmon.api.pokemon.species.Species;
+import com.pixelmonmod.pixelmon.api.registries.PixelmonSpecies;
 import com.pixelmonmod.pixelmon.api.storage.PCStorage;
-import com.pixelmonmod.pixelmon.api.storage.StoragePosition;
-import com.pixelmonmod.pixelmon.enums.EnumSpecies;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
-import com.pixelmonmod.pixelmon.util.helpers.CollectionHelper;
-import net.minecraftforge.fml.common.FMLCommonHandler;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
+import com.pixelmonmod.pixelmon.api.util.helpers.CollectionHelper;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Util;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.*;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 /**
  * When applied on a tournament, random Pokémon are provided and automatically taken back.
@@ -33,13 +31,11 @@ import java.util.concurrent.Executors;
  * @author Hiroku
  */
 public class RandomPokemon extends PlayerRule {
-	public static Executor removeRentalExecutor = Executors.newSingleThreadExecutor();
-
-	public List<EnumSpecies> globalPool = new ArrayList<>();
+	public List<Species> globalPool = new ArrayList<>();
 	public HashMap<UUID, Integer> rerollsRemaining = new HashMap<>();
 
 	public List<Tier> tiers = new ArrayList<>();
-	public PokemonSpec spec = new PokemonSpec();
+	public final PokemonSpecification spec;
 	public boolean rentalOnly = false;
 	public boolean localDuplicates = false;
 	public boolean globalDuplicates = true;
@@ -49,13 +45,11 @@ public class RandomPokemon extends PlayerRule {
 	public RandomPokemon(String arg) throws Exception {
 		super(arg);
 
-		String[] args = arg.split(",");
-
-		spec = PokemonSpec.from(args);
-		if (spec.extraSpecs == null)
-			spec.extraSpecs = new ArrayList<>();
-		spec.extraSpecs.add(new SpecFlag("untradeable"));
-		spec.extraSpecs.add(new SpecFlag("unbreedable"));
+		List<String> args = new ArrayList<>(Arrays.asList(arg.split(",")));
+		args.add("untradeable");
+		args.add("unbreedable");
+		args.add("rental"); // TODO: is this a problem? What happens to the spec object?
+		spec = PokemonSpecificationProxy.create(args);
 
 		for (String argument : args) {
 			if (Tier.parse(argument) != null)
@@ -99,16 +93,16 @@ public class RandomPokemon extends PlayerRule {
 	}
 
 	@Override
-	public boolean passes(Player player, PlayerPartyStorage storage) {
+	public boolean passes(PlayerEntity player, PlayerPartyStorage storage) {
 		if (!this.rentalOnly)
 			return true;
 
-		return storage.findOne(pokemon -> !pokemon.isEgg() && !new PokemonSpec("rental").matches(pokemon)) == null;
+		return storage.findOne(pokemon -> !pokemon.isEgg() && !PokemonUtils.isRental(pokemon)) == null;
 	}
 
 	@Override
-	public Text getBrokenRuleText(Player player) {
-		return Text.of(TextColors.DARK_AQUA, player.getName(), TextColors.RED, " brought non-rental Pokémon into the tournament!");
+	public Text getBrokenRuleText(PlayerEntity player) {
+		return Text.of(TextFormatting.DARK_AQUA, player.getName(), TextFormatting.RED, " brought non-rental Pokémon into the tournament!");
 	}
 
 	@Override
@@ -121,24 +115,24 @@ public class RandomPokemon extends PlayerRule {
 
 	@Override
 	public String getSerializationString() {
-		String line = "randompokemon:numpokemon:" + numPokemon + ",maxrerolls:" + maxRerolls;
+		StringBuilder line = new StringBuilder("randompokemon:numpokemon:" + numPokemon + ",maxrerolls:" + maxRerolls);
 		if (this.rentalOnly)
-			line += ",rentalonly";
-		String specString = PokemonUtils.serializePokemonSpec(spec);
+			line.append(",rentalonly");
+		String specString = spec.toString();
 		if (!specString.equals(""))
-			line += "," + specString;
+			line.append(",").append(specString);
 		for (Tier tier : tiers)
-			line += "," + tier.key;
+			line.append(",").append(tier.key);
 		if (localDuplicates)
-			line += ",localduplicates";
+			line.append(",localduplicates");
 		if (!globalDuplicates)
-			line += ",!globalduplicates";
-		return line;
+			line.append(",!globalduplicates");
+		return line.toString();
 	}
 
 	@Override
 	public Text getDisplayText() {
-		return Text.of(TextColors.GOLD, "Random Pokémon: ", TextColors.DARK_AQUA, numPokemon, " provided. ",
+		return Text.of(TextFormatting.GOLD, "Random Pokémon: ", TextFormatting.DARK_AQUA, numPokemon, " provided. ",
 				(rentalOnly ? "Players must use the Pokémon provided" : "Players may choose to use other Pokémon"),
 				(maxRerolls > 0 ? (". " + maxRerolls + " rerolls") : ". No rerolls"));
 	}
@@ -160,12 +154,12 @@ public class RandomPokemon extends PlayerRule {
 	public boolean canTeamJoin(Tournament tournament, Team team, boolean forced) {
 		if (!forced && this.maxRerolls >= 0) {
 			for (User user : team.users) {
-				if (this.rerollsRemaining.containsKey(user.getUniqueId()) && this.rerollsRemaining.get(user.getUniqueId()) < 1) {
+				if (this.rerollsRemaining.containsKey(user.id) && this.rerollsRemaining.get(user.id) < 1) {
 					if (team.users.size() > 1)
-						team.sendMessage(Text.of(TextColors.RED,
+						team.sendMessage(Text.of(TextFormatting.RED,
 								"At least one member of your team has attempted to join/reroll too many times!"));
 					else
-						team.sendMessage(Text.of(TextColors.RED,
+						team.sendMessage(Text.of(TextFormatting.RED,
 								"Too many joins/rerolls! You may not join."));
 					return false;
 				}
@@ -177,79 +171,76 @@ public class RandomPokemon extends PlayerRule {
 	@Override
 	public void onTeamJoin(Tournament tournament, Team team, boolean forced) {
 		for (User user : team.users) {
-			if (user.getPlayer().isPresent()) {
-				removeRentalPokemon(user.getPlayer().get(), false);
-				giveRandomPokemon(user.getUniqueId());
+			if (removeRentalPokemon(user, false)) {
+				giveRandomPokemon(user);
 			}
 		}
 	}
 
 	@Override
 	public void onTeamLeave(Tournament tournament, Team team, boolean forced) {
-		for (User user : team.users)
-			if (user.getPlayer().isPresent())
-				removeRentalPokemon(user.getPlayer().get(), true);
+		for (User user : team.users) {
+			removeRentalPokemon(user, true);
+		}
 	}
 
 	@Override
 	public void onTeamKnockedOut(Tournament tournament, Team team) {
-		for (User user : team.users)
-			if (user.getPlayer().isPresent())
-				removeRentalPokemon(user.getPlayer().get(), true);
+		for (User user : team.users) {
+			removeRentalPokemon(user, true);
+		}
 	}
 
 	@Override
 	public void onTeamForfeit(Tournament tournament, Team team, boolean forced) {
-		for (User user : team.users)
-			if (user.getPlayer().isPresent())
-				removeRentalPokemon(user.getPlayer().get(), true);
+		for (User user : team.users) {
+			removeRentalPokemon(user, true);
+		}
 	}
 
 	@Override
 	public void onTournamentEnd(Tournament tournament, List<User> winners) {
-		for (User user : winners)
-			if (user.getPlayer().isPresent())
-				removeRentalPokemon(user.getPlayer().get(), true);
+		for (User user : winners) {
+			removeRentalPokemon(user, true);
+		}
 
 		globalPool = new ArrayList<>();
 		rerollsRemaining = new HashMap<>();
 	}
 
-	public static void removeRentalPokemon(User user, boolean validateParty) {
-		PlayerPartyStorage party = Pixelmon.storageManager.getParty(user.getUniqueId());
-		PCStorage pc = Pixelmon.storageManager.getPCForPlayer(user.getUniqueId());
-		Pokemon[] pcPokemon = pc.getAll();
-		PokemonSpec rental = new PokemonSpec("rental");
+	/**
+	 * @param user          The {@link User} to check.
+	 * @param validateParty Whether the party should be validated after the rental pokémon have been removed.
+	 * @return {@code true} if the user was online and the check could've been made. {@code false} otherwise.
+	 */
+	public static boolean removeRentalPokemon(User user, boolean validateParty) {
+		PlayerEntity player = user.getPlayer();
+		if (player == null) return false;
+
+		// PC
+		PCStorage pc = user.getPC();
+		List<Pokemon> toRemove = new ArrayList<>();
+		for (Pokemon pokemon : pc.getAll()) {
+			if (pokemon != null && PokemonUtils.isRental(pokemon)) {
+				toRemove.add(pokemon);
+			}
+		}
+
+		for (Pokemon pokemon : toRemove) {
+			TournamentUtils.giveItemsToPlayer(player, pokemon.getHeldItem());
+			Tournaments.log("Took rental Pokémon: " + pokemon.getSpecies().getLocalizedName() + " from " + user.getName() + "'s PC");
+			pc.set(pokemon.getPosition(), null);
+		}
+
+		// Party
+		PlayerPartyStorage party = user.getParty();
 		for (Pokemon pokemon : party.getTeam()) {
-			if (rental.matches(pokemon)) {
-				PokemonUtils.stripHeldItem(user, pokemon);
+			if (PokemonUtils.isRental(pokemon)) {
+				TournamentUtils.giveItemsToPlayer(player, pokemon.getHeldItem());
 				Tournaments.log("Took rental Pokémon: " + pokemon.getSpecies().getLocalizedName() + " from " + user.getName() + "'s party");
 				party.set(pokemon.getPosition(), null);
 			}
 		}
-
-		removeRentalExecutor.execute(() ->
-		{
-			List<Pokemon> toRemove = new ArrayList<>();
-			for (Pokemon pokemon : pcPokemon)
-				if (pokemon != null && rental.matches(pokemon))
-					toRemove.add(pokemon);
-			if (toRemove.isEmpty())
-				return;
-
-			FMLCommonHandler.instance().getMinecraftServerInstance().addScheduledTask(() ->
-			{
-				for (Pokemon pokemon : toRemove) {
-					StoragePosition position = pokemon.getPosition();
-					boolean isStillThere = position != null && pc.get(pokemon.getPosition()) == pokemon;
-					if (isStillThere) {
-						PokemonUtils.stripHeldItem(user, pokemon);
-						Tournaments.log("Took rental Pokémon: " + pokemon.getSpecies().getLocalizedName() + " from " + user.getName() + "'s PC");
-						pc.set(pokemon.getPosition(), null);
-					}
-				}
-			});
-		});
 
 		if (validateParty) {
 			boolean hasNonEgg = party.findOne(pokemon -> !pokemon.isEgg()) != null;
@@ -258,7 +249,7 @@ public class RandomPokemon extends PlayerRule {
 				if (!party.hasSpace())
 					pc.transfer(party, party.findOne(Pokemon::isEgg).getPosition(), pc.getFirstEmptyPosition());
 
-				Pokemon replacement = pc.findOne(pokemon -> !pokemon.isEgg() && !pokemon.isInRanch() && !rental.matches(pokemon));
+				Pokemon replacement = pc.findOne(pokemon -> !pokemon.isEgg() && !PokemonUtils.isRental(pokemon));
 
 				if (replacement != null) {
 					party.transfer(pc, replacement.getPosition(), party.getFirstEmptyPosition());
@@ -266,20 +257,28 @@ public class RandomPokemon extends PlayerRule {
 				}
 			}
 		}
+
+		return true;
 	}
 
-	public void giveRandomPokemon(UUID uuid) {
-		List<EnumSpecies> pool = new ArrayList<>();
-		for (EnumSpecies p : EnumSpecies.values())
-			if (p != EnumSpecies.Meltan && p != EnumSpecies.Melmetal)
-				pool.add(p);
+	/**
+	 * @param user The {@link User} to give the random pokémon to. Must be online.
+	 */
+	public void giveRandomPokemon(User user) {
+		PlayerEntity player = user.getPlayer();
+		if (player == null) return;
+
+		List<Species> pool = new ArrayList<>();
+		for (Species species : PixelmonSpecies.getAll())
+			if (!PixelmonSpecies.MELTAN.getValueUnsafe().equals(species) && PixelmonSpecies.MELMETAL.getValueUnsafe().equals(species))
+				pool.add(species);
 		for (Tier tier : tiers)
 			tier.filter(pool);
 		if (!globalDuplicates)
 			pool.removeIf(p -> globalPool.contains(p));
 
-		PlayerPartyStorage party = Pixelmon.storageManager.getParty(uuid);
-		PCStorage pc = Pixelmon.storageManager.getPCForPlayer(uuid);
+		PlayerPartyStorage party = user.getParty();
+		PCStorage pc = user.getPC();
 
 		for (Pokemon pokemon : party.getAll())
 			if (pokemon != null)
@@ -300,9 +299,8 @@ public class RandomPokemon extends PlayerRule {
 				return;
 			}
 
-			Pokemon pokemon = Pixelmon.pokemonFactory.create(CollectionHelper.getRandomElement(pool));
+			Pokemon pokemon = PokemonFactory.create(CollectionHelper.getRandomElement(pool));
 			spec.apply(pokemon);
-			new PokemonSpec("untradeable", "unbreedable", "rental").apply(pokemon);
 
 			party.add(pokemon);
 
@@ -310,35 +308,33 @@ public class RandomPokemon extends PlayerRule {
 				globalPool.add(pokemon.getSpecies());
 			if (!localDuplicates)
 				pool.removeIf(p -> p == pokemon.getSpecies());
-			Optional<Player> optPlayer = Sponge.getServer().getPlayer(uuid);
-			if (optPlayer.isPresent()) {
-				optPlayer.get().sendMessage(Text.of(TextColors.DARK_GREEN, "You were provided with a ", TextColors.DARK_AQUA, pokemon.getSpecies().getLocalizedName()));
-				Tournaments.log("Given a " + pokemon.getSpecies().getLocalizedName() + " to " + optPlayer.get().getName() + " marked with the rental tag");
-			}
-		}
-		if (!rerollsRemaining.containsKey(uuid))
-			rerollsRemaining.put(uuid, this.maxRerolls);
-		else
-			rerollsRemaining.put(uuid, rerollsRemaining.get(uuid) - 1);
 
-		Optional<Player> optPlayer = Sponge.getServer().getPlayer(uuid);
-		if (optPlayer.isPresent()) {
-			int remaining = rerollsRemaining.get(uuid);
-			if (remaining > 0) {
-				optPlayer.get().sendMessage(Text.of(TextColors.GRAY, "To get a new set of random Pokémon, you may use ", TextColors.DARK_AQUA, "/tournament reroll"));
-				if (this.maxRerolls > -1)
-					optPlayer.get().sendMessage(Text.of(TextColors.GRAY, "Rerolls remaining: ", TextColors.DARK_AQUA, remaining));
+			player.sendMessage(Text.of(TextFormatting.DARK_GREEN, "You were provided with a ", TextFormatting.DARK_AQUA, pokemon.getSpecies().getLocalizedName()), Util.DUMMY_UUID);
+			Tournaments.log("Given a " + pokemon.getSpecies().getLocalizedName() + " to " + user.getName() + " marked with the rental tag");
+		}
+
+		if (!rerollsRemaining.containsKey(user.id)) {
+			rerollsRemaining.put(user.id, this.maxRerolls);
+		} else {
+			rerollsRemaining.put(user.id, rerollsRemaining.get(user.id) - 1);
+		}
+
+		int remaining = rerollsRemaining.get(user.id);
+		if (remaining > 0) {
+			player.sendMessage(Text.of(TextFormatting.GRAY, "To get a new set of random Pokémon, you may use ", TextFormatting.DARK_AQUA, "/tournament reroll"), Util.DUMMY_UUID);
+			if (this.maxRerolls > -1) {
+				player.sendMessage(Text.of(TextFormatting.GRAY, "Rerolls remaining: ", TextFormatting.DARK_AQUA, remaining), Util.DUMMY_UUID);
 			}
 		}
 	}
 
-	public boolean attemptReroll(Player player) {
-		if (maxRerolls > -1 && rerollsRemaining.containsKey(player.getUniqueId()) && rerollsRemaining.get(player.getUniqueId()) < 1) {
-			player.sendMessage(Text.of(TextColors.RED, "You may not reroll."));
+	public boolean attemptReroll(User user) {
+		if (maxRerolls > -1 && rerollsRemaining.containsKey(user.id) && rerollsRemaining.get(user.id) < 1) {
+			user.sendMessage(Text.of(TextFormatting.RED, "You may not reroll."));
 			return false;
 		}
-		removeRentalPokemon(player, false);
-		giveRandomPokemon(player.getUniqueId());
+		removeRentalPokemon(user, false);
+		giveRandomPokemon(user);
 		return true;
 	}
 }

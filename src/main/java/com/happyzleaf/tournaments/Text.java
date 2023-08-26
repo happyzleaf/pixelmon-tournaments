@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 public class Text extends StringTextComponent {
 	public static final Text WIP = of(TextFormatting.RED, "WIP");
+	public static final Text ERROR = of(TextFormatting.RED, "ERROR");
 
 	public Text(Object... texts) {
 		super(Arrays.stream(texts).filter(Objects::nonNull).map(o -> {

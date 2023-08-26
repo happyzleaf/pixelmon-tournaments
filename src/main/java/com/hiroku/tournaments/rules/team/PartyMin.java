@@ -1,13 +1,11 @@
 package com.hiroku.tournaments.rules.team;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.api.rule.types.TeamRule;
 import com.hiroku.tournaments.obj.Team;
-import com.pixelmonmod.pixelmon.Pixelmon;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Rule demanding that teams have no less than a particular number of Pokémon in their combined party.
@@ -37,8 +35,7 @@ public class PartyMin extends TeamRule {
 
 		for (User user : team.users) {
 			if (user.isOnline()) {
-				PlayerPartyStorage storage = Pixelmon.storageManager.getParty(user.getUniqueId());
-				count += storage.getTeam().size();
+				count += user.getParty().getTeam().size();
 			}
 		}
 
@@ -47,7 +44,7 @@ public class PartyMin extends TeamRule {
 
 	@Override
 	public Text getDisplayText() {
-		return Text.of(TextColors.GOLD, "Minimum Party Size: ", TextColors.DARK_AQUA, partyMin);
+		return Text.of(TextFormatting.GOLD, "Minimum Party Size: ", TextFormatting.DARK_AQUA, partyMin);
 	}
 
 	@Override
@@ -62,7 +59,7 @@ public class PartyMin extends TeamRule {
 
 	@Override
 	public Text getBrokenRuleText(Team team) {
-		return Text.of(team.getDisplayText(), TextColors.RED, " went below the minimum party size!");
+		return Text.of(team.getDisplayText(), TextFormatting.RED, " went below the minimum party size!");
 	}
 
 	@Override

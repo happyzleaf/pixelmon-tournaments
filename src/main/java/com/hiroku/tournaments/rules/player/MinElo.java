@@ -1,16 +1,17 @@
 package com.hiroku.tournaments.rules.player;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.rule.types.PlayerRule;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.elo.EloStorage;
 import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.rules.general.EloType;
-import com.pixelmonmod.pixelmon.storage.PlayerPartyStorage;
-import com.pixelmonmod.pixelmon.util.helpers.CollectionHelper;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
+import com.pixelmonmod.pixelmon.api.util.helpers.CollectionHelper;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.UUID;
 
@@ -24,15 +25,15 @@ public class MinElo extends PlayerRule {
 	}
 
 	@Override
-	public boolean passes(Player player, PlayerPartyStorage storage) {
-		return player.hasPermission("tournaments.admin.elo-bypass")
-				|| player.hasPermission("tournaments.admin.elo-bypass-team")
-				|| EloStorage.getElo(player.getUniqueId(), Tournament.instance().getRuleSet().getRule(EloType.class).eloType) >= minElo;
+	public boolean passes(PlayerEntity player, PlayerPartyStorage storage) {
+		return User.hasPermission(player, "tournaments.admin.elo-bypass")
+				|| User.hasPermission(player, "tournaments.admin.elo-bypass-team")
+				|| EloStorage.getElo(player.getUniqueID(), Tournament.instance().getRuleSet().getRule(EloType.class).eloType) >= minElo;
 	}
 
 	@Override
-	public Text getBrokenRuleText(Player player) {
-		return Text.of(TextColors.DARK_AQUA, player.getName(), TextColors.RED, " is below the minimum Elo!");
+	public Text getBrokenRuleText(PlayerEntity player) {
+		return Text.of(TextFormatting.DARK_AQUA, player.getName(), TextFormatting.RED, " is below the minimum Elo!");
 	}
 
 	@Override
@@ -42,7 +43,7 @@ public class MinElo extends PlayerRule {
 
 	@Override
 	public Text getDisplayText() {
-		return Text.of(TextColors.GOLD, "Minimum Elo: ", TextColors.DARK_AQUA, minElo);
+		return Text.of(TextFormatting.GOLD, "Minimum Elo: ", TextFormatting.DARK_AQUA, minElo);
 	}
 
 	@Override
@@ -55,7 +56,7 @@ public class MinElo extends PlayerRule {
 		String eloType = Tournament.instance().getRuleSet().getRule(EloType.class).eloType;
 		for (UUID uuid : team.getUUIDs()) {
 			if (EloStorage.getElo(uuid, eloType) < minElo) {
-				if (CollectionHelper.find(team.users, user -> user.getUniqueId().equals(uuid)).hasPermission("tournaments.admin.elo-bypass"))
+				if (CollectionHelper.find(team.users, user -> user.id.equals(uuid)).hasPermission("tournaments.admin.elo-bypass"))
 					continue;
 
 				if (CollectionHelper.find(team.users, user -> user.hasPermission("tournaments.admin.elo-bypass-team")) != null)
@@ -63,10 +64,10 @@ public class MinElo extends PlayerRule {
 
 				if (!forced) {
 					if (team.users.size() == 1)
-						team.sendMessage(Text.of(TextColors.RED, "Your Elo is too low to join this tournament. Minimum: " + minElo));
+						team.sendMessage(Text.of(TextFormatting.RED, "Your Elo is too low to join this tournament. Minimum: " + minElo));
 					else
-						team.sendMessage(Text.of(TextColors.DARK_AQUA, CollectionHelper.find(team.users, u -> u.getUniqueId().equals(uuid)).getName(),
-								TextColors.RED, " has an Elo that is too low to join this tournament. Minimum: " + minElo));
+						team.sendMessage(Text.of(TextFormatting.DARK_AQUA, CollectionHelper.find(team.users, u -> u.id.equals(uuid)).getName(),
+								TextFormatting.RED, " has an Elo that is too low to join this tournament. Minimum: " + minElo));
 				}
 				return false;
 			}

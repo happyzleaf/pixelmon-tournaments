@@ -1,12 +1,17 @@
 package com.happyzleaf.tournaments;
 
 import com.mojang.authlib.GameProfile;
+import com.pixelmonmod.pixelmon.api.storage.PCStorage;
 import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
 import com.pixelmonmod.pixelmon.api.storage.StorageProxy;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.management.OpEntry;
 import net.minecraft.util.Util;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import net.minecraftforge.server.permission.PermissionAPI;
+import net.minecraftforge.server.permission.context.PlayerContext;
 
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -56,5 +61,31 @@ public class User {
 
 	public PlayerPartyStorage getParty() {
 		return StorageProxy.getParty(id);
+	}
+
+	public PCStorage getPC() {
+		return StorageProxy.getPCForPlayer(id);
+	}
+
+	public boolean hasPermission(String node) {
+		return hasPermission(profile, getPlayer(), node);
+	}
+
+	private static boolean hasPermission(GameProfile profile, @Nullable PlayerEntity player, String node) {
+		OpEntry entry = ServerLifecycleHooks.getCurrentServer().getPlayerList().getOppedPlayers().getEntry(profile);
+		if (entry != null) {
+			return true;
+		}
+
+		return PermissionAPI.hasPermission(profile, node, player == null ? null : new PlayerContext(player));
+	}
+
+	public static boolean hasPermission(GameProfile profile, String node) {
+		PlayerEntity player = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUUID(checkNotNull(profile, "profile").getId());
+		return hasPermission(profile, player, node);
+	}
+
+	public static boolean hasPermission(PlayerEntity player, String node) {
+		return hasPermission(checkNotNull(player, "player").getGameProfile(), player, node);
 	}
 }
