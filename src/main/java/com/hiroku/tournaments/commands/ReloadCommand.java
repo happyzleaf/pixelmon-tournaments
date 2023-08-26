@@ -1,66 +1,60 @@
 package com.hiroku.tournaments.commands;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.Presets;
 import com.hiroku.tournaments.Tournaments;
 import com.hiroku.tournaments.Zones;
 import com.hiroku.tournaments.api.tiers.TierLoader;
 import com.hiroku.tournaments.config.TournamentConfig;
 import com.hiroku.tournaments.util.TournamentUtils;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Command for reloading configs and data.
  *
  * @author Hiroku
  */
-public class ReloadCommand implements CommandExecutor {
-	public static CommandSpec getSpec() {
-		return CommandSpec.builder()
-				.permission("tournaments.command.admin.reload")
-				.executor(new ReloadCommand())
-				.description(Text.of("Reloads configs and data"))
-				.build();
+public class ReloadCommand implements Command<CommandSource> {
+	public LiteralArgumentBuilder<CommandSource> create() {
+		return Commands.literal("reload")
+//				.description(Text.of("Reloads configs and data"))
+				.requires(source -> User.hasPermission(source, "tournaments.command.admin.reload"))
+				.executes(this);
 	}
 
 	@Override
-	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-		src.sendMessage(Text.of(TextColors.GRAY, "Beginning reload..."));
+	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
+		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Beginning reload..."), true);
 
 		TournamentUtils.createDir("config/tournaments");
 		TournamentUtils.createDir("data/tournaments");
-
-		src.sendMessage(Text.of(TextColors.GRAY, "Consolidated config and data directories"));
+		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Consolidated config and data directories"), true);
 
 		Tournaments.INSTANCE.registerDefaultRules();
 		Tournaments.INSTANCE.registerDefaultRewards();
-
-		src.sendMessage(Text.of(TextColors.GRAY, "Reloaded default rules and rewards"));
+		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Reloaded default rules and rewards"), true);
 
 		TournamentConfig.load();
-
-		src.sendMessage(Text.of(TextColors.GRAY, "Reloaded tournament config"));
+		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Reloaded tournament config"), true);
 
 		TierLoader.load();
-
-		src.sendMessage(Text.of(TextColors.GRAY, "Reloaded default and custom tiers"));
+		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Reloaded default and custom tiers"), true);
 
 		Zones.load();
-
-		src.sendMessage(Text.of(TextColors.GRAY, "Reloaded zones"));
+		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Reloaded zones"), true);
 
 		Presets.load();
+		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Reloaded presets"), true);
 
-		src.sendMessage(Text.of(TextColors.GRAY, "Reloaded presets"));
+		context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Reload successful."), true);
 
-		src.sendMessage(Text.of(TextColors.DARK_GREEN, "Reload successful."));
-
-		return CommandResult.success();
+		return 1;
 	}
 }

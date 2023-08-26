@@ -111,7 +111,7 @@ public class PokemonMatch extends Match {
 			zone.sendPlayersToZone(this);
 		}
 
-		tournament.tasks.add(Scheduler.delayTime(5, TimeUnit.SECONDS, () -> {
+		tournament.tasks.add(Scheduler.delay(5, TimeUnit.SECONDS, () -> {
 			tournament.getModes().forEach(mode -> mode.onMatchStart(tournament, this));
 			MatchStartResult result = start(rematch);
 			if (result instanceof MatchStartResult.Success)
@@ -296,7 +296,7 @@ public class PokemonMatch extends Match {
 		if (winningSide == null) {
 			sendMessage(Tournament.instance().getMessageProvider().getMatchErrorMessage(this));
 
-			tournament.tasks.add(Scheduler.delayTime(TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS, () -> {
+			tournament.tasks.add(Scheduler.delay(TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS, () -> {
 				if (Tournament.instance().round.contains(this))
 					start(Tournament.instance(), true);
 			}));

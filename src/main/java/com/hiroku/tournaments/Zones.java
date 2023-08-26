@@ -95,7 +95,7 @@ public class Zones {
 		}
 
 		if (this.leaveZone != null) {
-			tournament.tasks.add(Scheduler.delayTicks(60, () -> {
+			tournament.tasks.add(Scheduler.delay(60, () -> {
 				for (Side side : match.sides) {
 					for (Team team : side.teams) {
 						for (User user : team.users) {

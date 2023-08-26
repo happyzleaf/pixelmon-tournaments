@@ -1,54 +1,60 @@
 package com.hiroku.tournaments.commands;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
+import com.happyzleaf.tournaments.args.ChoiceSetArgument;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.enums.TournamentStates;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
 
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
-public class IgnoreCommand implements CommandExecutor {
-	public static CommandSpec getSpec() {
-		return CommandSpec.builder()
-				.permission("tournaments.command.common.ignore")
-				.executor(new IgnoreCommand())
-				.description(Text.of("Toggles tournament messages"))
-				.arguments(GenericArguments.optional(GenericArguments.bool(Text.of("yes/no"))))
-				.build();
+import static com.hiroku.tournaments.util.CommandUtils.getOptArgument;
+
+public class IgnoreCommand implements Command<CommandSource> {
+	private static final Set<String> CHOICES = new HashSet<>(Arrays.asList("yes", "no"));
+
+	public LiteralArgumentBuilder<CommandSource> create() {
+		return Commands.literal("ignore")
+//				.description(Text.of("Toggles tournament messages"))
+				.requires(source -> User.hasPermission(source, "tournaments.command.common.ignore"))
+				.executes(this)
+				.then(
+						Commands.argument("yes/no", ChoiceSetArgument.choiceSet(CHOICES))
+								.executes(this)
+				);
 	}
 
 	@Override
-	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-		if (!(src instanceof Player)) {
-			src.sendMessage(Text.of(TextColors.RED, "B-but... you're not even a player"));
-			return CommandResult.empty();
-		}
-
+	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
 		if (Tournament.instance() == null || Tournament.instance().state == TournamentStates.CLOSED) {
-			src.sendMessage(Text.of(TextColors.RED, "There's nothing to ignore; there's no tournament open"));
-			return CommandResult.empty();
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There's nothing to ignore; there's no tournament open"), true);
+			return 0;
 		}
 
-		Player player = (Player) src;
-		boolean ignore = !Tournament.instance().ignoreList.contains(player.getUniqueId());
-		Optional<Boolean> optBool = args.<Boolean>getOne(Text.of("yes/no"));
-		if (optBool.isPresent())
-			ignore = optBool.get();
+		PlayerEntity player = context.getSource().asPlayer();
+		boolean ignore = !Tournament.instance().ignoreList.contains(player.getUniqueID());
 
-		Tournament.instance().ignoreList.remove(player.getUniqueId());
+		Boolean choice = getOptArgument(context, "yes/no", String.class).map(s -> s.equals("yes")).orElse(null);
+		if (choice != null) {
+			ignore = choice;
+		}
+
+		Tournament.instance().ignoreList.remove(player.getUniqueID());
 		if (ignore)
-			Tournament.instance().ignoreList.add(player.getUniqueId());
+			Tournament.instance().ignoreList.add(player.getUniqueID());
 
-		src.sendMessage(Tournament.instance().getMessageProvider().getIgnoreToggleMessage(ignore));
+		context.getSource().sendFeedback(Tournament.instance().getMessageProvider().getIgnoreToggleMessage(ignore), true);
 
-		return CommandResult.success();
+		return 1;
 	}
 }

@@ -26,7 +26,7 @@ public class MinTeamElo extends TeamRule {
 		int totalElo = 0;
 
 		for (UUID uuid : team.getUserIDs())
-			totalElo += EloStorage.getElo(uuid, Tournament.instance().getRuleSet().getRule(EloType.class).eloType);
+			totalElo += EloStorage.getElo(uuid, Tournament.instance().getRuleSet().getRule(EloType.class).type);
 
 		return CollectionHelper.find(team.users, user -> user.hasPermission("tournaments.admin.elo-bypass-team")) != null
 				|| Math.round(1f * totalElo / team.users.size()) >= minTeamElo;

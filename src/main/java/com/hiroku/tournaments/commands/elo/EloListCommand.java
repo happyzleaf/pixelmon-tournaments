@@ -2,6 +2,7 @@ package com.hiroku.tournaments.commands.elo;
 
 import com.happyzleaf.tournaments.Text;
 import com.happyzleaf.tournaments.User;
+import com.hiroku.tournaments.config.TournamentConfig;
 import com.hiroku.tournaments.elo.EloStorage;
 import com.hiroku.tournaments.elo.EloTypes;
 import com.mojang.brigadier.Command;
@@ -17,6 +18,8 @@ import net.minecraftforge.server.command.EnumArgument;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static com.hiroku.tournaments.util.CommandUtils.getOptArgument;
 
 public class EloListCommand implements Command<CommandSource> {
 	public LiteralArgumentBuilder<CommandSource> create() {
@@ -36,8 +39,8 @@ public class EloListCommand implements Command<CommandSource> {
 
 	@Override
 	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-		int x = IntegerArgumentType.getInteger(context, "number");
-		EloTypes type = context.getArgument("type", EloTypes.class);
+		int x = getOptArgument(context, "number", int.class).orElse(TournamentConfig.INSTANCE.defaultEloTopNumber);
+		EloTypes type = getOptArgument(context, "type", EloTypes.class).orElse(null);
 
 		List<UUID> top = EloStorage.getTopXElo(x, type);
 

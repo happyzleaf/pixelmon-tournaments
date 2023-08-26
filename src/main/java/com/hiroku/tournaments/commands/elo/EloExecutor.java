@@ -15,6 +15,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.server.command.EnumArgument;
 
+import static com.hiroku.tournaments.util.CommandUtils.getOptArgument;
+
 public class EloExecutor implements Command<CommandSource> {
 	public LiteralArgumentBuilder<CommandSource> create(String base) {
 		return Commands.literal(base)
@@ -37,8 +39,8 @@ public class EloExecutor implements Command<CommandSource> {
 
 	@Override
 	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-		User user = UserArgument.getUser(context, "user");
-		EloTypes type = context.getArgument("type", EloTypes.class);
+		User user = UserArgument.getOptUser(context, "user").orElse(null);
+		EloTypes type = getOptArgument(context, "type", EloTypes.class).orElse(null);
 
 		if (user == null) {
 			if (!(context.getSource().getEntity() instanceof PlayerEntity)) {

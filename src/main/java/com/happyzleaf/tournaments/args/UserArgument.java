@@ -20,13 +20,25 @@ import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+
+import static com.hiroku.tournaments.util.CommandUtils.getOptArgument;
 
 public class UserArgument implements ArgumentType<UserArgument.IUserProvider> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("nothappyz", "d361de31-8f99-4662-a726-88493d0efc78");
 
 	public static User getUser(CommandContext<CommandSource> context, String key) throws CommandSyntaxException {
 		return context.getArgument(key, IUserProvider.class).getUser(context.getSource());
+	}
+
+	public static Optional<User> getOptUser(CommandContext<CommandSource> context, String key) throws CommandSyntaxException {
+		IUserProvider provider = getOptArgument(context, key, IUserProvider.class).orElse(null);
+		if (provider == null) {
+			return Optional.empty();
+		}
+
+		return Optional.of(provider.getUser(context.getSource()));
 	}
 
 	public static UserArgument user() {

@@ -12,7 +12,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 public class Scheduler {
 	private static final Map<UUID, Ticker> tickers = new HashMap<>();
 
-	public static UUID delayTicks(long ticks, Runnable task) {
+	public static UUID delay(long ticks, Runnable task) {
 		checkArgument(ticks >= 0, "ticks >= 0");
 
 		UUID id = UUID.randomUUID();
@@ -21,8 +21,8 @@ public class Scheduler {
 		return id;
 	}
 
-	public static UUID delayTime(long time, TimeUnit unit, Runnable task) {
-		return delayTicks(unit.toSeconds(time) * 20, task);
+	public static UUID delay(long time, TimeUnit unit, Runnable task) {
+		return delay(unit.toSeconds(time) * 20, task);
 	}
 
 	public static boolean cancel(UUID id) {

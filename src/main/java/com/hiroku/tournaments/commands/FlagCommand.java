@@ -1,61 +1,55 @@
 package com.hiroku.tournaments.commands;
 
+import com.happyzleaf.tournaments.Scheduler;
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.Tournaments;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.archetypes.pokemon.PokemonMatch;
 import com.hiroku.tournaments.enums.TournamentStates;
 import com.hiroku.tournaments.obj.Side;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.pixelmonmod.pixelmon.api.battles.BattleEndCause;
 import com.pixelmonmod.pixelmon.battles.BattleRegistry;
-import com.pixelmonmod.pixelmon.comm.packetHandlers.battles.EndSpectate;
-import com.pixelmonmod.pixelmon.enums.battle.EnumBattleEndCause;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.pixelmonmod.pixelmon.comm.packetHandlers.battles.EndSpectatePacket;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.concurrent.TimeUnit;
 
 /**
  * Command for flagging battles as buggy. When both sides have flagged the battle, the match will end
- * as a crashed ending and it will move to decision rules before a rematch.
+ * as a crashed ending, and it will move to decision rules before a rematch.
  *
  * @author Hiroku
  */
-public class FlagCommand implements CommandExecutor {
-	public static CommandSpec getSpec() {
-		return CommandSpec.builder()
-				.permission("tournaments.command.common.flag")
-				.executor(new FlagCommand())
-				.description(Text.of("Marks your tournament battle as bugged"))
-				.build();
+public class FlagCommand implements Command<CommandSource> {
+	public LiteralArgumentBuilder<CommandSource> create() {
+		return Commands.literal("flag")
+//				.description(Text.of("Marks your tournament battle as bugged"))
+				.requires(source -> User.hasPermission(source, "tournaments.command.common.flag"))
+				.executes(this);
 	}
 
 	@Override
-	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
+		PlayerEntity player = context.getSource().asPlayer();
+
 		final PokemonMatch match;
-
-		if (!(src instanceof Player)) {
-			src.sendMessage(Text.of(TextColors.RED, "You have to be a player to flag your battle as bugged, obviously"));
-			return CommandResult.empty();
-		}
-
-		Player player = (Player) src;
-
 		if (Tournament.instance() == null || Tournament.instance().state != TournamentStates.ACTIVE
-				|| (Tournament.instance().getMatch(player.getUniqueId())) == null
-				|| !(Tournament.instance().getMatch(player.getUniqueId()) instanceof PokemonMatch)
-				|| (match = (PokemonMatch) Tournament.instance().getMatch(player.getUniqueId())).battle == null) {
-			src.sendMessage(Text.of(TextColors.RED, "No match to flag."));
-			return CommandResult.empty();
+				|| (Tournament.instance().getMatch(player.getUniqueID())) == null
+				|| !(Tournament.instance().getMatch(player.getUniqueID()) instanceof PokemonMatch)
+				|| (match = (PokemonMatch) Tournament.instance().getMatch(player.getUniqueID())).battle == null) {
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No match to flag."), true);
+			return 0;
 		}
 
-		Side side = match.getSide(player.getUniqueId());
+		Side side = match.getSide(player.getUniqueID());
 
 		if (side == match.sides[0])
 			match.side1BugFlag = true;
@@ -66,20 +60,22 @@ public class FlagCommand implements CommandExecutor {
 			Tournaments.log("Match " + match.getDisplayText().toPlain() + " signalled as bugged. Attempting to force restart");
 			match.listenToBattleEnd = false;
 			try {
-				match.battle.endBattle(EnumBattleEndCause.FORCE);
+				match.battle.endBattle(BattleEndCause.FORCE);
 			} catch (Exception e) {
-				match.battle.spectators.forEach(spectator -> spectator.sendMessage(new EndSpectate()));
-				match.battle.participants.forEach(p -> p.endBattle(EnumBattleEndCause.FORCE));
+				match.battle.spectators.forEach(spectator -> spectator.sendMessage(new EndSpectatePacket()));
+				match.battle.participants.forEach(p -> p.endBattle(BattleEndCause.FORCE));
 				BattleRegistry.deRegisterBattle(match.battle);
 			}
 
 			match.listenToBattleEnd = true;
-			Sponge.getScheduler().createSyncExecutor(Tournaments.INSTANCE).schedule(() -> match.start(true), 1, TimeUnit.SECONDS);
-			match.sendMessage(Text.of(TextColors.GRAY, "Match signalled as bugged. Forcefully restarting"));
-			return CommandResult.success();
-		} else {
-			match.sendMessage(Text.of(side.getDisplayText(), TextColors.YELLOW, " has flagged the battle as bugged using /tournament flag."));
-			return CommandResult.success();
+			Tournament.instance().tasks.add(Scheduler.delay(1, TimeUnit.SECONDS, () -> match.start(true)));
+			match.sendMessage(Text.of(TextFormatting.GRAY, "Match signalled as bugged. Forcefully restarting"));
+
+			return 1;
 		}
+
+		match.sendMessage(Text.of(side.getDisplayText(), TextFormatting.YELLOW, " has flagged the battle as bugged using /tournament flag."));
+
+		return 1;
 	}
 }

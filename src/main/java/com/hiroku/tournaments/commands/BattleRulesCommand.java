@@ -1,44 +1,49 @@
 package com.hiroku.tournaments.commands;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.Tournament;
-import com.pixelmonmod.pixelmon.battles.rules.BattleRules;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.pixelmonmod.pixelmon.battles.api.rules.BattleRules;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.util.text.TextFormatting;
 
-public class BattleRulesCommand implements CommandExecutor {
-	public static CommandSpec getSpec() {
-		return CommandSpec.builder()
-				.description(Text.of("Sets the Pixelmon battle rules. The battle rule argument should be the exported battle rules but instead of new lines, use commas"))
-				.permission("tournaments.command.admin.battlerules")
-				.arguments(GenericArguments.optional(GenericArguments.remainingJoinedStrings(Text.of("<clear | battle rules export text"))))
-				.executor(new BattleRulesCommand())
-				.build();
+import static com.hiroku.tournaments.util.CommandUtils.getOptArgument;
+
+public class BattleRulesCommand implements Command<CommandSource> {
+	public LiteralArgumentBuilder<CommandSource> create() {
+		return Commands.literal("rules")
+//				.description(Text.of("Sets the Pixelmon battle rules. The battle rule argument should be the exported battle rules but instead of new lines, use commas"))
+				.requires(source -> User.hasPermission(source, "tournaments.command.admin.battlerules"))
+				.executes(this)
+				.then(
+						Commands.argument("<clear | battle rules export text", StringArgumentType.greedyString())
+								.executes(this)
+				);
 	}
 
 	@Override
-	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
 		if (Tournament.instance() == null) {
-			src.sendMessage(Text.of(TextColors.RED, "No tournament to set battle rules for. Try /tournament create"));
-			return CommandResult.empty();
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament to set battle rules for. Try /tournament create"), true);
+			return 0;
 		}
 
-		String arg = args.<String>getOne(Text.of("<clear | battle rules export text")).orElse("clear");
+		String arg = getOptArgument(context, "<clear | battle rules export text", String.class).orElse("clear");
 		if (arg.equalsIgnoreCase("clear")) {
 			Tournament.instance().getRuleSet().br = new BattleRules();
-			src.sendMessage(Text.of(TextColors.GREEN, "Cleared the battle rules."));
-			return CommandResult.success();
+			context.getSource().sendFeedback(Text.of(TextFormatting.GREEN, "Cleared the battle rules."), true);
+			return 1;
 		} else {
 			String lineSep = arg.replaceAll(",", "\n");
 			Tournament.instance().getRuleSet().br.importText(lineSep);
-			src.sendMessage(Text.of(TextColors.GREEN, "Imported battle rules text. Use /tournament to check them."));
-			return CommandResult.success();
+			context.getSource().sendFeedback(Text.of(TextFormatting.GREEN, "Imported battle rules text. Use /tournament to check them."), true);
+			return 0;
 		}
 	}
 }

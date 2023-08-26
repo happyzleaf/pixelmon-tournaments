@@ -1,5 +1,6 @@
 package com.hiroku.tournaments;
 
+import com.happyzleaf.tournaments.args.ChoiceSetArgument;
 import com.happyzleaf.tournaments.args.UserArgument;
 import com.hiroku.tournaments.api.reward.RewardTypeRegistrar;
 import com.hiroku.tournaments.api.rule.RuleTypeRegistrar;
@@ -83,6 +84,7 @@ public class Tournaments {
 		MinecraftForge.EVENT_BUS.addListener(this::onCommands);
 
 		ArgumentTypes.register("user", UserArgument.class, new ArgumentSerializer<>(UserArgument::user));
+		ArgumentTypes.register("choiceset", ChoiceSetArgument.class, new ChoiceSetArgument.Serializer());
 	}
 
 	private void onStart(FMLServerAboutToStartEvent event) {
@@ -123,7 +125,7 @@ public class Tournaments {
 		if (TournamentConfig.INSTANCE.baseCommandAliases.isEmpty()) {
 			Tournaments.log("Could not register base command! Alias list is empty.");
 		} else {
-			LiteralCommandNode<CommandSource> node = event.getDispatcher().register(TournamentsExecutor.getSpec(TournamentConfig.INSTANCE.baseCommandAliases.get(0)));
+			LiteralCommandNode<CommandSource> node = event.getDispatcher().register(TournamentsExecutor.create(TournamentConfig.INSTANCE.baseCommandAliases.get(0)));
 			for (String other : TournamentConfig.INSTANCE.baseCommandAliases.subList(1, TournamentConfig.INSTANCE.baseCommandAliases.size())) {
 				event.getDispatcher().register(Commands.literal(other).redirect(node));
 			}

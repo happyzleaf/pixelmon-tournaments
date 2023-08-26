@@ -1,52 +1,52 @@
 package com.hiroku.tournaments.commands;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.Zones;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.obj.LocationWrapper;
 import com.hiroku.tournaments.obj.Zone;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.service.pagination.PaginationService;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyles;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ZoneCommand implements CommandExecutor {
-	public static CommandSpec getSpec() {
-		return CommandSpec.builder()
-				.arguments(GenericArguments.optional(GenericArguments.remainingJoinedStrings(Text.of("options"))))
-				.permission("tournaments.command.admin.zones")
-				.executor(new ZoneCommand())
-				.description(Text.of("For setting and checking zone teleports for matches"))
-				.build();
+import static com.hiroku.tournaments.util.CommandUtils.getOptArgument;
+
+public class ZoneCommand implements Command<CommandSource> {
+	public LiteralArgumentBuilder<CommandSource> create() {
+		return Commands.literal("zones")
+//				.description(Text.of("For setting and checking zone teleports for matches"))
+				.requires(source -> User.hasPermission(source, "tournaments.command.admin.zones"))
+				.executes(this)
+				.then(
+						Commands.argument("options", StringArgumentType.greedyString())
+								.executes(this)
+				);
 	}
 
 	@Override
-	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-		String argStr = null;
-		if (args.hasAny(Text.of("options")))
-			argStr = args.<String>getOne(Text.of("options")).get();
+	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
+		String argStr = getOptArgument(context, "options", String.class).orElse(null);
 		if (argStr == null) {
-			showZonesSummary(src);
-			return CommandResult.success();
+			showZonesSummary(context.getSource());
+			return 1;
 		}
+
 		String[] argArr = argStr.split(" ");
 		if (argArr[0].equalsIgnoreCase("remove")) {
 			if (argArr.length < 2) {
-				src.sendMessage(Text.of(TextColors.RED, "Not enough arguments. Missing: Zone number/s"));
-				src.sendMessage(Text.of(TextColors.RED, "/tournament zones [remove <zoneNumbers...>]"));
-				return CommandResult.empty();
+				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Not enough arguments. Missing: Zone number/s"), true);
+				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "/tournament zones [remove <zoneNumbers...>]"), true);
+				return 0;
 			}
 			for (int i = 1; i < argArr.length; i++) {
 				try {
@@ -55,47 +55,47 @@ public class ZoneCommand implements CommandExecutor {
 						throw new NumberFormatException();
 					Zones.INSTANCE.removeZone(Zones.INSTANCE.getZones().get(zoneIndex - 1));
 					Zones.INSTANCE.save();
-					src.sendMessage(Text.of(TextColors.DARK_GREEN, "Removed zone ", argArr[i]));
+					context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Removed zone ", argArr[i]), true);
 				} catch (NumberFormatException nfe) {
-					src.sendMessage(Text.of(TextColors.RED, "Invalid zone number: ", TextColors.DARK_AQUA, argArr[i]));
+					context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Invalid zone number: ", TextFormatting.DARK_AQUA, argArr[i]), true);
 				}
 			}
-			return CommandResult.success();
+			return 1;
 		}
 		if (argArr[0].equalsIgnoreCase("leavezone")) {
 			if (argArr.length > 1) {
-				if (src instanceof Player) {
-					Zones.INSTANCE.leaveZone = new LocationWrapper(((Player) src).getLocation(), ((Player) src).getRotation());
+				if (context.getSource().getEntity() instanceof PlayerEntity) {
+					Zones.INSTANCE.leaveZone = new LocationWrapper(context.getSource().asPlayer());
 					Zones.INSTANCE.save();
-					src.sendMessage(Text.of(TextColors.DARK_GREEN, "Successfully set tournament leave zone"));
-					return CommandResult.success();
+					context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully set tournament leave zone"), true);
+					return 1;
 				}
 
-				src.sendMessage(Text.of(TextColors.RED, "You're not a player! Jeez."));
-				return CommandResult.empty();
+				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You're not a player! Jeez."), true);
+				return 0;
 			}
 
 			if (Zones.INSTANCE.leaveZone == null) {
-				src.sendMessage(Text.of(TextColors.RED, "There is no leave zone set. Use /tournaments zones leavezone set"));
-				return CommandResult.empty();
+				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no leave zone set. Use /tournaments zones leavezone set"), true);
+				return 0;
 			}
-			if (src instanceof Player) {
-				Zones.INSTANCE.leaveZone.sendPlayer((Player) src);
-				src.sendMessage(Text.of(TextColors.DARK_GREEN, "You've been warped to the tournament leave zone"));
-				return CommandResult.success();
+			if (context.getSource().getEntity() instanceof PlayerEntity) {
+				Zones.INSTANCE.leaveZone.sendPlayer(context.getSource().asPlayer());
+				context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "You've been warped to the tournament leave zone"), true);
+				return 1;
 			}
-			src.sendMessage(Text.of(TextColors.RED, "You aren't a player!"));
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You aren't a player!"), true);
 		}
 		if (argArr[0].equalsIgnoreCase("leavezoneremove")) {
 			Zones.INSTANCE.leaveZone = null;
 			Zones.INSTANCE.save();
-			src.sendMessage(Text.of(TextColors.DARK_GREEN, "Leavezone was removed!"));
-			return CommandResult.success();
+			context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Leavezone was removed!"), true);
+			return 1;
 		}
-		return CommandResult.empty();
+		return 0;
 	}
 
-	public static void showZonesSummary(CommandSource src) {
+	public static void showZonesSummary(CommandSource source) {
 		List<Text> contents = new ArrayList<>();
 		for (int i = 0; i < Zones.INSTANCE.getZones().size(); i++) {
 			final int fi = i + 1;
@@ -103,49 +103,53 @@ public class ZoneCommand implements CommandExecutor {
 			Text suffix = Text.of("");
 			if (Tournament.instance() != null) {
 				if (zone.engaged)
-					suffix = Text.of(TextColors.GOLD,
-							TextActions.executeCallback(dummySrc ->
-							{
-								if (zone.engaged) {
-									zone.engaged = false;
-									src.sendMessage(Text.of(TextColors.GRAY, "Disengaged zone ", TextColors.DARK_AQUA, fi));
-								}
-							}), " [", TextColors.RED, "Disengage", TextColors.GOLD, "]");
+					suffix = Text.of(TextFormatting.GOLD,
+							// TODO: textactions
+//							TextActions.executeCallback(dummySrc -> {
+//								if (zone.engaged) {
+//									zone.engaged = false;
+//									source.sendFeedback(Text.of(TextFormatting.GRAY, "Disengaged zone ", TextFormatting.DARK_AQUA, fi), true);
+//								}
+//							}),
+							" [", TextFormatting.RED, "Disengage", TextFormatting.GOLD, "]");
 				else
-					suffix = Text.of(TextColors.GOLD,
-							TextActions.executeCallback(dummySrc ->
-							{
-								if (!zone.engaged) {
-									zone.engaged = true;
-									src.sendMessage(Text.of(TextColors.GRAY, "Engaged zone ", TextColors.DARK_AQUA, fi));
-								}
-							}), " [", TextColors.DARK_GREEN, "Engage", TextColors.GOLD, "]");
+					suffix = Text.of(TextFormatting.GOLD,
+							// TODO: textactions
+//							TextActions.executeCallback(dummySrc -> {
+//								if (!zone.engaged) {
+//									zone.engaged = true;
+//									source.sendFeedback(Text.of(TextFormatting.GRAY, "Engaged zone ", TextFormatting.DARK_AQUA, fi), true);
+//								}
+//							}),
+							" [", TextFormatting.DARK_GREEN, "Engage", TextFormatting.GOLD, "]");
 			}
-			contents.add(Text.of(TextColors.GOLD, "[", TextColors.DARK_AQUA, "Zone ", (i + 1), TextColors.GOLD, "]: ", zone.getSummaryText(),
+			contents.add(Text.of(TextFormatting.GOLD, "[", TextFormatting.DARK_AQUA, "Zone ", (i + 1), TextFormatting.GOLD, "]: ", zone.getSummaryText(),
 					" ", Text.of(
-							TextActions.showText(Text.of(TextColors.GRAY, TextStyles.ITALIC, "Click to edit zone")),
-							TextActions.executeCallback(dummySrc -> zone.editZone((Player) src)),
-							TextColors.GOLD, "[", TextColors.YELLOW, "Edit", TextColors.GOLD, "]"),
+							// TODO: textactions
+//							TextActions.showText(Text.of(TextFormatting.GRAY, TextFormatting.ITALIC, "Click to edit zone")),
+//							TextActions.executeCallback(dummySrc -> zone.editZone((Player) source)),
+							TextFormatting.GOLD, "[", TextFormatting.YELLOW, "Edit", TextFormatting.GOLD, "]"),
 					suffix)
 			);
 		}
 		contents.add(Text.of(
-				TextActions.executeCallback(dummySrc ->
-				{
-					Zone zone = new Zone();
-					Zones.INSTANCE.addZone(zone);
-					zone.editZone((Player) src);
-					Zones.INSTANCE.save();
-				}),
-				TextActions.showText(Text.of(TextColors.GRAY, TextStyles.ITALIC, "Click here to create a new zone")),
-				TextColors.GOLD, "[", TextColors.AQUA, "Add new zone", TextColors.GOLD, "]"
+				// TODO: textactions
+//				TextActions.executeCallback(dummySrc -> {
+//					Zone zone = new Zone();
+//					Zones.INSTANCE.addZone(zone);
+//					zone.editZone((Player) source);
+//					Zones.INSTANCE.save();
+//				}),
+//				TextActions.showText(Text.of(TextFormatting.GRAY, TextFormatting.ITALIC, "Click here to create a new zone")),
+				TextFormatting.GOLD, "[", TextFormatting.AQUA, "Add new zone", TextFormatting.GOLD, "]"
 		));
 
-		Sponge.getServiceManager().provide(PaginationService.class).get().builder()
-				.contents(contents)
-				.padding(Text.of(TextColors.GOLD, "-"))
-				.title(Text.of(TextColors.GOLD, "Zones"))
-				.linesPerPage(8)
-				.sendTo(src);
+		// TODO: pagination
+//		Sponge.getServiceManager().provide(PaginationService.class).get().builder()
+//				.contents(contents)
+//				.padding(Text.of(TextFormatting.GOLD, "-"))
+//				.title(Text.of(TextFormatting.GOLD, "Zones"))
+//				.linesPerPage(8)
+//				.sendTo(source);
 	}
 }

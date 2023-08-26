@@ -1,17 +1,19 @@
 package com.hiroku.tournaments.commands;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.enums.TournamentStates;
+import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.rules.player.RandomPokemon;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Command used specifically when there is a {@link RandomPokemon} rule in effect, and a player
@@ -19,41 +21,36 @@ import org.spongepowered.api.text.format.TextColors;
  *
  * @author Hiroku
  */
-public class RerollCommand implements CommandExecutor {
-	public static CommandSpec getSpec() {
-		return CommandSpec.builder()
-				.permission("tournaments.command.common.reroll")
-				.executor(new RerollCommand())
-				.description(Text.of("Attempts to get a new set of random Pokémon"))
-				.build();
+public class RerollCommand implements Command<CommandSource> {
+	public LiteralArgumentBuilder<CommandSource> create() {
+		return Commands.literal("reroll")
+//				.description(Text.of("Attempts to get a new set of random Pokémon"))
+				.requires(source -> User.hasPermission(source, "tournaments.command.common.reroll"))
+				.executes(this);
 	}
 
 	@Override
-	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-		if (!(src instanceof Player)) {
-			src.sendMessage(Text.of(TextColors.RED, "You're the console, why would you be able to reroll!?"));
-			return CommandResult.empty();
-		}
-
-		Player player = (Player) src;
+	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
+		PlayerEntity player = context.getSource().asPlayer();
 
 		if (Tournament.instance() == null || Tournament.instance().state != TournamentStates.OPEN) {
-			src.sendMessage(Text.of(TextColors.RED, "There must be a tournament in the open state for you to use this command!"));
-			return CommandResult.empty();
-		}
-		Tournament t = Tournament.instance();
-
-		if (t.getTeam(player.getUniqueId()) == null) {
-			player.sendMessage(Text.of(TextColors.RED, "You aren't even in the tournament!"));
-			return CommandResult.empty();
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There must be a tournament in the open state for you to use this command!"), true);
+			return 0;
 		}
 
-		RandomPokemon rule = t.getRuleSet().getRule(RandomPokemon.class);
+		Team team = Tournament.instance().getTeam(player.getUniqueID());
+		User user = team == null ? null : team.getUser(player.getUniqueID());
+		if (team == null) {
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You aren't even in the tournament!"), true);
+			return 0;
+		}
+
+		RandomPokemon rule = Tournament.instance().getRuleSet().getRule(RandomPokemon.class);
 		if (rule == null) {
-			player.sendMessage(Text.of(TextColors.RED, "This tournament isn't a random Pokémon tournament!"));
-			return CommandResult.empty();
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "This tournament isn't a random Pokémon tournament!"), true);
+			return 0;
 		}
 
-		return rule.attemptReroll(player) ? CommandResult.success() : CommandResult.empty();
+		return rule.attemptReroll(user) ? 1 : 0;
 	}
 }

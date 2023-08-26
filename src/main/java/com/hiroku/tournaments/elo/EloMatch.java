@@ -19,6 +19,6 @@ public class EloMatch {
 	}
 
 	public void process() {
-		EloStorage.registerBattle(winners, losers, Tournament.instance().getRuleSet().getRule(EloType.class).eloType, draw);
+		EloStorage.registerBattle(winners, losers, Tournament.instance().getRuleSet().getRule(EloType.class).type, draw);
 	}
 }

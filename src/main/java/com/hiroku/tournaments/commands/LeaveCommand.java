@@ -1,62 +1,57 @@
 package com.hiroku.tournaments.commands;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.Match;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.enums.TournamentStates;
 import com.hiroku.tournaments.obj.Team;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
 
 /**
  * Command for leaving a tournament.
  *
  * @author Hiroku
  */
-public class LeaveCommand implements CommandExecutor {
-	public static CommandSpec getSpec() {
-		return CommandSpec.builder()
-				.permission("tournaments.command.common.leave")
-				.executor(new LeaveCommand())
-				.description(Text.of("Leaves the tournament"))
-				.build();
+public class LeaveCommand implements Command<CommandSource> {
+	public LiteralArgumentBuilder<CommandSource> create() {
+		return Commands.literal("leave")
+//				.description(Text.of("Leaves the tournament"))
+				.requires(source -> User.hasPermission(source, "tournaments.command.common.leave"))
+				.executes(this);
 	}
 
 	@Override
-	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-		if (!(src instanceof Player)) {
-			src.sendMessage(Text.of(TextColors.RED, "You can't leave the tournament if you're a CONSOLE. Jeez."));
-			return CommandResult.empty();
-		}
-
-		Player player = (Player) src;
+	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
+		PlayerEntity player = context.getSource().asPlayer();
 		if (Tournament.instance() == null || Tournament.instance().state == TournamentStates.CLOSED) {
-			src.sendMessage(Text.of(TextColors.RED, "There is no tournament to leave"));
-			return CommandResult.empty();
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no tournament to leave"), true);
+			return 0;
 		}
-		Team team = Tournament.instance().getTeam(player.getUniqueId());
+		Team team = Tournament.instance().getTeam(player.getUniqueID());
 		if (team == null) {
-			src.sendMessage(Text.of(TextColors.RED, "You aren't even in the tournament!"));
-			return CommandResult.empty();
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You aren't even in the tournament!"), true);
+			return 0;
 		}
 		if (!team.alive) {
-			src.sendMessage(Text.of(TextColors.RED, "Why do you want to leave? You're already knocked out!"));
-			return CommandResult.empty();
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Why do you want to leave? You're already knocked out!"), true);
+			return 0;
 		}
 
 		Match match = Tournament.instance().getMatch(team);
 		if (match != null) {
-			src.sendMessage(Text.of(TextColors.RED, "You are assigned to a match. You should use ", TextColors.DARK_AQUA, "/tournament forfeit", TextColors.RED, " instead"));
-			return CommandResult.empty();
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You are assigned to a match. You should use ", TextFormatting.DARK_AQUA, "/tournament forfeit", TextFormatting.RED, " instead"), true);
+			return 0;
 		}
 
 		Tournament.instance().removeTeams(false, team);
-		return CommandResult.success();
+		return 1;
 	}
 }

@@ -1,49 +1,50 @@
 package com.hiroku.tournaments.commands;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.Presets;
 import com.hiroku.tournaments.Zones;
 import com.hiroku.tournaments.api.Preset;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.enums.TournamentStates;
 import com.hiroku.tournaments.obj.Zone;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.util.text.TextFormatting;
 
-public class CreateCommand implements CommandExecutor {
-	public static CommandSpec getSpec() {
-		return CommandSpec.builder()
-				.permission("tournaments.command.admin.create")
-				.description(Text.of("Creates a new tournament"))
-				.executor(new CreateCommand())
-				.arguments(
-						GenericArguments.optional(GenericArguments.string(Text.of("preset"))))
-				.build();
+import static com.hiroku.tournaments.util.CommandUtils.getOptArgument;
+
+public class CreateCommand implements Command<CommandSource> {
+	public LiteralArgumentBuilder<CommandSource> create() {
+		return Commands.literal("create")
+//				.description(Text.of("Creates a new tournament"))
+				.requires(source -> User.hasPermission(source, "tournaments.command.admin.create"))
+				.executes(this)
+				.then(
+						Commands.argument("preset", StringArgumentType.greedyString())
+								.executes(this)
+				);
 	}
 
 	@Override
-	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
+	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
 		if (Tournament.instance() != null && Tournament.instance().state != TournamentStates.CLOSED) {
 			if (Tournament.instance().state == TournamentStates.ACTIVE) {
-				src.sendMessage(Text.of(TextColors.RED, "There is a tournament that's ACTIVE man"));
-				return CommandResult.empty();
+				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is a tournament that's ACTIVE man"), true);
+				return 0;
 			}
 			if (Tournament.instance().state == TournamentStates.OPEN) {
-				src.sendMessage(Text.of(TextColors.RED, "There is a tournament that's open"));
-				return CommandResult.empty();
+				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is a tournament that's open"), true);
+				return 0;
 			}
 		}
 
-		String arg = null;
-
-		if (args.hasAny(Text.of("preset")))
-			arg = args.<String>getOne(Text.of("preset")).get();
+		String arg = getOptArgument(context, "preset", String.class).orElse(null);
 
 		new Tournament();
 
@@ -63,12 +64,13 @@ public class CreateCommand implements CommandExecutor {
 					zone.engaged = preset.zones.contains(zone);
 				}
 			}
-			src.sendMessage(Text.of(TextColors.DARK_GREEN, "Started a new tournament with preset: ", TextColors.DARK_AQUA, presetName));
-		} else if (arg == null)
-			src.sendMessage(Text.of(TextColors.DARK_GREEN, "Started a new tournament."));
-		else
-			src.sendMessage(Text.of(TextColors.DARK_GREEN, "Started a new tournament, but the preset given was unknown"));
+			context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Started a new tournament with preset: ", TextFormatting.DARK_AQUA, presetName), true);
+		} else if (arg == null) {
+			context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Started a new tournament."), true);
+		} else {
+			context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Started a new tournament, but the preset given was unknown"), true);
+		}
 
-		return CommandResult.success();
+		return 1;
 	}
 }

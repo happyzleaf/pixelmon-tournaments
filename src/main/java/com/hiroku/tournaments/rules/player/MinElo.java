@@ -28,7 +28,7 @@ public class MinElo extends PlayerRule {
 	public boolean passes(PlayerEntity player, PlayerPartyStorage storage) {
 		return User.hasPermission(player, "tournaments.admin.elo-bypass")
 				|| User.hasPermission(player, "tournaments.admin.elo-bypass-team")
-				|| EloStorage.getElo(player.getUniqueID(), Tournament.instance().getRuleSet().getRule(EloType.class).eloType) >= minElo;
+				|| EloStorage.getElo(player.getUniqueID(), Tournament.instance().getRuleSet().getRule(EloType.class).type) >= minElo;
 	}
 
 	@Override

@@ -375,7 +375,7 @@ public class Tournament extends Mode {
 				getRuleSet().getRule(EloType.class).eloMatches.add(new EloMatch(match.sides[0].getUUIDs(), match.sides[1].getUUIDs(), true));
 
 			sendMessage(getMessageProvider().getMatchDrawMessage(match));
-			tasks.add(Scheduler.delayTime(TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS, () -> {
+			tasks.add(Scheduler.delay(TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS, () -> {
 				if (round.contains(match)) {
 					match.start(this, true);
 				}
@@ -411,7 +411,7 @@ public class Tournament extends Mode {
 
 			sendMessage(messageProvider.getUpcomingRoundMessage(roundNum, round));
 
-			tasks.add(Scheduler.delayTime(TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS, this::checkForMoreBattles));
+			tasks.add(Scheduler.delay(TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS, this::checkForMoreBattles));
 
 			return;
 		}
