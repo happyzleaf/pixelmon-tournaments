@@ -211,7 +211,7 @@ public class RandomPokemon extends PlayerRule {
 			if (user.getPlayer().isPresent())
 				removeRentalPokemon(user.getPlayer().get(), true);
 
-		globalPool = new ArrayList<EnumSpecies>();
+		globalPool = new ArrayList<>();
 		rerollsRemaining = new HashMap<>();
 	}
 

@@ -27,7 +27,7 @@ public class ItemsReward extends RewardBase {
 	public ItemsReward(String arg) throws Exception {
 		super(arg);
 
-		items = new ArrayList<ItemStack>();
+		items = new ArrayList<>();
 
 		Optional<Player> optPlayer;
 

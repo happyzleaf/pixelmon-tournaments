@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.hiroku.tournaments.api.Match;
 import net.minecraftforge.eventbus.api.Event;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Event fired when a round starts
@@ -17,7 +17,7 @@ public class RoundStartEvent extends Event {
 	 */
 	public final ImmutableList<Match> round;
 
-	public RoundStartEvent(ArrayList<Match> round) {
+	public RoundStartEvent(List<Match> round) {
 		this.round = ImmutableList.copyOf(round);
 	}
 }
