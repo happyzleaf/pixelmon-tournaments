@@ -3,7 +3,10 @@ package com.hiroku.tournaments.rewards;
 import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.Tournaments;
 import com.hiroku.tournaments.api.reward.RewardBase;
+import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
+import com.pixelmonmod.pixelmon.api.storage.StorageProxy;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.TextFormatting;
 
 import java.math.BigDecimal;
@@ -28,14 +31,9 @@ public class MoneyReward extends RewardBase {
 
 	@Override
 	public void give(PlayerEntity player) {
-//		EconomyService economy = Sponge.getServiceManager().provide(EconomyService.class).get();
-//		Optional<UniqueAccount> optAcc = economy.getOrCreateAccount(player.getUniqueId());
-//
-//		if (optAcc.isPresent()) {
-//			optAcc.get().deposit(economy.getDefaultCurrency(), BigDecimal.valueOf(amount), Cause.builder().insert(0, Tournaments.INSTANCE).build(EventContext.empty()));
-//			player.sendMessage(Text.of(TextFormatting.DARK_GREEN, "You were rewarded ", economy.getDefaultCurrency().getSymbol(), amount));
-//		} else
-//			player.sendMessage(Text.of(TextFormatting.RED, "There was an error giving you the cash reward of ", economy.getDefaultCurrency().getSymbol(), amount));
+		PlayerPartyStorage party = StorageProxy.getParty(player.getUniqueID());
+		party.setBalance(party.getBalance().add(BigDecimal.valueOf(amount)));
+		player.sendMessage(Text.of(TextFormatting.DARK_GREEN, "You were rewarded $", amount), Util.DUMMY_UUID);
 	}
 
 	@Override
