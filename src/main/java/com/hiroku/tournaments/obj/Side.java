@@ -47,7 +47,7 @@ public class Side {
 	 */
 	public Team getTeam(UUID uuid) {
 		for (Team team : teams)
-			if (team.hasPlayer(uuid))
+			if (team.hasUser(uuid))
 				return team;
 		return null;
 	}
@@ -71,7 +71,7 @@ public class Side {
 	public List<UUID> getUUIDs() {
 		List<UUID> uuids = new ArrayList<>();
 		for (Team team : teams)
-			uuids.addAll(team.getUUIDs());
+			uuids.addAll(team.getUserIDs());
 		return uuids;
 	}
 

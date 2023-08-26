@@ -28,25 +28,31 @@ public class Team {
 	 * Whether the team is alive or knocked out.
 	 */
 	public boolean alive = true;
-	/**
-	 * Whether the team is currently in a tournament match or not.
-	 */
-	public boolean inMatch = false;
 
 	/**
 	 * Checks if the given UUID is a member of this team.
 	 *
-	 * @param uuid - The UUID to be checked.
+	 * @param id - The UUID to be checked.
 	 * @return - true if the given UUID matches a member of this team, otherwise false/
 	 */
-	public boolean hasPlayer(UUID uuid) {
+	public boolean hasUser(UUID id) {
 		for (User user : users) {
-			if (user.id.equals(uuid)) {
+			if (user.id.equals(id)) {
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	public User getUser(UUID id) {
+		for (User user : users) {
+			if (user.id.equals(id)) {
+				return user;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -96,7 +102,7 @@ public class Team {
 	/**
 	 * Gets the UUIDs of all the members of the team.
 	 */
-	public List<UUID> getUUIDs() {
+	public List<UUID> getUserIDs() {
 		List<UUID> uuids = new ArrayList<>();
 		for (User user : users) {
 			uuids.add(user.id);

@@ -25,7 +25,7 @@ public class BattleListener {
 		if (match == null || !match.listenToBattleEnd)
 			return;
 		if (event.isAbnormal())
-			match.handleCrashedBattle();
+			match.handleCrashedBattle(Tournament.instance());
 		else {
 			UUID uuid = match.sides[0].teams[0].users.get(0).id;
 			BattleParticipant bp = event.getBattleController().participants.stream()

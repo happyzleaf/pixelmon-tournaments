@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 import static com.google.common.base.Preconditions.checkArgument;
 
 public class Scheduler {
-	private static Map<UUID, Ticker> tickers = new HashMap<>();
+	private static final Map<UUID, Ticker> tickers = new HashMap<>();
 
 	public static UUID delayTicks(long ticks, Runnable task) {
 		checkArgument(ticks >= 0, "ticks >= 0");

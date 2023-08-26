@@ -1,12 +1,15 @@
 package com.hiroku.tournaments.obj;
 
 import com.happyzleaf.tournaments.Text;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class LocationWrapper {
 	public final RegistryKey<World> dimensionKey;
@@ -17,6 +20,10 @@ public class LocationWrapper {
 		this.dimensionKey = world == null ? null : world.getDimensionKey();
 		this.position = position;
 		this.rotation = rotation;
+	}
+
+	public LocationWrapper(Entity at) {
+		this(checkNotNull(at, "at").getEntityWorld(), at.getPositionVec(), at.getPitchYaw());
 	}
 
 	public LocationWrapper() {

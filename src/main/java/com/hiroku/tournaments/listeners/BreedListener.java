@@ -1,20 +1,16 @@
 package com.hiroku.tournaments.listeners;
 
 import com.hiroku.tournaments.Tournaments;
-import com.pixelmonmod.pixelmon.api.events.BreedEvent;
-import com.pixelmonmod.pixelmon.api.pokemon.PokemonSpec;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.service.user.UserStorageService;
+import com.hiroku.tournaments.util.PokemonUtils;
+import com.pixelmonmod.pixelmon.api.daycare.event.DayCareEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class BreedListener {
 	@SubscribeEvent
-	public void onBreeding(BreedEvent.MakeEgg event) {
-		PokemonSpec rental = new PokemonSpec("rental");
-		if (rental.matches(event.parent1) || rental.matches(event.parent2)) {
+	public void onDayCareAdd(DayCareEvent.PrePokemonAdd event) {
+		if (PokemonUtils.isRental(event.getParentOne()) || PokemonUtils.isRental(event.getParentTwo())) {
 			event.setCanceled(true);
-			UserStorageService uss = Sponge.getServiceManager().provide(UserStorageService.class).get();
-			Tournaments.log(uss.get(event.parent1.getOwnerPlayerUUID()).get().getName() + " is attempting to breed a rental Pokémon!");
+			Tournaments.log(event.getPlayer().getDisplayName().getString() + " is attempting to breed a rental Pokémon!");
 		}
 	}
 }

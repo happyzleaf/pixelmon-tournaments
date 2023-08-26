@@ -54,7 +54,7 @@ public class MaxElo extends PlayerRule {
 	@Override
 	public boolean canTeamJoin(Tournament tournament, Team team, boolean forced) {
 		String eloType = Tournament.instance().getRuleSet().getRule(EloType.class).eloType;
-		for (UUID uuid : team.getUUIDs()) {
+		for (UUID uuid : team.getUserIDs()) {
 			if (EloStorage.getElo(uuid, eloType) > maxElo) {
 				if (CollectionHelper.find(team.users, user -> user.id.equals(uuid)).hasPermission("tournaments.admin.elo-bypass"))
 					continue;

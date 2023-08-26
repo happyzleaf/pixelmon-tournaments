@@ -4,6 +4,7 @@ import com.happyzleaf.tournaments.Scheduler;
 import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.Match;
 import com.hiroku.tournaments.api.Preset;
+import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.config.TournamentConfig;
 import com.hiroku.tournaments.obj.LocationWrapper;
 import com.hiroku.tournaments.obj.Side;
@@ -81,7 +82,7 @@ public class Zones {
 		return zoneMatches.get(zone);
 	}
 
-	public void matchEnded(Match match) {
+	public void matchEnded(Tournament tournament, Match match) {
 		Zone matchZone = null;
 		for (Zone zone : zoneMatches.keySet()) {
 			if (zoneMatches.get(zone) == match) {
@@ -94,7 +95,7 @@ public class Zones {
 		}
 
 		if (this.leaveZone != null) {
-			Scheduler.delayTicks(60, () -> {
+			tournament.tasks.add(Scheduler.delayTicks(60, () -> {
 				for (Side side : match.sides) {
 					for (Team team : side.teams) {
 						for (User user : team.users) {
@@ -104,7 +105,7 @@ public class Zones {
 						}
 					}
 				}
-			});
+			}));
 		}
 	}
 

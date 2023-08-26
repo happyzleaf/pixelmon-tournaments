@@ -111,23 +111,23 @@ public class PokemonMatch extends Match {
 			zone.sendPlayersToZone(this);
 		}
 
-		Scheduler.delayTime(5, TimeUnit.SECONDS, () -> {
+		tournament.tasks.add(Scheduler.delayTime(5, TimeUnit.SECONDS, () -> {
 			tournament.getModes().forEach(mode -> mode.onMatchStart(tournament, this));
 			MatchStartResult result = start(rematch);
 			if (result instanceof MatchStartResult.Success)
 				Tournaments.EVENT_BUS.post(new MatchStartEvent(this, zone));
 			else if (result instanceof MatchStartResult.InsufficientPokemon) {
-				Zones.INSTANCE.matchEnded(this);
+				Zones.INSTANCE.matchEnded(tournament, this);
 				Side side = this.getSide(((MatchStartResult.InsufficientPokemon) result).user.id);
 				sendMessage(tournament.getMessageProvider().getInsufficientPokemonMessage(side));
 				tournament.matchEnds(this, this.getOtherSide(side), side);
 			} else if (result instanceof MatchStartResult.PlayerOffline) {
-				Zones.INSTANCE.matchEnded(this);
+				Zones.INSTANCE.matchEnded(tournament, this);
 				Side side = getSide(((MatchStartResult.PlayerOffline) result).user.id);
 				sendMessage(tournament.getMessageProvider().getPlayersOfflineMessage(side));
 				tournament.matchEnds(this, getOtherSide(side), side);
 			} else if (result instanceof MatchStartResult.RuleBroken) {
-				Zones.INSTANCE.matchEnded(this);
+				Zones.INSTANCE.matchEnded(tournament, this);
 
 				MatchStartResult.RuleBroken ruleResult = (MatchStartResult.RuleBroken) result;
 
@@ -136,7 +136,7 @@ public class PokemonMatch extends Match {
 				Side side = ((MatchStartResult.RuleBroken) result).side;
 				tournament.matchEnds(this, this.getOtherSide(side), side);
 			} else if (result instanceof MatchStartResult.BattleRuleBroken) {
-				Zones.INSTANCE.matchEnded(this);
+				Zones.INSTANCE.matchEnded(tournament, this);
 
 				MatchStartResult.BattleRuleBroken ruleResult = (MatchStartResult.BattleRuleBroken) result;
 				sendMessage(tournament.getMessageProvider().getBattleRuleBreakMessage(ruleResult));
@@ -144,11 +144,11 @@ public class PokemonMatch extends Match {
 				Side side = ((MatchStartResult.BattleRuleBroken) result).side;
 				tournament.matchEnds(this, this.getOtherSide(side), side);
 			} else if (result instanceof MatchStartResult.Error) {
-				Zones.INSTANCE.matchEnded(this);
+				Zones.INSTANCE.matchEnded(tournament, this);
 				((MatchStartResult.Error) result).exception.printStackTrace();
-				handleCrashedBattle();
+				handleCrashedBattle(tournament);
 			}
-		});
+		}));
 	}
 
 	// The contents of this function may seem unnecessarily complicated, but I am both trying to plan for every possibility and 
@@ -286,7 +286,7 @@ public class PokemonMatch extends Match {
 	 * that {@link Side} will be declared the winner. If a decision could not be made or there were no
 	 * decider rules, a rematch will be scheduled.
 	 */
-	public void handleCrashedBattle() {
+	public void handleCrashedBattle(Tournament tournament) {
 		List<DeciderRule> deciders = Tournament.instance().getRuleSet().getCrashDeciderRules();
 		Side winningSide = null;
 		for (DeciderRule rule : deciders)
@@ -296,10 +296,10 @@ public class PokemonMatch extends Match {
 		if (winningSide == null) {
 			sendMessage(Tournament.instance().getMessageProvider().getMatchErrorMessage(this));
 
-			Scheduler.delayTime(TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS, () -> {
+			tournament.tasks.add(Scheduler.delayTime(TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS, () -> {
 				if (Tournament.instance().round.contains(this))
 					start(Tournament.instance(), true);
-			});
+			}));
 		} else {
 			Tournament.instance().matchEnds(this, winningSide, getOtherSide(winningSide));
 		}

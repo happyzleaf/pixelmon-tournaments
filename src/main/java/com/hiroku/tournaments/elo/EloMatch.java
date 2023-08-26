@@ -10,7 +10,7 @@ import java.util.UUID;
 public class EloMatch {
 	public final List<UUID> winners = new ArrayList<>();
 	public final List<UUID> losers = new ArrayList<>();
-	public boolean draw = false;
+	public final boolean draw;
 
 	public EloMatch(List<UUID> winners, List<UUID> losers, boolean draw) {
 		this.winners.addAll(winners);

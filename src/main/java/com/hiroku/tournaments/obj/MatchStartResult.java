@@ -2,8 +2,6 @@ package com.hiroku.tournaments.obj;
 
 import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 
 /**
  * The result of a match start.
@@ -51,7 +49,7 @@ public abstract class MatchStartResult {
 	 */
 	public static class InsufficientPokemon extends MatchStartResult {
 		/**
-		 * The {@link Team} containing the {@link Player} without enough Pokémon.
+		 * The {@link Team} containing the {@link User} without enough Pokémon.
 		 */
 		public final Team team;
 		/**

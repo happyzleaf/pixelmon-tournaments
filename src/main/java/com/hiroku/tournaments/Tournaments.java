@@ -86,9 +86,7 @@ public class Tournaments {
 		Pixelmon.EVENT_BUS.register(EXPERIENCE_LISTENER);
 		Pixelmon.EVENT_BUS.register(BREED_LISTENER);
 		Pixelmon.EVENT_BUS.register(TRADE_LISTENER);
-
-		// TODO: login listener
-//		Sponge.getEventManager().registerListeners(this, loginListener);
+		MinecraftForge.EVENT_BUS.register(LOGIN_LISTENER);
 
 		registerDefaultRules();
 		registerDefaultRewards();

@@ -23,9 +23,11 @@ import com.hiroku.tournaments.obj.Side;
 import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.obj.Zone;
 import com.hiroku.tournaments.rules.general.EloType;
-import com.hiroku.tournaments.util.TournamentUtils;
 import com.pixelmonmod.pixelmon.api.util.helpers.RandomHelper;
+import net.minecraft.command.CommandSource;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Util;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 import java.lang.reflect.InvocationTargetException;
@@ -94,6 +96,8 @@ public class Tournament extends Mode {
 	 */
 	public int roundNum = 0;
 
+	public List<UUID> tasks = new ArrayList<>();
+
 	/**
 	 * Creates a new tournament with an immediate specification of some of its rules.
 	 *
@@ -155,8 +159,8 @@ public class Tournament extends Mode {
 		}
 
 		ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers().stream()
-				.filter(p -> !ignoreList.contains(p.getUniqueId()))
-				.forEach(p -> p.sendMessage(Text.of(getPrefix(), text)));
+				.filter(p -> !ignoreList.contains(p.getUniqueID()))
+				.forEach(p -> p.sendMessage(Text.of(getPrefix(), text), Util.DUMMY_UUID));
 	}
 
 	/**
@@ -271,7 +275,7 @@ public class Tournament extends Mode {
 	 */
 	public Team getTeam(UUID uuid) {
 		for (Team team : teams)
-			if (team.hasPlayer(uuid))
+			if (team.hasUser(uuid))
 				return team;
 		return null;
 	}
@@ -344,7 +348,7 @@ public class Tournament extends Mode {
 		final Side losingSideFinal = losingSide;
 
 		this.getModes().forEach(mode -> mode.onMatchEnd(this, match, winningSideFinal, losingSideFinal));
-		Zones.INSTANCE.matchEnded(match);
+		Zones.INSTANCE.matchEnded(this, match);
 		round.remove(match);
 		if (!checkForMoreBattles() && round.isEmpty()) {
 			getModes().forEach(mode -> mode.onRoundEnd(this));
@@ -371,11 +375,11 @@ public class Tournament extends Mode {
 				getRuleSet().getRule(EloType.class).eloMatches.add(new EloMatch(match.sides[0].getUUIDs(), match.sides[1].getUUIDs(), true));
 
 			sendMessage(getMessageProvider().getMatchDrawMessage(match));
-			Scheduler.delayTime(TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS, () -> {
+			tasks.add(Scheduler.delayTime(TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS, () -> {
 				if (round.contains(match)) {
 					match.start(this, true);
 				}
-			});
+			}));
 		} else {
 			this.matchEnds(match, winningSide, match.getOtherSide(winningSide));
 		}
@@ -407,7 +411,7 @@ public class Tournament extends Mode {
 
 			sendMessage(messageProvider.getUpcomingRoundMessage(roundNum, round));
 
-			Scheduler.delayTime(TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS, this::checkForMoreBattles);
+			tasks.add(Scheduler.delayTime(TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS, this::checkForMoreBattles));
 
 			return;
 		}
@@ -508,11 +512,11 @@ public class Tournament extends Mode {
 	public void open() {
 		this.state = EnumTournamentState.OPEN;
 		sendMessage(getMessageProvider().getOpenMessage(this));
-		sendMessage(Text.of(TextActions.executeCallback(src ->
-		{
-			ignoreList.add(((Player) src).getUniqueId());
-			src.sendMessage(getMessageProvider().getIgnoreToggleMessage(true));
-		}), getMessageProvider().getIgnorePromptMessage()));
+		// TODO: textactions onclick
+//		sendMessage(Text.of(TextActions.executeCallback(src -> {
+//			ignoreList.add(((Player) src).getUniqueId());
+//			src.sendMessage(getMessageProvider().getIgnoreToggleMessage(true), Util.DUMMY_UUID);
+//		}), getMessageProvider().getIgnorePromptMessage()));
 		getModes().forEach(mode -> mode.onTournamentOpen(this));
 
 		// Just in case it didn't get cleared before.
@@ -530,7 +534,7 @@ public class Tournament extends Mode {
 		this.teams = new ArrayList<>();
 		this.ignoreList = new ArrayList<>();
 		this.ruleSet = new RuleSet();
-		Sponge.getScheduler().getScheduledTasks(Tournaments.INSTANCE).forEach(t -> t.cancel());
+		tasks.forEach(Scheduler::cancel);
 	}
 
 	/**
@@ -563,15 +567,19 @@ public class Tournament extends Mode {
 		Tournaments.EVENT_BUS.post(new TournamentEndEvent(winnerUsers));
 		getModes().forEach(mode -> mode.onTournamentEnd(this, winnerUsers));
 
-		if (winners == null || winners.isEmpty())
+		if (winners.isEmpty())
 			sendMessage(messageProvider.getNoWinnerMessage());
 		else {
 			sendMessage(messageProvider.getWinnerMessage(winners));
 
-			for (User user : winnerUsers)
-				if (user.isOnline())
-					for (RewardBase reward : rewards)
-						reward.give(user.getPlayer().get());
+			for (User user : winnerUsers) {
+				PlayerEntity player = user.getPlayer();
+				if (player != null) {
+					for (RewardBase reward : rewards) {
+						reward.give(player);
+					}
+				}
+			}
 		}
 
 		if (getRuleSet().isElo()) {
@@ -585,134 +593,151 @@ public class Tournament extends Mode {
 	}
 
 	public void showTournament(CommandSource src) {
-		src.sendMessage(Text.of(TextColors.GOLD, "---------- Tournament -----------"));
+		src.sendFeedback(Text.of(TextFormatting.GOLD, "---------- Tournament -----------"), true);
 		if (state == EnumTournamentState.CLOSED)
-			src.sendMessage(Text.of(TextColors.GOLD, "State: ", TextColors.RED, "CLOSED"));
+			src.sendFeedback(Text.of(TextFormatting.GOLD, "State: ", TextFormatting.RED, "CLOSED"), true);
 		else if (state == EnumTournamentState.OPEN)
-			src.sendMessage(Text.of(TextColors.GOLD, "State: ", TextColors.GREEN, "OPEN"));
+			src.sendFeedback(Text.of(TextFormatting.GOLD, "State: ", TextFormatting.GREEN, "OPEN"), true);
 		else {
-			src.sendMessage(Text.of(TextColors.GOLD, "State: ", TextColors.YELLOW, "ACTIVE"));
-			src.sendMessage(Text.of(TextColors.GOLD, "Round: ", TextColors.DARK_AQUA, roundNum));
+			src.sendFeedback(Text.of(TextFormatting.GOLD, "State: ", TextFormatting.YELLOW, "ACTIVE"), true);
+			src.sendFeedback(Text.of(TextFormatting.GOLD, "Round: ", TextFormatting.DARK_AQUA, roundNum), true);
 		}
 
-		src.sendMessage(Text.of(TextColors.GOLD, "Rules: ", Text.of(
-				TextActions.showText(getRuleSet().getDisplayText()),
-				TextActions.executeCallback(dummySrc ->
-				{
-					Player player = src instanceof Player ? (Player) src : null;
-
-					List<Text> contents = new ArrayList<>();
-					for (RuleBase rule : getRuleSet().rules)
-						if (rule.canShow(player))
-							contents.add(Text.of(rule.getDisplayText()));
-					PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
-					pagination.contents(contents)
-							.padding(Text.of(TextColors.GOLD, "-"))
-							.linesPerPage(10)
-							.title(Text.of(TextColors.GOLD, "Rules"));
-					pagination.sendTo(src);
-				}),
-				TextColors.GRAY, "[Hover to see, click for full list]")));
+		src.sendFeedback(Text.of(TextFormatting.GOLD, "Rules: ", Text.of(
+				// TODO: onhover
+//				TextActions.showText(getRuleSet().getDisplayText()),
+				// TODO: textactions onclick
+//				TextActions.executeCallback(dummySrc ->
+//				{
+//					PlayerEntity player = src.getEntity() instanceof PlayerEntity ? (PlayerEntity) src.getEntity() : null;
+//
+//					List<Text> contents = new ArrayList<>();
+//					for (RuleBase rule : getRuleSet().rules)
+//						if (rule.canShow(player))
+//							contents.add(Text.of(rule.getDisplayText()));
+				//  TODO: pagination
+//					PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
+//					pagination.contents(contents)
+//							.padding(Text.of(TextColors.GOLD, "-"))
+//							.linesPerPage(10)
+//							.title(Text.of(TextColors.GOLD, "Rules"));
+//					pagination.sendTo(src);
+//				}),
+				TextFormatting.GRAY, "[Hover to see, click for full list]")), true);
 
 		if (!getRuleSet().br.exportText().isEmpty()) {
-			src.sendMessage(Text.of(TextColors.GOLD, "Battle Rules: ", Text.of(
-					TextActions.showText(Text.of(getRuleSet().br.exportText())),
-					TextActions.executeCallback(dummySrc ->
-					{
-						boolean clause = false;
-						List<Text> contents = new ArrayList<>();
-						for (String line : getRuleSet().br.exportText().split("\n")) {
-							contents.add(Text.of((clause ? "- " : "") + line));
-
-							if (line.equals("Clauses"))
-								clause = true;
-						}
-						PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
-						pagination.contents(contents)
-								.padding(Text.of(TextColors.GOLD, "-"))
-								.linesPerPage(10)
-								.title(Text.of(TextColors.GOLD, "Battle Rules"));
-						pagination.sendTo(src);
-					}),
-					TextColors.GRAY, "[Hover to see, click for full list]")));
+			src.sendFeedback(Text.of(TextFormatting.GOLD, "Battle Rules: ", Text.of(
+					// TODO: onhover
+//					TextActions.showText(Text.of(getRuleSet().br.exportText())),
+					// TODO: textactions onclick
+//					TextActions.executeCallback(dummySrc ->
+//					{
+//						boolean clause = false;
+//						List<Text> contents = new ArrayList<>();
+//						for (String line : getRuleSet().br.exportText().split("\n")) {
+//							contents.add(Text.of((clause ? "- " : "") + line));
+//
+//							if (line.equals("Clauses"))
+//								clause = true;
+//						}
+					//  TODO: pagination
+//						PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
+//						pagination.contents(contents)
+//								.padding(Text.of(TextFormatting.GOLD, "-"))
+//								.linesPerPage(10)
+//								.title(Text.of(TextFormatting.GOLD, "Battle Rules"));
+//						pagination.sendTo(src);
+//					}),
+					TextFormatting.GRAY, "[Hover to see, click for full list]")), true);
 		}
-		src.sendMessage(Text.of(TextColors.GOLD, "Rewards: ", Text.of(
-				TextActions.showText(TournamentUtils.showRewards(src)),
-				TextActions.executeCallback(dummySrc ->
-				{
-					Player player = src instanceof Player ? (Player) src : null;
+		src.sendFeedback(Text.of(TextFormatting.GOLD, "Rewards: ", Text.of(
+				// TODO: onhover
+//				TextActions.showText(TournamentUtils.showRewards(src)),
+				// TODO: textactions onclick
+//				TextActions.executeCallback(dummySrc ->
+//				{
+//					PlayerEntity player = src.getEntity() instanceof PlayerEntity ? (PlayerEntity) src.getEntity() : null;
+//
+//					List<Text> contents = new ArrayList<>();
+//					for (RewardBase reward : rewards)
+//						if (reward.canShow(player))
+//							contents.add(Text.of(reward.getDisplayText()));
+//
+				//  TODO: pagination
+//					PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
+//					pagination.contents(contents)
+//							.padding(Text.of(TextFormatting.GOLD, "-"))
+//							.linesPerPage(10)
+//							.title(Text.of(TextFormatting.GOLD, "Rewards"));
+//					pagination.sendTo(src);
+//				}),
+				TextFormatting.GRAY, "[Hover to preview, click for full list]")), true);
 
-					List<Text> contents = new ArrayList<>();
-					for (RewardBase reward : rewards)
-						if (reward.canShow(player))
-							contents.add(Text.of(reward.getDisplayText()));
-					PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
-					pagination.contents(contents)
-							.padding(Text.of(TextColors.GOLD, "-"))
-							.linesPerPage(10)
-							.title(Text.of(TextColors.GOLD, "Rewards"));
-					pagination.sendTo(src);
-				}),
-				TextColors.GRAY, "[Hover to preview, click for full list]")));
+		src.sendFeedback(Text.of(TextFormatting.GOLD, "Teams: ", Text.of(
+				// TODO: onhover
+//				TextActions.showText(TournamentUtils.showTeams(src)),
+				// TODO: textactions onclick
+//				TextActions.executeCallback(dummySrc ->
+//				{
+//					List<Text> contents = new ArrayList<>();
+//
+//					List<Team> liveTeams = new ArrayList<>();
+//					List<Team> deadTeams = new ArrayList<>();
+//
+//					for (Team team : teams) {
+//						if (team.alive)
+//							liveTeams.add(team);
+//						else
+//							deadTeams.add(team);
+//					}
+//
+//					List<Team> orderedTeams = new ArrayList<>();
+//					for (Team team : liveTeams)
+//						orderedTeams.add(team);
+//					for (Team team : deadTeams)
+//						orderedTeams.add(team);
+//
+//					for (Team team : orderedTeams) {
+//						if (team.alive)
+//							contents.add(Text.of(TextFormatting.GREEN, "*", team.getDisplayText()));
+//						else
+//							contents.add(Text.of(TextFormatting.RED, "*", team.getDisplayText()));
+//					}
+//
+				//  TODO: pagination
+//					PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
+//					pagination.contents(contents)
+//							.header(Text.of(TextFormatting.GREEN, "*", TextFormatting.GOLD, " = alive, ", TextFormatting.RED, "*", TextFormatting.GOLD, " = knocked out, "))
+//							.padding(Text.of(TextFormatting.GOLD, "-"))
+//							.linesPerPage(10)
+//							.title(Text.of(TextFormatting.GOLD, "Teams"));
+//					pagination.sendTo(src);
+//				}),
+				TextFormatting.GRAY, "[Hover to preview, click for full list]")), true);
 
-		src.sendMessage(Text.of(TextColors.GOLD, "Teams: ", Text.of(
-				TextActions.showText(TournamentUtils.showTeams(src)),
-				TextActions.executeCallback(dummySrc ->
-				{
-					List<Text> contents = new ArrayList<>();
+		src.sendFeedback(Text.of(TextFormatting.GOLD, "Current Matches: ", Text.of(
+				// TODO: onhover
+//				TextActions.showText(TournamentUtils.showMatches(src)),
+				// TODO: textactions onclick
+//				TextActions.executeCallback(dummySrc ->
+//				{
+//					List<Text> contents = new ArrayList<>();
+//					for (Match match : round)
+//						contents.add(Text.of(match.getStateText(), match.getDisplayText()));
+//
+				//  TODO: pagination
+//					PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
+//					pagination.contents(contents)
+//							.header(Text.of(TextFormatting.GRAY, "*", TextFormatting.GOLD, " = waiting, ", TextFormatting.YELLOW, "*", TextFormatting.GOLD, " = starting, ",
+//									TextColors.RED, "*", TextFormatting.GOLD, " = active"))
+//							.padding(Text.of(TextFormatting.GOLD, "-"))
+//							.linesPerPage(10)
+//							.title(Text.of(TextFormatting.GOLD, "Upcoming Matches"));
+//					pagination.sendTo(src);
+//				}),
+				TextFormatting.GRAY, "[Hover to preview, click for full list]")), true);
 
-					List<Team> liveTeams = new ArrayList<>();
-					List<Team> deadTeams = new ArrayList<>();
-
-					for (Team team : teams) {
-						if (team.alive)
-							liveTeams.add(team);
-						else
-							deadTeams.add(team);
-					}
-
-					List<Team> orderedTeams = new ArrayList<>();
-					for (Team team : liveTeams)
-						orderedTeams.add(team);
-					for (Team team : deadTeams)
-						orderedTeams.add(team);
-
-					for (Team team : orderedTeams) {
-						if (team.alive)
-							contents.add(Text.of(TextColors.GREEN, "*", team.getDisplayText()));
-						else
-							contents.add(Text.of(TextColors.RED, "*", team.getDisplayText()));
-					}
-
-					PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
-					pagination.contents(contents)
-							.header(Text.of(TextColors.GREEN, "*", TextColors.GOLD, " = alive, ", TextColors.RED, "*", TextColors.GOLD, " = knocked out, "))
-							.padding(Text.of(TextColors.GOLD, "-"))
-							.linesPerPage(10)
-							.title(Text.of(TextColors.GOLD, "Teams"));
-					pagination.sendTo(src);
-				}),
-				TextColors.GRAY, "[Hover to preview, click for full list]")));
-
-		src.sendMessage(Text.of(TextColors.GOLD, "Current Matches: ", Text.of(
-				TextActions.showText(TournamentUtils.showMatches(src)),
-				TextActions.executeCallback(dummySrc ->
-				{
-					List<Text> contents = new ArrayList<>();
-					for (Match match : round)
-						contents.add(Text.of(match.getStateText(), match.getDisplayText()));
-					PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
-					pagination.contents(contents)
-							.header(Text.of(TextColors.GRAY, "*", TextColors.GOLD, " = waiting, ", TextColors.YELLOW, "*", TextColors.GOLD, " = starting, ",
-									TextColors.RED, "*", TextColors.GOLD, " = active"))
-							.padding(Text.of(TextColors.GOLD, "-"))
-							.linesPerPage(10)
-							.title(Text.of(TextColors.GOLD, "Upcoming Matches"));
-					pagination.sendTo(src);
-				}),
-				TextColors.GRAY, "[Hover to preview, click for full list]")));
-
-		src.sendMessage(Text.of(TextColors.GOLD, "--------------------------------"));
+		src.sendFeedback(Text.of(TextFormatting.GOLD, "--------------------------------"), true);
 	}
 
 	public ImmutableList<Mode> getModes() {

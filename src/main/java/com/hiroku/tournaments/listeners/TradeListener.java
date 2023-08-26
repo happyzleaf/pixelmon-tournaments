@@ -1,21 +1,37 @@
 package com.hiroku.tournaments.listeners;
 
+import com.happyzleaf.tournaments.Text;
+import com.hiroku.tournaments.util.PokemonUtils;
 import com.pixelmonmod.pixelmon.api.events.PixelmonTradeEvent;
-import com.pixelmonmod.pixelmon.api.pokemon.PokemonSpec;
-import net.minecraft.util.text.TextComponentString;
+import com.pixelmonmod.pixelmon.api.events.PokegiftEvent;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class TradeListener {
 	@SubscribeEvent
 	public void onTrade(PixelmonTradeEvent event) {
-		if (event.pokemon1 == null || event.pokemon2 == null || event.player1 == null || event.player2 == null)
+		if (event.getPokemon1() == null || event.getPokemon2() == null || event.getPlayer1() == null || event.getPlayer2() == null) {
 			return;
-		PokemonSpec rental = new PokemonSpec("rental");
-		if (rental.matches(event.pokemon1) || rental.matches(event.pokemon2)) {
+		}
+
+		if (PokemonUtils.isRental(event.getPokemon1()) || PokemonUtils.isRental(event.getPokemon2())) {
 			event.setCanceled(true);
-			event.player1.sendMessage(new TextComponentString(TextFormatting.RED + "Trade cancelled; one of the Pokémon was rented for a tournament!"));
-			event.player2.sendMessage(new TextComponentString(TextFormatting.RED + "Trade cancelled; one of the Pokémon was rented for a tournament!"));
+			event.getPlayer1().sendMessage(Text.of(TextFormatting.RED, "Trade cancelled; one of the Pokémon was rented for a tournament!"), Util.DUMMY_UUID);
+			event.getPlayer2().sendMessage(Text.of(TextFormatting.RED, "Trade cancelled; one of the Pokémon was rented for a tournament!"), Util.DUMMY_UUID);
+		}
+	}
+
+	@SubscribeEvent
+	public void onPokegift(PokegiftEvent event) {
+		if (event.getPokemon() == null || event.getGiver() == null || event.getReceiver() == null) {
+			return;
+		}
+
+		if (PokemonUtils.isRental(event.getPokemon())) {
+			event.setCanceled(true);
+			event.getGiver().sendMessage(Text.of(TextFormatting.RED, "Trade cancelled; the Pokémon was rented for a tournament!"), Util.DUMMY_UUID);
+			event.getReceiver().sendMessage(Text.of(TextFormatting.RED, "Trade cancelled; the Pokémon was rented for a tournament!"), Util.DUMMY_UUID);
 		}
 	}
 }
