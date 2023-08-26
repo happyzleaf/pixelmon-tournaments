@@ -4,7 +4,7 @@ import com.hiroku.tournaments.Presets;
 import com.hiroku.tournaments.Zones;
 import com.hiroku.tournaments.api.Preset;
 import com.hiroku.tournaments.api.Tournament;
-import com.hiroku.tournaments.enums.EnumTournamentState;
+import com.hiroku.tournaments.enums.TournamentStates;
 import com.hiroku.tournaments.obj.Zone;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -29,12 +29,12 @@ public class CreateCommand implements CommandExecutor {
 
 	@Override
 	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-		if (Tournament.instance() != null && Tournament.instance().state != EnumTournamentState.CLOSED) {
-			if (Tournament.instance().state == EnumTournamentState.ACTIVE) {
+		if (Tournament.instance() != null && Tournament.instance().state != TournamentStates.CLOSED) {
+			if (Tournament.instance().state == TournamentStates.ACTIVE) {
 				src.sendMessage(Text.of(TextColors.RED, "There is a tournament that's ACTIVE man"));
 				return CommandResult.empty();
 			}
-			if (Tournament.instance().state == EnumTournamentState.OPEN) {
+			if (Tournament.instance().state == TournamentStates.OPEN) {
 				src.sendMessage(Text.of(TextColors.RED, "There is a tournament that's open"));
 				return CommandResult.empty();
 			}

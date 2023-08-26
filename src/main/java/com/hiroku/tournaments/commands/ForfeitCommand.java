@@ -1,7 +1,7 @@
 package com.hiroku.tournaments.commands;
 
 import com.hiroku.tournaments.api.Tournament;
-import com.hiroku.tournaments.enums.EnumTournamentState;
+import com.hiroku.tournaments.enums.TournamentStates;
 import com.hiroku.tournaments.obj.Team;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -32,12 +32,12 @@ public class ForfeitCommand implements CommandExecutor {
 
 	@Override
 	public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
-		if (Tournament.instance() == null || Tournament.instance().state == EnumTournamentState.CLOSED) {
+		if (Tournament.instance() == null || Tournament.instance().state == TournamentStates.CLOSED) {
 			src.sendMessage(Text.of(TextColors.RED, "There is no tournament dummy"));
 			return CommandResult.empty();
 		}
 
-		boolean isActive = Tournament.instance().state == EnumTournamentState.ACTIVE;
+		boolean isActive = Tournament.instance().state == TournamentStates.ACTIVE;
 
 		User user = null;
 

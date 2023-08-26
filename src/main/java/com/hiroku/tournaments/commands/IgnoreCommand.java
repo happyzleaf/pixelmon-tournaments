@@ -1,7 +1,7 @@
 package com.hiroku.tournaments.commands;
 
 import com.hiroku.tournaments.api.Tournament;
-import com.hiroku.tournaments.enums.EnumTournamentState;
+import com.hiroku.tournaments.enums.TournamentStates;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -32,7 +32,7 @@ public class IgnoreCommand implements CommandExecutor {
 			return CommandResult.empty();
 		}
 
-		if (Tournament.instance() == null || Tournament.instance().state == EnumTournamentState.CLOSED) {
+		if (Tournament.instance() == null || Tournament.instance().state == TournamentStates.CLOSED) {
 			src.sendMessage(Text.of(TextColors.RED, "There's nothing to ignore; there's no tournament open"));
 			return CommandResult.empty();
 		}

@@ -1,7 +1,7 @@
 package com.hiroku.tournaments.commands;
 
 import com.hiroku.tournaments.api.Tournament;
-import com.hiroku.tournaments.enums.EnumTournamentState;
+import com.hiroku.tournaments.enums.TournamentStates;
 import com.hiroku.tournaments.rules.player.RandomPokemon;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -37,7 +37,7 @@ public class RerollCommand implements CommandExecutor {
 
 		Player player = (Player) src;
 
-		if (Tournament.instance() == null || Tournament.instance().state != EnumTournamentState.OPEN) {
+		if (Tournament.instance() == null || Tournament.instance().state != TournamentStates.OPEN) {
 			src.sendMessage(Text.of(TextColors.RED, "There must be a tournament in the open state for you to use this command!"));
 			return CommandResult.empty();
 		}

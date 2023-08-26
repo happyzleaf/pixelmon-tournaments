@@ -3,7 +3,7 @@ package com.hiroku.tournaments.commands;
 import com.hiroku.tournaments.Tournaments;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.archetypes.pokemon.PokemonMatch;
-import com.hiroku.tournaments.enums.EnumTournamentState;
+import com.hiroku.tournaments.enums.TournamentStates;
 import com.hiroku.tournaments.obj.Side;
 import com.pixelmonmod.pixelmon.battles.BattleRegistry;
 import com.pixelmonmod.pixelmon.comm.packetHandlers.battles.EndSpectate;
@@ -47,7 +47,7 @@ public class FlagCommand implements CommandExecutor {
 
 		Player player = (Player) src;
 
-		if (Tournament.instance() == null || Tournament.instance().state != EnumTournamentState.ACTIVE
+		if (Tournament.instance() == null || Tournament.instance().state != TournamentStates.ACTIVE
 				|| (Tournament.instance().getMatch(player.getUniqueId())) == null
 				|| !(Tournament.instance().getMatch(player.getUniqueId()) instanceof PokemonMatch)
 				|| (match = (PokemonMatch) Tournament.instance().getMatch(player.getUniqueId())).battle == null) {

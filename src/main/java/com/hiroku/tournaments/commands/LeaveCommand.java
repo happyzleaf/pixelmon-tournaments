@@ -2,7 +2,7 @@ package com.hiroku.tournaments.commands;
 
 import com.hiroku.tournaments.api.Match;
 import com.hiroku.tournaments.api.Tournament;
-import com.hiroku.tournaments.enums.EnumTournamentState;
+import com.hiroku.tournaments.enums.TournamentStates;
 import com.hiroku.tournaments.obj.Team;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -36,7 +36,7 @@ public class LeaveCommand implements CommandExecutor {
 		}
 
 		Player player = (Player) src;
-		if (Tournament.instance() == null || Tournament.instance().state == EnumTournamentState.CLOSED) {
+		if (Tournament.instance() == null || Tournament.instance().state == TournamentStates.CLOSED) {
 			src.sendMessage(Text.of(TextColors.RED, "There is no tournament to leave"));
 			return CommandResult.empty();
 		}

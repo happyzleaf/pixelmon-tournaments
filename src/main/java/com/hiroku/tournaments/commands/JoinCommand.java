@@ -1,7 +1,7 @@
 package com.hiroku.tournaments.commands;
 
 import com.hiroku.tournaments.api.Tournament;
-import com.hiroku.tournaments.enums.EnumTournamentState;
+import com.hiroku.tournaments.enums.TournamentStates;
 import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.rules.general.BattleType;
 import com.hiroku.tournaments.rules.general.BattleType.TeamsComposition;
@@ -77,11 +77,11 @@ public class JoinCommand implements CommandExecutor {
 		Player player = (Player) src;
 
 		Tournament tournament = Tournament.instance();
-		if (tournament == null || tournament.state == EnumTournamentState.CLOSED) {
+		if (tournament == null || tournament.state == TournamentStates.CLOSED) {
 			src.sendMessage(Text.of(TextColors.RED, "There is no tournament to join."));
 			return CommandResult.empty();
 		}
-		if (tournament.state == EnumTournamentState.ACTIVE) {
+		if (tournament.state == TournamentStates.ACTIVE) {
 			src.sendMessage(Text.of(TextColors.RED, "The tournament is active! You cannot join while it is in motion!"));
 			return CommandResult.empty();
 		}

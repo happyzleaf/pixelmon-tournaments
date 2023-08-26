@@ -2,7 +2,7 @@ package com.hiroku.tournaments.listeners;
 
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.archetypes.pokemon.PokemonMatch;
-import com.hiroku.tournaments.enums.EnumTournamentState;
+import com.hiroku.tournaments.enums.TournamentStates;
 import com.hiroku.tournaments.rules.general.SetParty;
 import com.hiroku.tournaments.util.PokemonUtils;
 import com.pixelmonmod.pixelmon.api.events.ExperienceGainEvent;
@@ -26,7 +26,7 @@ public class ExperienceListener {
 
 		Pokemon pokemon = event.pokemon.getPokemon();
 		PlayerEntity player = pokemon.getOwnerPlayer();
-		if (Tournament.instance() != null && Tournament.instance().state == EnumTournamentState.ACTIVE && player != null) {
+		if (Tournament.instance() != null && Tournament.instance().state == TournamentStates.ACTIVE && player != null) {
 			BattleController bc = BattleRegistry.getBattle(player);
 			if (bc != null && PokemonMatch.getMatch(bc) != null) {
 				event.setExperience(0);

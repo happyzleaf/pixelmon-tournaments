@@ -4,19 +4,11 @@ import com.hiroku.tournaments.Tournaments;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.command.TournamentCommandWrapper;
 import com.hiroku.tournaments.api.events.command.SubcommandEvent;
-import com.hiroku.tournaments.enums.EnumTournamentState;
+import com.hiroku.tournaments.enums.TournamentStates;
 import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.rules.player.RandomPokemon;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.command.CommandSource;
 
 import java.util.*;
 
@@ -26,7 +18,7 @@ import java.util.*;
  * @author Hiroku
  */
 public class TournamentsExecutor implements CommandExecutor {
-	public static CommandSpec getSpec() {
+	public static LiteralArgumentBuilder<CommandSource> getSpec(String base) {
 		HashMap<List<String>, CommandSpec> children = new HashMap<List<String>, CommandSpec>();
 
 		children.put(Collections.singletonList("reload"), ReloadCommand.getSpec());
@@ -75,9 +67,9 @@ public class TournamentsExecutor implements CommandExecutor {
 			if (choice.equals("open")) {
 				if (Tournament.instance() == null)
 					src.sendMessage(Text.of(TextColors.RED, "There is no tournament to open. Try /tournament create"));
-				else if (Tournament.instance().state == EnumTournamentState.OPEN)
+				else if (Tournament.instance().state == TournamentStates.OPEN)
 					src.sendMessage(Text.of(TextColors.RED, "The tournament is already open. Pay attention."));
-				else if (Tournament.instance().state == EnumTournamentState.ACTIVE)
+				else if (Tournament.instance().state == TournamentStates.ACTIVE)
 					src.sendMessage(Text.of(TextColors.RED, "I mean, the tournament is up and running, so dunno what you're trying to do"));
 				else {
 					Tournament.instance().open();
@@ -98,10 +90,10 @@ public class TournamentsExecutor implements CommandExecutor {
 					return CommandResult.success();
 				}
 			} else if (choice.equals("start")) {
-				if (Tournament.instance() == null || Tournament.instance().state == EnumTournamentState.CLOSED) {
+				if (Tournament.instance() == null || Tournament.instance().state == TournamentStates.CLOSED) {
 					src.sendMessage(Text.of(TextColors.RED, "There is no open tournament to start. Have you tried /tournament open?"));
 					return CommandResult.empty();
-				} else if (Tournament.instance().state == EnumTournamentState.ACTIVE) {
+				} else if (Tournament.instance().state == TournamentStates.ACTIVE) {
 					src.sendMessage(Text.of(TextColors.RED, "A tournament is already active. Close it if you want to make a new one."));
 					return CommandResult.empty();
 				}

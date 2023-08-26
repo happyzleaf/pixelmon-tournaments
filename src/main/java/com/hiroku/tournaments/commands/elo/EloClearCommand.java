@@ -1,54 +1,63 @@
 package com.hiroku.tournaments.commands.elo;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
+import com.happyzleaf.tournaments.args.UserArgument;
 import com.hiroku.tournaments.elo.EloStorage;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.hiroku.tournaments.elo.EloTypes;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.server.command.EnumArgument;
 
-public class EloClearCommand implements CommandExecutor {
-	public static CommandSpec getSpec() {
-		return CommandSpec.builder()
-				.description(Text.of("Elo clear command"))
-				.executor(new EloClearCommand())
-				.permission("tournaments.command.admin.elo.clear.base")
-				.arguments(GenericArguments.optionalWeak(GenericArguments.user(Text.of("user"))),
-						GenericArguments.optional(GenericArguments.string(Text.of("elo-type"))))
-				.build();
+public class EloClearCommand implements Command<CommandSource> {
+	public LiteralArgumentBuilder<CommandSource> create() {
+		return Commands.literal("clear")
+//				.description(Text.of("Elo clear command"))
+				.requires(source -> User.hasPermission(source, "tournaments.command.admin.elo.clear.base"))
+				.executes(this)
+				.then(
+						Commands.argument("user", UserArgument.user())
+								.executes(this)
+								.then(
+										Commands.argument("type", EnumArgument.enumArgument(EloTypes.class))
+												.executes(this)
+								)
+				);
 	}
 
 	@Override
-	public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
-		User user = ctx.<User>getOne(Text.of("user")).orElse(null);
-		String eloType = ctx.<String>getOne(Text.of("elo-type")).orElse(null);
+	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
+		User user = UserArgument.getUser(context, "user");
+		EloTypes type = context.getArgument("type", EloTypes.class);
 
-		if (user == null && !(src instanceof Player)) {
-			src.sendMessage(Text.of(TextColors.RED, "You must specify a player!"));
-			return CommandResult.empty();
-		} else if (user == null)
-			user = (User) src;
+		if (user == null) {
+			if (!(context.getSource().getEntity() instanceof PlayerEntity)) {
+				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You must specify a player!"), true);
+				return 0;
+			}
 
-		if (user != src && !src.hasPermission("tournaments.command.admin.elo.clear.other")) {
-			src.sendMessage(Text.of(TextColors.RED, "You don't have permission to clear the Elo of others!"));
-			return CommandResult.empty();
+			user = new User(context.getSource().asPlayer());
 		}
 
-		if (eloType == null)
-			EloStorage.clearElo(user.getUniqueId());
-		else
-			EloStorage.clearElo(user.getUniqueId(), eloType);
+		if (!user.is(context.getSource()) && !User.hasPermission(context.getSource(), "tournaments.command.admin.elo.clear.other")) {
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You don't have permission to clear the Elo of others!"), true);
+			return 0;
+		}
 
-		src.sendMessage(Text.of(TextColors.DARK_GREEN, "Successfully cleared " + (eloType == null ? "" : (eloType + " "))
-				+ "Elo" + (user == src ? "" : (" from " + user.getName()))));
+		if (type == null) {
+			EloStorage.clearElo(user.id);
+		} else {
+			EloStorage.clearElo(user.id, type);
+		}
 
+		context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully cleared " + (type == null ? "" : (type + " ")) + "Elo" + (user.is(context.getSource()) ? "" : (" from " + user.getName()))), true);
 
-		return CommandResult.success();
+		return 1;
 	}
 }

@@ -4,7 +4,9 @@ import com.mojang.authlib.GameProfile;
 import com.pixelmonmod.pixelmon.api.storage.PCStorage;
 import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
 import com.pixelmonmod.pixelmon.api.storage.StorageProxy;
+import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.OpEntry;
 import net.minecraft.util.Util;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
@@ -67,6 +69,18 @@ public class User {
 		return StorageProxy.getPCForPlayer(id);
 	}
 
+	public boolean is(PlayerEntity player) {
+		return player != null && id == player.getUniqueID();
+	}
+
+	public boolean is(GameProfile profile) {
+		return profile != null && id == profile.getId();
+	}
+
+	public boolean is(CommandSource source) {
+		return source != null && source.getEntity() instanceof PlayerEntity && id == ((PlayerEntity) source.getEntity()).getUniqueID();
+	}
+
 	public boolean hasPermission(String node) {
 		return hasPermission(profile, getPlayer(), node);
 	}
@@ -87,5 +101,17 @@ public class User {
 
 	public static boolean hasPermission(PlayerEntity player, String node) {
 		return hasPermission(checkNotNull(player, "player").getGameProfile(), player, node);
+	}
+
+	public static boolean hasPermission(CommandSource source, String node) {
+		if (source.source instanceof MinecraftServer) {
+			return true;
+		}
+
+		if (source.getEntity() instanceof PlayerEntity) {
+			return hasPermission(((PlayerEntity) source.getEntity()).getGameProfile(), (PlayerEntity) source.getEntity(), node);
+		}
+
+		return false;
 	}
 }

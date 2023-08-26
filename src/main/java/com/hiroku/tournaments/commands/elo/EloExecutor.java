@@ -1,69 +1,72 @@
 package com.hiroku.tournaments.commands.elo;
 
+import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.User;
+import com.happyzleaf.tournaments.args.UserArgument;
 import com.hiroku.tournaments.elo.EloStorage;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.command.spec.CommandExecutor;
-import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.format.TextColors;
+import com.hiroku.tournaments.elo.EloTypes;
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.Commands;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraftforge.server.command.EnumArgument;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
-public class EloExecutor implements CommandExecutor {
-	public static CommandSpec getSpec() {
-		HashMap<List<String>, CommandSpec> children = new HashMap<List<String>, CommandSpec>();
-
-		children.put(Arrays.asList("clear", "reset", "wipe"), EloClearCommand.getSpec());
-		children.put(Arrays.asList("clearall", "resetall", "wipeall"), EloClearAllCommand.getSpec());
-		children.put(Arrays.asList("list", "top"), EloListCommand.getSpec());
-
-		return CommandSpec.builder()
-				.description(Text.of("Base Elo command"))
-				.executor(new EloExecutor())
-				.children(children)
-				.permission("tournaments.command.common.elo.base")
-				.arguments(
-						GenericArguments.optionalWeak(GenericArguments.user(Text.of("user"))),
-						GenericArguments.optional(GenericArguments.string(Text.of("elo-type"))))
-				.build();
+public class EloExecutor implements Command<CommandSource> {
+	public LiteralArgumentBuilder<CommandSource> create(String base) {
+		return Commands.literal(base)
+//				.description(Text.of("Base Elo command"))
+				.requires(source -> User.hasPermission(source, "tournaments.command.common.elo.base"))
+				.executes(this)
+				.then(
+						Commands.argument("user", UserArgument.user())
+								// TODO: requires??? (for all children also?)
+								.executes(this)
+								.then(
+										Commands.argument("type", EnumArgument.enumArgument(EloTypes.class))
+												.executes(this)
+								)
+				)
+				.then(new EloClearCommand().create())
+				.then(new EloClearAllCommand().create())
+				.then(new EloListCommand().create());
 	}
 
 	@Override
-	public CommandResult execute(CommandSource src, CommandContext ctx) throws CommandException {
-		User user = ctx.<User>getOne(Text.of("user")).orElse(null);
+	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
+		User user = UserArgument.getUser(context, "user");
+		EloTypes type = context.getArgument("type", EloTypes.class);
 
-		if (user == null && !(src instanceof Player)) {
-			src.sendMessage(Text.of(TextColors.RED, "You must specify a player!"));
-			return CommandResult.empty();
-		} else if (user == null)
-			user = (User) src;
+		if (user == null) {
+			if (!(context.getSource().getEntity() instanceof PlayerEntity)) {
+				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You must specify a player!"), true);
+				return 0;
+			}
 
-		String eloType = ctx.<String>getOne(Text.of("elo-type")).orElse(null);
+			user = new User(context.getSource().asPlayer());
+		}
 
-		if (user != src && !src.hasPermission("landlord.command.common.elo.other")) {
-			src.sendMessage(Text.of(TextColors.RED, "You don't have permission to check the Elo of other players!"));
-			return CommandResult.empty();
+		if (!user.is(context.getSource()) && !User.hasPermission(context.getSource(), "landlord.command.common.elo.other")) {
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You don't have permission to check the Elo of other players!"), true);
+			return 0;
 		}
 
 		int elo;
-		if (eloType == null)
-			elo = EloStorage.getAverageElo(user.getUniqueId());
-		else
-			elo = EloStorage.getElo(user.getUniqueId(), eloType);
+		if (type == null) {
+			elo = EloStorage.getAverageElo(user.id);
+		} else {
+			elo = EloStorage.getElo(user.id, type);
+		}
 
-		if (src == user)
-			src.sendMessage(Text.of(TextColors.GOLD, eloType == null ? "Average" : eloType, " Elo: " + elo));
-		else
-			src.sendMessage(Text.of(TextColors.DARK_AQUA, user.getName() + "'s ", TextColors.GOLD, eloType == null ? "Average" : eloType, " Elo: " + elo));
+		if (user.is(context.getSource())) {
+			context.getSource().sendFeedback(Text.of(TextFormatting.GOLD, type == null ? "Average" : type, " Elo: " + elo), true);
+		} else {
+			context.getSource().sendFeedback(Text.of(TextFormatting.DARK_AQUA, user.getName() + "'s ", TextFormatting.GOLD, type == null ? "Average" : type, " Elo: " + elo), true);
+		}
 
-		return CommandResult.success();
+		return 1;
 	}
 }

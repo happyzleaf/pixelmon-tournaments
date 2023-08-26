@@ -18,7 +18,7 @@ import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.config.TournamentConfig;
 import com.hiroku.tournaments.elo.EloMatch;
 import com.hiroku.tournaments.elo.EloStorage;
-import com.hiroku.tournaments.enums.EnumTournamentState;
+import com.hiroku.tournaments.enums.TournamentStates;
 import com.hiroku.tournaments.obj.Side;
 import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.obj.Zone;
@@ -53,9 +53,9 @@ public class Tournament extends Mode {
 	 */
 	public Class<? extends Match> matchClass = PokemonMatch.class;
 	/**
-	 * The state of the tournament as a member of {@link EnumTournamentState}.
+	 * The state of the tournament as a member of {@link TournamentStates}.
 	 */
-	public EnumTournamentState state = EnumTournamentState.CLOSED;
+	public TournamentStates state = TournamentStates.CLOSED;
 	/**
 	 * The implementation of {@link IMessageProvider} which provides all global messages.
 	 */
@@ -510,7 +510,7 @@ public class Tournament extends Mode {
 	 * Opens the tournament for joining.
 	 */
 	public void open() {
-		this.state = EnumTournamentState.OPEN;
+		this.state = TournamentStates.OPEN;
 		sendMessage(getMessageProvider().getOpenMessage(this));
 		// TODO: textactions onclick
 //		sendMessage(Text.of(TextActions.executeCallback(src -> {
@@ -529,7 +529,7 @@ public class Tournament extends Mode {
 	 */
 	public void close() {
 		sendMessage(getMessageProvider().getClosedMessage(state));
-		this.state = EnumTournamentState.CLOSED;
+		this.state = TournamentStates.CLOSED;
 		this.round = new ArrayList<>();
 		this.teams = new ArrayList<>();
 		this.ignoreList = new ArrayList<>();
@@ -546,7 +546,7 @@ public class Tournament extends Mode {
 			return;
 		getModes().forEach(mode -> mode.onTournamentStart(this));
 		sendMessage(getMessageProvider().getStartMessage(this));
-		this.state = EnumTournamentState.ACTIVE;
+		this.state = TournamentStates.ACTIVE;
 		startRound();
 	}
 
@@ -594,9 +594,9 @@ public class Tournament extends Mode {
 
 	public void showTournament(CommandSource src) {
 		src.sendFeedback(Text.of(TextFormatting.GOLD, "---------- Tournament -----------"), true);
-		if (state == EnumTournamentState.CLOSED)
+		if (state == TournamentStates.CLOSED)
 			src.sendFeedback(Text.of(TextFormatting.GOLD, "State: ", TextFormatting.RED, "CLOSED"), true);
-		else if (state == EnumTournamentState.OPEN)
+		else if (state == TournamentStates.OPEN)
 			src.sendFeedback(Text.of(TextFormatting.GOLD, "State: ", TextFormatting.GREEN, "OPEN"), true);
 		else {
 			src.sendFeedback(Text.of(TextFormatting.GOLD, "State: ", TextFormatting.YELLOW, "ACTIVE"), true);

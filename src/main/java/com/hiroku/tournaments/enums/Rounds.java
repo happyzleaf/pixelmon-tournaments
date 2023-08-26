@@ -5,7 +5,7 @@ package com.hiroku.tournaments.enums;
  *
  * @author Hiroku
  */
-public enum EnumRound {
+public enum Rounds {
 	QUARTER_FINAL,
 	SEMI_FINAL,
 	GRAND_FINAL

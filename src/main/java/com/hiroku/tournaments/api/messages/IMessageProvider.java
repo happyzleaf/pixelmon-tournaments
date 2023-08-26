@@ -8,7 +8,7 @@ import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.api.rule.types.SideRule;
 import com.hiroku.tournaments.api.rule.types.TeamRule;
 import com.hiroku.tournaments.config.TournamentConfig;
-import com.hiroku.tournaments.enums.EnumTournamentState;
+import com.hiroku.tournaments.enums.TournamentStates;
 import com.hiroku.tournaments.obj.MatchStartResult;
 import com.hiroku.tournaments.obj.Side;
 import com.hiroku.tournaments.obj.Team;
@@ -61,8 +61,8 @@ public interface IMessageProvider {
 		return stringToText(TournamentConfig.INSTANCE.startMessage);
 	}
 
-	default Text getClosedMessage(EnumTournamentState state) {
-		if (state == EnumTournamentState.ACTIVE || state == EnumTournamentState.OPEN)
+	default Text getClosedMessage(TournamentStates state) {
+		if (state == TournamentStates.ACTIVE || state == TournamentStates.OPEN)
 			return stringToText(TournamentConfig.INSTANCE.closeMessage);
 		return null;
 	}

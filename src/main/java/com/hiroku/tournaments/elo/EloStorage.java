@@ -18,7 +18,7 @@ public class EloStorage {
 
 	private static EloStorage INSTANCE;
 
-	public HashMap<UUID, HashMap<String, EloData>> data = new HashMap<>();
+	public Map<UUID, Map<EloTypes, EloData>> data = new HashMap<>();
 
 	public static void load() {
 		File file = new File(PATH);
@@ -58,20 +58,19 @@ public class EloStorage {
 		}
 	}
 
-	public static int getElo(UUID uuid, String eloType) {
-		if (eloType == null)
+	public static int getElo(UUID uuid, EloTypes type) {
+		if (type == null) {
 			return getAverageElo(uuid);
+		}
 
-		return INSTANCE.data.getOrDefault(uuid, new HashMap<>()).getOrDefault(eloType.toLowerCase(), new EloData()).getElo();
+		return INSTANCE.data.getOrDefault(uuid, new HashMap<>()).getOrDefault(type, new EloData()).getElo();
 	}
 
-	public static void registerBattle(UUID winner, UUID loser, String eloType, boolean draw) {
-		registerBattle(Collections.singletonList(winner), Collections.singletonList(loser), eloType.toLowerCase(), draw);
+	public static void registerBattle(UUID winner, UUID loser, EloTypes type, boolean draw) {
+		registerBattle(Collections.singletonList(winner), Collections.singletonList(loser), type, draw);
 	}
 
-	public static void registerBattle(List<UUID> winners, List<UUID> losers, String eloType, boolean draw) {
-		eloType = eloType.toLowerCase();
-
+	public static void registerBattle(List<UUID> winners, List<UUID> losers, EloTypes type, boolean draw) {
 		List<UUID> allUUIDs = new ArrayList<>(winners);
 		allUUIDs.addAll(losers);
 
@@ -79,9 +78,9 @@ public class EloStorage {
 		for (UUID uuid : allUUIDs) {
 			if (!INSTANCE.data.containsKey(uuid))
 				INSTANCE.data.put(uuid, new HashMap<>());
-			if (!INSTANCE.data.get(uuid).containsKey(eloType))
-				INSTANCE.data.get(uuid).put(eloType, new EloData());
-			previousElos.put(uuid, INSTANCE.data.get(uuid).get(eloType));
+			if (!INSTANCE.data.get(uuid).containsKey(type))
+				INSTANCE.data.get(uuid).put(type, new EloData());
+			previousElos.put(uuid, INSTANCE.data.get(uuid).get(type));
 		}
 
 		int loserEloAverage = 0;
@@ -111,9 +110,9 @@ public class EloStorage {
 		save();
 	}
 
-	public static void clearElo(UUID uuid, String eloType) {
+	public static void clearElo(UUID uuid, EloTypes type) {
 		if (INSTANCE.data.containsKey(uuid)) {
-			INSTANCE.data.get(uuid).remove(eloType.toLowerCase());
+			INSTANCE.data.get(uuid).remove(type);
 			save();
 		}
 	}
@@ -129,17 +128,18 @@ public class EloStorage {
 		save();
 	}
 
-	public static void clearAllElos(String eloType) {
-		if (eloType == null)
+	public static void clearAllElos(EloTypes type) {
+		if (type == null) {
 			clearAllElos();
-		else {
-			Tournaments.log("Wiping all " + eloType + " Elo ratings");
-			eloType = eloType.toLowerCase();
-			for (Entry<UUID, HashMap<String, EloData>> entry : INSTANCE.data.entrySet())
-				entry.getValue().remove(eloType);
-
-			save();
+			return;
 		}
+
+		Tournaments.log("Wiping all " + type + " Elo ratings");
+		for (Entry<UUID, Map<EloTypes, EloData>> entry : INSTANCE.data.entrySet()) {
+			entry.getValue().remove(type);
+		}
+
+		save();
 	}
 
 	public static int getAverageElo(UUID uuid) {
@@ -154,16 +154,14 @@ public class EloStorage {
 		return Math.round(1f * total / totalTypes);
 	}
 
-	public static List<UUID> getTopXElo(int x, String eloType) {
-		if (eloType == null)
+	public static List<UUID> getTopXElo(int x, EloTypes type) {
+		if (type == null)
 			return getTopXAverageElo(x);
 
-		eloType = eloType.toLowerCase();
-
 		HashMap<UUID, Integer> values = new HashMap<>();
-		for (Entry<UUID, HashMap<String, EloData>> entry : INSTANCE.data.entrySet())
-			if (entry.getValue().containsKey(eloType))
-				values.put(entry.getKey(), entry.getValue().get(eloType).getElo());
+		for (Entry<UUID, Map<EloTypes, EloData>> entry : INSTANCE.data.entrySet())
+			if (entry.getValue().containsKey(type))
+				values.put(entry.getKey(), entry.getValue().get(type).getElo());
 		return getTopX(x, values);
 	}
 

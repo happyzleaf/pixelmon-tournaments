@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.enums;
 
-public enum EnumTournamentState {
+public enum TournamentStates {
 	CLOSED,
 	OPEN,
 	ACTIVE,
