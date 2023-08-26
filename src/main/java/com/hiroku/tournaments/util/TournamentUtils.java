@@ -20,6 +20,7 @@ import org.spongepowered.api.world.World;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -70,7 +71,7 @@ public class TournamentUtils {
 	 * @param deciders - The list of {@link DeciderRule}s that must be sorted. This must have at least 2 elements.
 	 * @return - The sorted list where the first element has the highest weight and the last has the lowest.
 	 */
-	public static ArrayList<DeciderRule> getOrderedDeciderRules(ArrayList<DeciderRule> deciders) {
+	public static List<DeciderRule> getOrderedDeciderRules(List<DeciderRule> deciders) {
 		if (deciders == null || deciders.size() < 2)
 			return deciders;
 
@@ -104,8 +105,8 @@ public class TournamentUtils {
 		if (tournament.teams.isEmpty())
 			builder.append(Text.of(TextColors.GRAY, "No teams."));
 		else {
-			ArrayList<Team> liveTeams = new ArrayList<>();
-			ArrayList<Team> deadTeams = new ArrayList<>();
+			List<Team> liveTeams = new ArrayList<>();
+			List<Team> deadTeams = new ArrayList<>();
 
 			for (Team team : tournament.teams) {
 				if (team.alive)
@@ -114,7 +115,7 @@ public class TournamentUtils {
 					deadTeams.add(team);
 			}
 
-			ArrayList<Team> orderedTeams = new ArrayList<>(liveTeams);
+			List<Team> orderedTeams = new ArrayList<>(liveTeams);
 			orderedTeams.addAll(deadTeams);
 
 			builder.append(Text.of(orderedTeams.get(0).alive ? Text.of(TextColors.GREEN, "*") : "", orderedTeams.get(0).getDisplayText()));
@@ -156,7 +157,7 @@ public class TournamentUtils {
 
 		Text.Builder builder = Text.builder();
 		builder.append(Text.of(TextColors.GOLD, TextStyles.UNDERLINE, "Rewards:\n"));
-		ArrayList<RewardBase> visibleRewards = new ArrayList<>(tournament.rewards);
+		List<RewardBase> visibleRewards = new ArrayList<>(tournament.rewards);
 		visibleRewards.removeIf(reward -> !reward.canShow(player));
 		if (visibleRewards.isEmpty())
 			builder.append(Text.of(TextColors.GRAY, "No rewards in tournament"));

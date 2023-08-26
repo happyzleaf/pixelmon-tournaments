@@ -17,10 +17,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.NoSuchElementException;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Rule demanding that players not heal (or by extension, add to their party) their Pokémon between battles. Healing defaults to being
@@ -36,7 +33,7 @@ public class Healing extends PlayerRule {
 	/**
 	 * A mapping from player UUID to a list of the previously saved states of a player's party. This is updated after each battle.
 	 */
-	public HashMap<UUID, ArrayList<PokemonState>> states = new HashMap<>();
+	public HashMap<UUID, List<PokemonState>> states = new HashMap<>();
 
 	public Healing(String arg) throws Exception {
 		super(arg);
@@ -49,7 +46,7 @@ public class Healing extends PlayerRule {
 		if (healingAllowed)
 			return true;
 
-		ArrayList<PokemonState> playerStates = states.get(player.getUniqueId());
+		List<PokemonState> playerStates = states.get(player.getUniqueId());
 		if (playerStates != null) {
 			for (PokemonState state : playerStates) {
 				Pokemon pokemon = storage.find(state.id);
@@ -80,7 +77,7 @@ public class Healing extends PlayerRule {
 				for (User user : team.users) {
 					try {
 						PlayerPartyStorage storage = Pixelmon.storageManager.getParty(user.getUniqueId());
-						ArrayList<PokemonState> playerStates = new ArrayList<>();
+						List<PokemonState> playerStates = new ArrayList<>();
 						for (Pokemon pokemon : storage.getTeam())
 							playerStates.add(new PokemonState(pokemon));
 						this.states.put(user.getUniqueId(), playerStates);

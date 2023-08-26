@@ -2,7 +2,6 @@ package com.hiroku.tournaments.api;
 
 import com.google.common.collect.ImmutableList;
 import com.happyzleaf.tournaments.Scheduler;
-import com.happyzleaf.tournaments.Serializers;
 import com.happyzleaf.tournaments.Text;
 import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.Tournaments;
@@ -62,7 +61,7 @@ public class Tournament extends Mode {
 	/**
 	 * The prefix for all global tournament messages.
 	 */
-	private Text prefix = Serializers.FORMATTING_CODE.deserialize(TournamentConfig.INSTANCE.prefix);
+	private Text prefix = Text.deserialize(TournamentConfig.INSTANCE.prefix);
 
 	/**
 	 * The {@link RuleSet} specification of all {@link RuleBase}s relevant to this tournament.
@@ -445,7 +444,7 @@ public class Tournament extends Mode {
 	 * which renders the tournament complete and ready for winners.
 	 */
 	public List<Match> createMatches() {
-		List<Match> matches = new ArrayList<>();
+		List<Match> matches;
 
 		// Check the other modes first
 		List<Mode> modes = this.getModes();
@@ -486,7 +485,7 @@ public class Tournament extends Mode {
 	 * @return - true if there are still waiting battles in this round. False if not.
 	 */
 	public boolean checkForMoreBattles() {
-		ArrayList<Match> waitingMatches = new ArrayList<>(round);
+		List<Match> waitingMatches = new ArrayList<>(round);
 		waitingMatches.removeIf(match -> match.matchActive);
 
 		boolean matchExists = waitingMatches.size() > 0;
@@ -552,11 +551,11 @@ public class Tournament extends Mode {
 	 *
 	 * @param winners - The winners of the tournament. May be empty.
 	 */
-	public void end(ArrayList<Team> winners) {
+	public void end(List<Team> winners) {
 		if (winners == null)
 			winners = new ArrayList<>();
 
-		ArrayList<User> winnerUsers = new ArrayList<User>();
+		List<User> winnerUsers = new ArrayList<>();
 		for (Team team : winners)
 			for (User user : team.users)
 				winnerUsers.add(user);
@@ -602,7 +601,7 @@ public class Tournament extends Mode {
 				{
 					Player player = src instanceof Player ? (Player) src : null;
 
-					ArrayList<Text> contents = new ArrayList<Text>();
+					List<Text> contents = new ArrayList<>();
 					for (RuleBase rule : getRuleSet().rules)
 						if (rule.canShow(player))
 							contents.add(Text.of(rule.getDisplayText()));
@@ -621,7 +620,7 @@ public class Tournament extends Mode {
 					TextActions.executeCallback(dummySrc ->
 					{
 						boolean clause = false;
-						ArrayList<Text> contents = new ArrayList<Text>();
+						List<Text> contents = new ArrayList<>();
 						for (String line : getRuleSet().br.exportText().split("\n")) {
 							contents.add(Text.of((clause ? "- " : "") + line));
 
@@ -643,7 +642,7 @@ public class Tournament extends Mode {
 				{
 					Player player = src instanceof Player ? (Player) src : null;
 
-					ArrayList<Text> contents = new ArrayList<Text>();
+					List<Text> contents = new ArrayList<>();
 					for (RewardBase reward : rewards)
 						if (reward.canShow(player))
 							contents.add(Text.of(reward.getDisplayText()));
@@ -660,10 +659,10 @@ public class Tournament extends Mode {
 				TextActions.showText(TournamentUtils.showTeams(src)),
 				TextActions.executeCallback(dummySrc ->
 				{
-					ArrayList<Text> contents = new ArrayList<Text>();
+					List<Text> contents = new ArrayList<>();
 
-					ArrayList<Team> liveTeams = new ArrayList<>();
-					ArrayList<Team> deadTeams = new ArrayList<>();
+					List<Team> liveTeams = new ArrayList<>();
+					List<Team> deadTeams = new ArrayList<>();
 
 					for (Team team : teams) {
 						if (team.alive)
@@ -672,7 +671,7 @@ public class Tournament extends Mode {
 							deadTeams.add(team);
 					}
 
-					ArrayList<Team> orderedTeams = new ArrayList<>();
+					List<Team> orderedTeams = new ArrayList<>();
 					for (Team team : liveTeams)
 						orderedTeams.add(team);
 					for (Team team : deadTeams)
@@ -699,7 +698,7 @@ public class Tournament extends Mode {
 				TextActions.showText(TournamentUtils.showMatches(src)),
 				TextActions.executeCallback(dummySrc ->
 				{
-					ArrayList<Text> contents = new ArrayList<Text>();
+					List<Text> contents = new ArrayList<>();
 					for (Match match : round)
 						contents.add(Text.of(match.getStateText(), match.getDisplayText()));
 					PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
@@ -717,7 +716,7 @@ public class Tournament extends Mode {
 	}
 
 	public ImmutableList<Mode> getModes() {
-		ArrayList<Mode> modes = new ArrayList<>();
+		List<Mode> modes = new ArrayList<>();
 		modes.addAll(rewards);
 		modes.addAll(getRuleSet().rules);
 		modes.addAll(extraModes);

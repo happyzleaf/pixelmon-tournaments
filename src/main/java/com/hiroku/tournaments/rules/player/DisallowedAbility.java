@@ -10,6 +10,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -21,7 +22,7 @@ public class DisallowedAbility extends PlayerRule {
 	/**
 	 * The list of all abilities (represented by their classes) that are not allowed.
 	 */
-	public ArrayList<String> abilities = new ArrayList<>();
+	public List<String> abilities = new ArrayList<>();
 
 	public DisallowedAbility(String arg) throws Exception {
 		super(arg);

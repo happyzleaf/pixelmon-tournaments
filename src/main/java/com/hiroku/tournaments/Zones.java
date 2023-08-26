@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 /**
@@ -32,16 +33,16 @@ public class Zones {
 	public static Zones INSTANCE = new Zones();
 	private static final HashMap<Zone, Match> zoneMatches = new HashMap<>();
 
-	private final ArrayList<Zone> zones = new ArrayList<>();
+	private final List<Zone> zones = new ArrayList<>();
 
 	public LocationWrapper leaveZone = null;
 
-	public ArrayList<Zone> getZones() {
+	public List<Zone> getZones() {
 		return zones;
 	}
 
 	public Zone getFreeZone() {
-		ArrayList<Zone> engagedZones = this.getEngagedZones();
+		List<Zone> engagedZones = this.getEngagedZones();
 		if (engagedZones.isEmpty())
 			engagedZones = zones;
 		for (Zone zone : engagedZones)
@@ -68,8 +69,8 @@ public class Zones {
 		return null;
 	}
 
-	public ArrayList<Zone> getEngagedZones() {
-		ArrayList<Zone> engagedZones = new ArrayList<>();
+	public List<Zone> getEngagedZones() {
+		List<Zone> engagedZones = new ArrayList<>();
 		for (Zone zone : zones)
 			if (zone.engaged)
 				engagedZones.add(zone);

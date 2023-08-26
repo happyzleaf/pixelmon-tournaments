@@ -1,15 +1,17 @@
 package com.hiroku.tournaments.api.tiers;
 
 import com.hiroku.tournaments.Tournaments;
+import com.pixelmonmod.api.pokemon.PokemonSpecification;
+import com.pixelmonmod.api.pokemon.PokemonSpecificationProxy;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
-import com.pixelmonmod.pixelmon.api.pokemon.PokemonSpec;
-import com.pixelmonmod.pixelmon.util.helpers.CollectionHelper;
+import com.pixelmonmod.pixelmon.api.util.helpers.CollectionHelper;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -33,11 +35,11 @@ public class TierLoader {
 		File dir = new File(PATH);
 		if (!dir.exists())
 			dir.mkdir();
-		ArrayList<File> tierFiles = new ArrayList<>();
+		List<File> tierFiles = new ArrayList<>();
 		getFiles(PATH, tierFiles);
 		for (File file : tierFiles) {
 			try {
-				final ArrayList<PokemonSpec> pokemon = new ArrayList<PokemonSpec>();
+				final List<PokemonSpecification> pokemon = new ArrayList<>();
 				String key = file.getName().substring(0, file.getName().indexOf("."));
 				String displayName = key;
 				Predicate<Pokemon> condition = p -> CollectionHelper.find(pokemon, spec -> spec.matches(p)) != null;
@@ -51,7 +53,7 @@ public class TierLoader {
 						displayName = line.split("=")[1].trim();
 					else {
 						line = line.replaceAll(",", "").trim();
-						pokemon.add(new PokemonSpec(line.split(" ")));
+						pokemon.add(PokemonSpecificationProxy.create(line.split(" ")));
 					}
 				}
 
@@ -74,7 +76,7 @@ public class TierLoader {
 	 * @param files - The latest list of non-directory {@link File}s that
 	 *              are recognized as tier files.
 	 */
-	public static void getFiles(String dir, final ArrayList<File> files) {
+	public static void getFiles(String dir, List<File> files) {
 		File file = new File(dir);
 		for (String name : file.list()) {
 			File subFile = new File(dir + "/" + name);

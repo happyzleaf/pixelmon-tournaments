@@ -20,7 +20,7 @@ public class CommandReward extends RewardBase {
 
 		if (arg.contains("text:")) {
 			String subArg = arg.substring(arg.indexOf("text:") + 5).split(";")[0];
-			displayText = TextSerializers.FORMATTING_CODE.deserialize(subArg);
+			displayText = Text.deserialize(subArg);
 		}
 		if (arg.contains("cmd:"))
 			command = arg.substring(arg.indexOf("cmd:") + 4).split(";")[0];
@@ -38,7 +38,7 @@ public class CommandReward extends RewardBase {
 
 	@Override
 	public String getSerializationString() {
-		return "command:text:" + TextSerializers.FORMATTING_CODE.serialize(displayText) + ";cmd:" + command;
+		return "command:text:" + displayText.serialize() + ";cmd:" + command;
 	}
 
 	@Override

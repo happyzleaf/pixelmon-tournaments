@@ -1,6 +1,5 @@
 package com.hiroku.tournaments.api.messages;
 
-import com.happyzleaf.tournaments.Serializers;
 import com.happyzleaf.tournaments.Text;
 import com.hiroku.tournaments.api.Match;
 import com.hiroku.tournaments.api.Tournament;
@@ -35,11 +34,11 @@ public interface IMessageProvider {
 	}
 
 	default String textToString(Text text) {
-		return Serializers.FORMATTING_CODE.serialize(text);
+		return text.serialize();
 	}
 
 	default Text stringToText(String string) {
-		return Serializers.FORMATTING_CODE.deserialize(string);
+		return Text.deserialize(string);
 	}
 
 	default Text getJoinMessage(Team team, boolean forced) {

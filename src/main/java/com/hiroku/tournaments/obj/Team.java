@@ -96,8 +96,8 @@ public class Team {
 	/**
 	 * Gets the UUIDs of all the members of the team.
 	 */
-	public ArrayList<UUID> getUUIDs() {
-		ArrayList<UUID> uuids = new ArrayList<>();
+	public List<UUID> getUUIDs() {
+		List<UUID> uuids = new ArrayList<>();
 		for (User user : users) {
 			uuids.add(user.id);
 		}

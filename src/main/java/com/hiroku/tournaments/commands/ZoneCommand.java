@@ -20,6 +20,7 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ZoneCommand implements CommandExecutor {
 	public static CommandSpec getSpec() {
@@ -95,7 +96,7 @@ public class ZoneCommand implements CommandExecutor {
 	}
 
 	public static void showZonesSummary(CommandSource src) {
-		ArrayList<Text> contents = new ArrayList<Text>();
+		List<Text> contents = new ArrayList<>();
 		for (int i = 0; i < Zones.INSTANCE.getZones().size(); i++) {
 			final int fi = i + 1;
 			Zone zone = Zones.INSTANCE.getZones().get(i);

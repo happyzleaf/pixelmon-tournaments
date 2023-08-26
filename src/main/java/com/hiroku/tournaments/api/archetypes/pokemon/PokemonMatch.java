@@ -169,8 +169,8 @@ public class PokemonMatch extends Match {
 
 			int neededPokemon = composition.neededPokemon;
 
-			ArrayList<BattleParticipant> side1Participants = new ArrayList<>();
-			ArrayList<BattleParticipant> side2Participants = new ArrayList<>();
+			List<BattleParticipant> side1Participants = new ArrayList<>();
+			List<BattleParticipant> side2Participants = new ArrayList<>();
 
 			BattleRules br = new BattleRules(Tournament.instance().getRuleSet().br.exportText());
 			br.set(BattleRuleRegistry.BATTLE_TYPE, composition == TeamsComposition.SINGLE ? com.pixelmonmod.pixelmon.api.battles.BattleType.SINGLE : com.pixelmonmod.pixelmon.api.battles.BattleType.DOUBLE);

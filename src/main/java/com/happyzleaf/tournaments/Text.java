@@ -26,12 +26,20 @@ public class Text extends StringTextComponent {
 		return getText();
 	}
 
+	public String serialize() {
+		return getText().replace("\u00A7", "&");
+	}
+
 	public static Builder builder() {
 		return new Builder();
 	}
 
 	public static Text of(Object... texts) {
 		return new Text(texts);
+	}
+
+	public static Text deserialize(String text) {
+		return new Text(text.replace("&", "\u00A7"));
 	}
 
 	public static class Builder {

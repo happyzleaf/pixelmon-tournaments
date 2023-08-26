@@ -11,6 +11,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Rule restricting what kind of Pokémon can be used.
@@ -21,7 +22,7 @@ public class Tiers extends PlayerRule {
 	/**
 	 * The list of {@link Tier} that define the Pokémon allowed in the tournament.
 	 */
-	public ArrayList<Tier> tiers = new ArrayList<>();
+	public List<Tier> tiers = new ArrayList<>();
 
 	public Tiers(String arg) throws Exception {
 		super(arg);
@@ -92,7 +93,7 @@ public class Tiers extends PlayerRule {
 	}
 
 	public void synchronize(RandomPokemon other) {
-		ArrayList<Tier> combined = new ArrayList<>();
+		List<Tier> combined = new ArrayList<>();
 		for (Tier tier : other.tiers)
 			if (!combined.contains(tier))
 				combined.add(tier);

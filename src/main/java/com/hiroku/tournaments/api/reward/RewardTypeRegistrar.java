@@ -38,7 +38,7 @@ public final class RewardTypeRegistrar {
 		if (duplicate != null)
 			rewardTypes.remove(duplicate);
 
-		ArrayList<String> sanitizedKeys = new ArrayList<>();
+		List<String> sanitizedKeys = new ArrayList<>();
 		for (String key : keys)
 			sanitizedKeys.add(key.toLowerCase());
 

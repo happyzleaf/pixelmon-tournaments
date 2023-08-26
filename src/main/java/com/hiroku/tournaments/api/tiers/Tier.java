@@ -1,6 +1,5 @@
 package com.hiroku.tournaments.api.tiers;
 
-import com.pixelmonmod.pixelmon.Pixelmon;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 import com.pixelmonmod.pixelmon.api.pokemon.PokemonFactory;
 import com.pixelmonmod.pixelmon.api.pokemon.species.Species;
@@ -70,7 +69,7 @@ public class Tier {
 	/**
 	 * Little cup - not-evolved, but able to evolve. e.g. Bulbasaur is acceptable, Pachirisu is not
 	 */
-	public static final Tier LC = new Tier("LC", "Little Cup", p -> !p.getForm().getEvolutions().isEmpty() && p.getForm().preEvolutions.length == 0);
+	public static final Tier LC = new Tier("LC", "Little Cup", p -> !p.getForm().getEvolutions().isEmpty() && p.getForm().getPreEvolutions().size() == 0);
 	/**
 	 * Has strictly 1 type
 	 */
@@ -81,7 +80,7 @@ public class Tier {
 	public static final Tier DUALTYPE = new Tier("DUALTYPE", "Dualtype", p -> p.getForm().getTypes().size() == 2);
 	//NU, RU, UU, OU, UBER - Waiting on lists of each
 
-	public static final ArrayList<Tier> tiers = new ArrayList<>();
+	public static final List<Tier> tiers = new ArrayList<>();
 
 	public static void loadDefaultTiers() {
 		tiers.add(NO_LEGENDARIES);

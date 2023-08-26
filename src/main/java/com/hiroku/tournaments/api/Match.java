@@ -1,7 +1,6 @@
 package com.hiroku.tournaments.api;
 
 import com.happyzleaf.tournaments.Text;
-import com.hiroku.tournaments.obj.MatchStartResult;
 import com.hiroku.tournaments.obj.Side;
 import com.hiroku.tournaments.obj.Team;
 import net.minecraft.util.text.TextFormatting;
@@ -32,9 +31,7 @@ public abstract class Match {
 	public abstract void forceEnd();
 
 	/**
-	 * Attempts to start a match and returns the result.
-	 *
-	 * @return - A {@link MatchStartResult} representing the result of the battle start. This will be a subclass of MatchStartResult.
+	 * Attempts to start a match.
 	 */
 	public void start(Tournament tournament) {
 		start(tournament, false);

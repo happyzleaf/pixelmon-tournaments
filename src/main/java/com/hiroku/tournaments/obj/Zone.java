@@ -1,6 +1,7 @@
 package com.hiroku.tournaments.obj;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.Zones;
 import com.hiroku.tournaments.api.Match;
 import org.spongepowered.api.entity.living.player.Player;
@@ -12,6 +13,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Zone {
 	public int uid = -1;
@@ -31,7 +33,7 @@ public class Zone {
 
 	public void sendPlayersToZone(Match match) {
 		for (int side = 0; side < 2; side++) {
-			ArrayList<User> sideUsers = new ArrayList<User>();
+			List<User> sideUsers = new ArrayList<>();
 
 			for (Team team : match.sides[side].teams)
 				sideUsers.addAll(team.users);

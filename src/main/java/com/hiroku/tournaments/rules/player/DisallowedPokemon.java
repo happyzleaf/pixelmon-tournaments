@@ -12,10 +12,11 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class DisallowedPokemon extends PlayerRule {
-	public ArrayList<String> pokemons = new ArrayList<>();
-	public ArrayList<Tier> tiers = new ArrayList<>();
+	public List<String> pokemons = new ArrayList<>();
+	public List<Tier> tiers = new ArrayList<>();
 
 	public DisallowedPokemon(String arg) throws Exception {
 		super(arg);

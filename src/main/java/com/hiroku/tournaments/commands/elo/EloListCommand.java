@@ -46,7 +46,7 @@ public class EloListCommand implements CommandExecutor {
 			return CommandResult.empty();
 		}
 
-		ArrayList<Text> contents = new ArrayList<>();
+		List<Text> contents = new ArrayList<>();
 		for (UUID uuid : top) {
 			String name = uss.get(uuid).get().getName();
 			contents.add(Text.of(TextColors.GOLD, EloStorage.getElo(uuid, eloType), ": ", TextColors.DARK_AQUA, name));

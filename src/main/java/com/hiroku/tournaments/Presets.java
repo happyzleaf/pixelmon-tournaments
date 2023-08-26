@@ -8,12 +8,12 @@ import com.hiroku.tournaments.api.rule.RuleSet;
 import com.hiroku.tournaments.api.rule.RuleTypeRegistrar;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.obj.Zone;
-import com.pixelmonmod.pixelmon.battles.rules.BattleRules;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Static manager of all the rule+reward+zone presets. These are located: ./config/tournaments/presets/*.txt
@@ -79,7 +79,9 @@ public class Presets {
 
 		Preset standard = new Preset(
 				new RuleSet("legendaries:false", "partycount:3", "healthtotal:2", "battletype:single", "levelmax:50"),
-				new ArrayList<>(), new ArrayList<>());
+				new ArrayList<>(),
+				new ArrayList<>()
+		);
 
 		presets.put("Standard", standard);
 		Tournaments.log("Loaded default preset: Standard");
@@ -96,7 +98,7 @@ public class Presets {
 
 					BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(new File(dir, fileName)), StandardCharsets.UTF_8));
 
-					ArrayList<String> linesList = new ArrayList<>();
+					List<String> linesList = new ArrayList<>();
 					String s = null;
 					while ((s = br.readLine()) != null) {
 						if (s.trim().startsWith("//") || s.trim().equals("") || s.trim().equals("{") || s.trim().equals("}"))
@@ -112,8 +114,8 @@ public class Presets {
 					else {
 						int ruleRewardZone = -1;
 						RuleSet ruleset = new RuleSet();
-						ArrayList<RewardBase> rewards = new ArrayList<>();
-						ArrayList<Zone> zones = new ArrayList<>();
+						List<RewardBase> rewards = new ArrayList<>();
+						List<Zone> zones = new ArrayList<>();
 						BattleRules battleRules = new BattleRules();
 
 						for (String line : linesList) {

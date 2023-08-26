@@ -4,6 +4,7 @@ import com.happyzleaf.tournaments.Text;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -67,8 +68,8 @@ public class Side {
 	/**
 	 * Gets the UUIDs of every member of all teams on this side.
 	 */
-	public ArrayList<UUID> getUUIDs() {
-		ArrayList<UUID> uuids = new ArrayList<>();
+	public List<UUID> getUUIDs() {
+		List<UUID> uuids = new ArrayList<>();
 		for (Team team : teams)
 			uuids.addAll(team.getUUIDs());
 		return uuids;

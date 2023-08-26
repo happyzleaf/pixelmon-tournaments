@@ -4,16 +4,17 @@ import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.rules.general.EloType;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class EloMatch {
-	public ArrayList<UUID> winners = new ArrayList<>();
-	public ArrayList<UUID> losers = new ArrayList<>();
+	public final List<UUID> winners = new ArrayList<>();
+	public final List<UUID> losers = new ArrayList<>();
 	public boolean draw = false;
 
-	public EloMatch(ArrayList<UUID> winners, ArrayList<UUID> losers, boolean draw) {
-		this.winners = winners;
-		this.losers = losers;
+	public EloMatch(List<UUID> winners, List<UUID> losers, boolean draw) {
+		this.winners.addAll(winners);
+		this.losers.addAll(losers);
 		this.draw = draw;
 	}
 

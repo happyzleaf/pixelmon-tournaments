@@ -20,6 +20,7 @@ import org.spongepowered.api.util.Tristate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class RewardsCommand implements CommandExecutor {
 	public static CommandSpec getSpec() {
@@ -49,7 +50,7 @@ public class RewardsCommand implements CommandExecutor {
 		if (!args.hasAny(Text.of("option"))) {
 			Player player = src instanceof Player ? (Player) src : null;
 
-			ArrayList<Text> contents = new ArrayList<Text>();
+			List<Text> contents = new ArrayList<>();
 			for (RewardBase reward : Tournament.instance().rewards)
 				if (reward.canShow(player))
 					contents.add(Text.of(reward.getDisplayText()));

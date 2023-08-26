@@ -1,6 +1,5 @@
 package com.hiroku.tournaments.elo;
 
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.hiroku.tournaments.Tournaments;
@@ -8,11 +7,8 @@ import com.hiroku.tournaments.Tournaments;
 import java.io.File;
 import java.io.FileReader;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 public class EloStorage {
 	public static final String PATH = "data/tournaments/elo.json";
@@ -70,13 +66,13 @@ public class EloStorage {
 	}
 
 	public static void registerBattle(UUID winner, UUID loser, String eloType, boolean draw) {
-		registerBattle(Lists.newArrayList(winner), Lists.newArrayList(loser), eloType.toLowerCase(), draw);
+		registerBattle(Collections.singletonList(winner), Collections.singletonList(loser), eloType.toLowerCase(), draw);
 	}
 
-	public static void registerBattle(ArrayList<UUID> winners, ArrayList<UUID> losers, String eloType, boolean draw) {
+	public static void registerBattle(List<UUID> winners, List<UUID> losers, String eloType, boolean draw) {
 		eloType = eloType.toLowerCase();
 
-		ArrayList<UUID> allUUIDs = new ArrayList<>(winners);
+		List<UUID> allUUIDs = new ArrayList<>(winners);
 		allUUIDs.addAll(losers);
 
 		HashMap<UUID, EloData> previousElos = new HashMap<>();
@@ -179,8 +175,8 @@ public class EloStorage {
 	}
 
 	private static List<UUID> getTopX(int x, HashMap<UUID, Integer> values) {
-		ArrayList<UUID> leaderUUIDs = new ArrayList<>();
-		ArrayList<Integer> leaderValues = new ArrayList<>();
+		List<UUID> leaderUUIDs = new ArrayList<>();
+		List<Integer> leaderValues = new ArrayList<>();
 
 		for (Entry<UUID, Integer> entry : values.entrySet()) {
 			if (leaderUUIDs.size() < x) {
@@ -196,7 +192,7 @@ public class EloStorage {
 			}
 		}
 
-		ArrayList<UUID> finalLeaderUUIDs = new ArrayList<>();
+		List<UUID> finalLeaderUUIDs = new ArrayList<>();
 
 		while (!leaderUUIDs.isEmpty()) {
 			int minIndex = minimumIndex(leaderValues);
@@ -207,7 +203,7 @@ public class EloStorage {
 		return finalLeaderUUIDs;
 	}
 
-	private static int minimumIndex(ArrayList<Integer> values) {
+	private static int minimumIndex(List<Integer> values) {
 		int minIndex = -1;
 		int minValue = Integer.MAX_VALUE;
 

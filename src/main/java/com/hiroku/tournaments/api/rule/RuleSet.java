@@ -34,7 +34,7 @@ public class RuleSet {
 	/**
 	 * The rules contained within this {@link RuleSet}.
 	 */
-	public final ArrayList<RuleBase> rules = new ArrayList<>();
+	public final List<RuleBase> rules = new ArrayList<>();
 
 	/**
 	 * Creates a RuleSet based off an array of various rule arguments. E.g. {"levelmin:50" , "levelmax:100"}
@@ -109,7 +109,7 @@ public class RuleSet {
 	 * @return - A list of all the {@link RuleBase}s of this class in the set. This list may be empty.
 	 */
 	public <T extends RuleBase> List<T> getRules(Class<T> clazz) {
-		ArrayList<T> matchingRules = new ArrayList<>();
+		List<T> matchingRules = new ArrayList<>();
 		for (RuleBase rule : rules) {
 			try {
 				matchingRules.add(clazz.cast(rule));
@@ -140,7 +140,7 @@ public class RuleSet {
 	 * @param ruleType - The type of rules to remove.
 	 */
 	public void removeRuleType(Class<? extends RuleBase> ruleType) {
-		ArrayList<RuleBase> matchingRules = new ArrayList<>();
+		List<RuleBase> matchingRules = new ArrayList<>();
 		for (RuleBase rule : rules) {
 			try {
 				ruleType.cast(rule);
@@ -208,8 +208,8 @@ public class RuleSet {
 	 *
 	 * @return - A list of {@link DeciderRule}s that apply to draws.
 	 */
-	public ArrayList<DeciderRule> getDrawDeciderRules() {
-		ArrayList<DeciderRule> deciders = new ArrayList<>();
+	public List<DeciderRule> getDrawDeciderRules() {
+		List<DeciderRule> deciders = new ArrayList<>();
 		for (DeciderRule rule : this.getRules(DeciderRule.class))
 			if (rule.applyToDraws())
 				deciders.add(rule);
@@ -222,8 +222,8 @@ public class RuleSet {
 	 *
 	 * @return - A list of {@link DeciderRule}s that apply to crash/error battles in descending order of weight.
 	 */
-	public ArrayList<DeciderRule> getCrashDeciderRules() {
-		ArrayList<DeciderRule> deciders = new ArrayList<>();
+	public List<DeciderRule> getCrashDeciderRules() {
+		List<DeciderRule> deciders = new ArrayList<>();
 		for (DeciderRule rule : this.getRules(DeciderRule.class))
 			if (rule.applyToCrashes())
 				deciders.add(rule);
@@ -263,7 +263,7 @@ public class RuleSet {
 		//       descending weight crash deciding rules, 
 		//       player/team/side rules.
 
-		ArrayList<Text> contents = new ArrayList<Text>();
+		List<Text> contents = new ArrayList<>();
 
 		PlayerEntity player = src.getEntity() instanceof PlayerEntity ? src.asPlayer() : null;
 
@@ -281,6 +281,7 @@ public class RuleSet {
 				contents.add(rule.getDisplayText());
 
 		// TODO: omg paginations........ I might do a gui here instead.
+		//       or if I manage to implement TextSerializers onClick I might also do this
 //		PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
 //		pagination.contents(contents)
 //				.padding(Text.of(TextColors.GOLD, "-"))

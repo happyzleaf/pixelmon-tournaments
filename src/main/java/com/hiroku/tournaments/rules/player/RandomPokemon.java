@@ -35,10 +35,10 @@ import java.util.concurrent.Executors;
 public class RandomPokemon extends PlayerRule {
 	public static Executor removeRentalExecutor = Executors.newSingleThreadExecutor();
 
-	public ArrayList<EnumSpecies> globalPool = new ArrayList<EnumSpecies>();
+	public List<EnumSpecies> globalPool = new ArrayList<>();
 	public HashMap<UUID, Integer> rerollsRemaining = new HashMap<>();
 
-	public ArrayList<Tier> tiers = new ArrayList<>();
+	public List<Tier> tiers = new ArrayList<>();
 	public PokemonSpec spec = new PokemonSpec();
 	public boolean rentalOnly = false;
 	public boolean localDuplicates = false;
@@ -230,7 +230,7 @@ public class RandomPokemon extends PlayerRule {
 
 		removeRentalExecutor.execute(() ->
 		{
-			ArrayList<Pokemon> toRemove = new ArrayList<>();
+			List<Pokemon> toRemove = new ArrayList<>();
 			for (Pokemon pokemon : pcPokemon)
 				if (pokemon != null && rental.matches(pokemon))
 					toRemove.add(pokemon);
@@ -269,7 +269,7 @@ public class RandomPokemon extends PlayerRule {
 	}
 
 	public void giveRandomPokemon(UUID uuid) {
-		ArrayList<EnumSpecies> pool = new ArrayList<EnumSpecies>();
+		List<EnumSpecies> pool = new ArrayList<>();
 		for (EnumSpecies p : EnumSpecies.values())
 			if (p != EnumSpecies.Meltan && p != EnumSpecies.Melmetal)
 				pool.add(p);
