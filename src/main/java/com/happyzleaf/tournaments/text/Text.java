@@ -81,6 +81,7 @@ public class Text extends StringTextComponent {
 
     // TODO this MIGHT not account for the siblings... do that???
     //      test and make sure
+    //      also make sure that textformatting don't appear. They shouldn't
     public String toPlain() {
 //		StringBuilder result = new StringBuilder(getText());
 //		for (ITextComponent sibling : getSiblings()) {

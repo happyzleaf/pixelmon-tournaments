@@ -1,6 +1,7 @@
 package com.hiroku.tournaments.commands;
 
 import com.happyzleaf.tournaments.User;
+import com.happyzleaf.tournaments.text.Pagination;
 import com.happyzleaf.tournaments.text.Text;
 import com.hiroku.tournaments.Zones;
 import com.hiroku.tournaments.api.Tournament;
@@ -137,13 +138,11 @@ public class ZoneCommand implements Command<CommandSource> {
                             Zones.INSTANCE.save();
                         })
         );
-
-        // TODO: pagination
-//		Sponge.getServiceManager().provide(PaginationService.class).get().builder()
-//				.contents(contents)
-//				.padding(Text.of(TextFormatting.GOLD, "-"))
-//				.title(Text.of(TextFormatting.GOLD, "Zones"))
-//				.linesPerPage(8)
-//				.sendTo(source);
+        Pagination.builder()
+                .title(Text.of(TextFormatting.GOLD, "Zones"))
+                .padding(Text.of(TextFormatting.GOLD, "-"))
+                .linesPerPage(8)
+                .contents(contents)
+                .sendTo(source);
     }
 }

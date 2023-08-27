@@ -3,6 +3,7 @@ package com.hiroku.tournaments.api;
 import com.google.common.collect.ImmutableList;
 import com.happyzleaf.tournaments.Scheduler;
 import com.happyzleaf.tournaments.User;
+import com.happyzleaf.tournaments.text.Pagination;
 import com.happyzleaf.tournaments.text.Text;
 import com.hiroku.tournaments.Tournaments;
 import com.hiroku.tournaments.Zones;
@@ -615,14 +616,12 @@ public class Tournament extends Mode {
                             for (RuleBase rule : getRuleSet().rules)
                                 if (rule.canShow(src))
                                     contents.add(Text.of(rule.getDisplayText()));
-
-                            // TODO: pagination
-//					        PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
-//      					pagination.contents(contents)
-//		        					.padding(Text.of(TextColors.GOLD, "-"))
-//				        			.linesPerPage(10)
-//						        	.title(Text.of(TextColors.GOLD, "Rules"));
-//					        pagination.sendTo(src);
+                            Pagination.builder()
+                                    .title(Text.of(TextFormatting.GOLD, "Rules"))
+                                    .padding(Text.of(TextFormatting.GOLD, "-"))
+                                    .linesPerPage(10)
+                                    .contents(contents)
+                                    .sendTo(src);
                         })
         ), true);
 
@@ -638,14 +637,12 @@ public class Tournament extends Mode {
                                     if (line.equals("Clauses"))
                                         clause = true;
                                 }
-
-                                //  TODO: pagination
-//			        			PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
-//		        				pagination.contents(contents)
-//		        						.padding(Text.of(TextFormatting.GOLD, "-"))
-//		        						.linesPerPage(10)
-//			        					.title(Text.of(TextFormatting.GOLD, "Battle Rules"));
-//			        			pagination.sendTo(source);
+                                Pagination.builder()
+                                        .title(Text.of(TextFormatting.GOLD, "Battle Rules"))
+                                        .padding(Text.of(TextFormatting.GOLD, "-"))
+                                        .linesPerPage(10)
+                                        .contents(contents)
+                                        .sendTo(src);
                             })
             ), true);
         }
@@ -657,14 +654,12 @@ public class Tournament extends Mode {
                             for (RewardBase reward : rewards)
                                 if (reward.canShow(src))
                                     contents.add(Text.of(reward.getDisplayText()));
-
-                            //  TODO: pagination
-//			        		PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
-//			        		pagination.contents(contents)
-//		        					.padding(Text.of(TextFormatting.GOLD, "-"))
-//		        					.linesPerPage(10)
-//			        				.title(Text.of(TextFormatting.GOLD, "Rewards"));
-//		        			pagination.sendTo(source);
+                            Pagination.builder()
+                                    .title(Text.of(TextFormatting.GOLD, "Rewards"))
+                                    .padding(Text.of(TextFormatting.GOLD, "-"))
+                                    .linesPerPage(10)
+                                    .contents(contents)
+                                    .sendTo(src);
                         })
         ), true);
 
@@ -697,15 +692,13 @@ public class Tournament extends Mode {
                                     contents.add(Text.of(TextFormatting.RED, "*", team.getDisplayText()));
                             }
 
-                            //  TODO: pagination
-//		        			PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
-//			        		pagination.contents(contents)
-//			        				.header(Text.of(TextFormatting.GREEN, "*", TextFormatting.GOLD, " = alive, ", TextFormatting.RED, "*", TextFormatting.GOLD, " = knocked out, "))
-//			        				.padding(Text.of(TextFormatting.GOLD, "-"))
-//			        				.linesPerPage(10)
-//			        				.title(Text.of(TextFormatting.GOLD, "Teams"));
-//		        			pagination.sendTo(source);
-
+			        		Pagination.builder()
+                                    .title(Text.of(TextFormatting.GOLD, "Teams"))
+                                    .padding(Text.of(TextFormatting.GOLD, "-"))
+                                    .header(Text.of(TextFormatting.GREEN, "*", TextFormatting.GOLD, " = alive, ", TextFormatting.RED, "*", TextFormatting.GOLD, " = knocked out, "))
+                                    .linesPerPage(10)
+                                    .contents(contents)
+                                    .sendTo(src);
                         })
         ), true);
 
@@ -716,16 +709,13 @@ public class Tournament extends Mode {
                             List<Text> contents = new ArrayList<>();
                             for (Match match : round)
                                 contents.add(Text.of(match.getStateText(), match.getDisplayText()));
-
-                            //  TODO: pagination
-//			        		PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
-//				        	pagination.contents(contents)
-//					        		.header(Text.of(TextFormatting.GRAY, "*", TextFormatting.GOLD, " = waiting, ", TextFormatting.YELLOW, "*", TextFormatting.GOLD, " = starting, ",
-//					        				TextColors.RED, "*", TextFormatting.GOLD, " = active"))
-//					        		.padding(Text.of(TextFormatting.GOLD, "-"))
-//				        			.linesPerPage(10)
-//				        			.title(Text.of(TextFormatting.GOLD, "Upcoming Matches"));
-//					        pagination.sendTo(source);
+				        	Pagination.builder()
+                                    .title(Text.of(TextFormatting.GOLD, "Upcoming Matches"))
+                                    .padding(Text.of(TextFormatting.GOLD, "-"))
+                                    .header(Text.of(TextFormatting.GRAY, "*", TextFormatting.GOLD, " = waiting, ", TextFormatting.YELLOW, "*", TextFormatting.GOLD, " = starting, ", TextFormatting.RED, "*", TextFormatting.GOLD, " = active"))
+                                    .linesPerPage(10)
+                                    .contents(contents)
+                                    .sendTo(src);
                         })
         ), true);
 

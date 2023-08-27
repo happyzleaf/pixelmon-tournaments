@@ -1,5 +1,6 @@
 package com.hiroku.tournaments.commands.elo;
 
+import com.happyzleaf.tournaments.text.Pagination;
 import com.happyzleaf.tournaments.text.Text;
 import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.config.TournamentConfig;
@@ -54,12 +55,12 @@ public class EloListCommand implements Command<CommandSource> {
 			contents.add(Text.of(TextFormatting.GOLD, EloStorage.getElo(id, type), ": ", TextFormatting.DARK_AQUA, new User(id).getName()));
 		}
 
-		// TODO: pagination
-//		ps.builder().title(Text.of(TextFormatting.GOLD, "Top ", x, " ", type == null ? "Average" : type, " Elo Ratings"))
-//				.linesPerPage(8)
-//				.contents(contents)
-//				.padding(Text.of(TextFormatting.GOLD, "-"))
-//				.sendTo(src);
+		Pagination.builder()
+				.title(Text.of(TextFormatting.GOLD, "Top ", x, " ", type == null ? "Average" : type, " Elo Ratings"))
+				.padding(Text.of(TextFormatting.GOLD, "-"))
+				.linesPerPage(8)
+				.contents(contents)
+				.sendTo(context.getSource());
 
 		return 1;
 	}

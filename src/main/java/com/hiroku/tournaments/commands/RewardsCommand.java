@@ -1,5 +1,6 @@
 package com.hiroku.tournaments.commands;
 
+import com.happyzleaf.tournaments.text.Pagination;
 import com.happyzleaf.tournaments.text.Text;
 import com.happyzleaf.tournaments.User;
 import com.happyzleaf.tournaments.args.ChoiceSetArgument;
@@ -54,13 +55,12 @@ public class RewardsCommand implements Command<CommandSource> {
 			for (RewardBase reward : Tournament.instance().rewards)
 				if (reward.canShow(player))
 					contents.add(Text.of(reward.getDisplayText()));
-			// TODO: pagination
-//			PaginationList.Builder pagination = Sponge.getServiceManager().provide(PaginationService.class).get().builder();
-//			pagination.contents(contents)
-//					.padding(Text.of(TextFormatting.GOLD, "-"))
-//					.linesPerPage(10)
-//					.title(Text.of(TextFormatting.GOLD, "Rewards"));
-//			pagination.sendTo(src);
+			Pagination.builder()
+					.title(Text.of(TextFormatting.GOLD, "Rewards"))
+					.padding(Text.of(TextFormatting.GOLD, "-"))
+					.linesPerPage(10)
+					.contents(contents)
+					.sendTo(context.getSource());
 			return 1;
 		}
 
