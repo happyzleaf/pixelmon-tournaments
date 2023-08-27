@@ -101,26 +101,7 @@ public class TournamentsExecutor implements Command<CommandSource> {
         }
 
         if (Tournament.instance() == null) {
-            // TODO remove this shit
             context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament"), true);
-            context.getSource().sendFeedback(Text.of(Text.of(TextFormatting.RED), "No tournament"), true);
-            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tourna", Text.of(Text.of(Text.of(TextFormatting.DARK_GREEN))), "ment"), true);
-            context.getSource().sendFeedback(Text.builder()
-                    .append(Text.of("Questo testo essere normale ", TextFormatting.DARK_PURPLE).onClick((src, ctx) -> System.out.println("Clicked!")))
-                    .append(Text.of("[Click]").onHover(Text.of(TextFormatting.LIGHT_PURPLE, "Click me!!!!")))
-                    .append(Text.of(" -> Ciao :)"))
-                    .build(), true);
-            context.getSource().sendFeedback(
-                    Text.of("[Click]")
-                            .onHover(Text.of(TextFormatting.LIGHT_PURPLE, "Click me!!!!"))
-                            .onClick((src, ctx) -> System.out.println("Clicked!")),
-                    true);
-            context.getSource().sendFeedback(
-                    Text.of(Text.of("Questo testo essere normale ", TextFormatting.DARK_PURPLE).onClick((src, ctx) -> System.out.println("Clicked!")),
-                            Text.of("[Click]").onHover(Text.of(TextFormatting.LIGHT_PURPLE, "Click me!!!!")),
-                            Text.of(" -> Ciao :)"))
-                            .onHover(Text.of("Ao")),
-                    true);
         } else {
             Tournament.instance().showTournament(context.getSource());
         }

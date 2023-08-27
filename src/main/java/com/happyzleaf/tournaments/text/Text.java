@@ -2,10 +2,7 @@ package com.happyzleaf.tournaments.text;
 
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.*;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 
@@ -15,7 +12,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Text extends StringTextComponent {
     public static final Text WIP = of(TextFormatting.RED, "WIP");
@@ -25,54 +21,42 @@ public class Text extends StringTextComponent {
 
     private Text(List<Object> objs) {
         super("");
+        this.objs = objs.stream()
+                .map(obj -> {
+                    if (obj instanceof TextFormatting) {
+                        return obj;
+                    }
 
-        this.objs = objs.stream().flatMap(obj -> {
-            if (obj instanceof Text) {
-                return ((Text) obj).objs.stream();
-            } else {
-                return Stream.of(obj);
-            }
-        }).collect(Collectors.toList());
+                    return obj instanceof ITextComponent ? obj : new StringTextComponent(obj.toString());
+                })
+                .peek(obj -> {
+                    if (obj instanceof ITextComponent) {
+                        appendSibling((ITextComponent) obj);
+                    }
+                })
+                .collect(Collectors.toList());
+        deepWalk(this.getStyle());
+    }
 
-        Style style = this.getStyle();
+    private Style deepWalk(Style current) {
+        this.setStyle(this.getStyle().mergeStyle(current));
+
         for (Object obj : this.objs) {
-            if (obj == null) continue;
-
             if (obj instanceof TextFormatting) {
                 TextFormatting formatting = (TextFormatting) obj;
-                style = style.applyFormatting(formatting);
+                current = current.applyFormatting(formatting);
+            } else if (obj instanceof Text) {
+                Text text = (Text) obj;
+                current = text.deepWalk(current);
             } else {
-                TextComponent component = obj instanceof TextComponent ? (TextComponent) obj : new StringTextComponent(obj.toString());
-                component.setStyle(component.getStyle().mergeStyle(style));
-                this.appendSibling(component);
+                TextComponent component = (TextComponent) obj;
+                current = component.getStyle().mergeStyle(current);
+                component.setStyle(current);
             }
         }
 
-//        this.objs = objs;
-//        walkStyle(this.getStyle());
+        return current;
     }
-
-//    private void walkStyle(Style current) {
-//        this.setStyle(current);
-//
-//        for (Object obj : this.objs) {
-//            if (obj instanceof TextFormatting) {
-//                TextFormatting formatting = (TextFormatting) obj;
-//                current = current.applyFormatting(formatting);
-//            } else {
-//                TextComponent component = obj instanceof TextComponent ? (TextComponent) obj : new StringTextComponent(obj.toString());
-//                if (component instanceof Text) {
-//                    ((Text) component).walkStyle(current);
-//                }
-//
-//                component.setStyle(current);
-//
-//                if (!this.siblings.contains(component)) {
-//                    this.siblings.add(component);
-//                }
-//            }
-//        }
-//    }
 
     public Text onClick(@Nullable PlayerEntity recipient, TextAction.Callback action) {
         String command = TextAction.register(recipient, action);
