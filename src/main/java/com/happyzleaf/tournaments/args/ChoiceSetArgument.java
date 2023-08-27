@@ -1,7 +1,5 @@
 package com.happyzleaf.tournaments.args;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -10,8 +8,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.IArgumentSerializer;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 
@@ -51,36 +47,5 @@ public class ChoiceSetArgument implements ArgumentType<String> {
 	@Override
 	public Collection<String> getExamples() {
 		return set;
-	}
-
-	public static class Serializer implements IArgumentSerializer<ChoiceSetArgument> {
-		@Override
-		public void write(ChoiceSetArgument argument, PacketBuffer buffer) {
-			buffer.writeInt(argument.set.size());
-			for (String s : argument.set) {
-				buffer.writeString(s);
-			}
-		}
-
-		@Override
-		public ChoiceSetArgument read(PacketBuffer buffer) {
-			Set<String> set = new HashSet<>();
-
-			int size = buffer.readInt();
-			for (int i = 0; i < size; i++) {
-				set.add(buffer.readString());
-			}
-
-			return new ChoiceSetArgument(set);
-		}
-
-		@Override
-		public void write(ChoiceSetArgument argument, JsonObject json) {
-			JsonArray array = new JsonArray();
-			for (String s : argument.set) {
-				array.add(s);
-			}
-			json.add("set", array);
-		}
 	}
 }

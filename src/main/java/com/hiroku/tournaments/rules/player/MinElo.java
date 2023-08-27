@@ -6,6 +6,7 @@ import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.rule.types.PlayerRule;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.elo.EloStorage;
+import com.hiroku.tournaments.elo.EloTypes;
 import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.rules.general.EloType;
 import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
@@ -53,7 +54,7 @@ public class MinElo extends PlayerRule {
 
 	@Override
 	public boolean canTeamJoin(Tournament tournament, Team team, boolean forced) {
-		String eloType = Tournament.instance().getRuleSet().getRule(EloType.class).eloType;
+		EloTypes eloType = Tournament.instance().getRuleSet().getRule(EloType.class).type;
 		for (UUID uuid : team.getUserIDs()) {
 			if (EloStorage.getElo(uuid, eloType) < minElo) {
 				if (CollectionHelper.find(team.users, user -> user.id.equals(uuid)).hasPermission("tournaments.admin.elo-bypass"))

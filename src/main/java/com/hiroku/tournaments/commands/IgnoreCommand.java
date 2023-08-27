@@ -29,7 +29,7 @@ public class IgnoreCommand implements Command<CommandSource> {
 				.requires(source -> User.hasPermission(source, "tournaments.command.common.ignore"))
 				.executes(this)
 				.then(
-						Commands.argument("yes/no", ChoiceSetArgument.choiceSet(CHOICES))
+						Commands.argument("choice", ChoiceSetArgument.choiceSet(CHOICES))
 								.executes(this)
 				);
 	}
@@ -44,7 +44,7 @@ public class IgnoreCommand implements Command<CommandSource> {
 		PlayerEntity player = context.getSource().asPlayer();
 		boolean ignore = !Tournament.instance().ignoreList.contains(player.getUniqueID());
 
-		Boolean choice = getOptArgument(context, "yes/no", String.class).map(s -> s.equals("yes")).orElse(null);
+		Boolean choice = getOptArgument(context, "choice", String.class).map(s -> s.equals("yes")).orElse(null);
 		if (choice != null) {
 			ignore = choice;
 		}

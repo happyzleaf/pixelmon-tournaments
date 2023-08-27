@@ -30,10 +30,10 @@ public class RewardsCommand implements Command<CommandSource> {
 				.requires(source -> User.hasPermission(source, "tournaments.command.common.rewards"))
 				.executes(this)
 				.then(
-						Commands.argument("choice", ChoiceSetArgument.choiceSet(CHOICES))
+						Commands.argument("action", ChoiceSetArgument.choiceSet(CHOICES))
 								.executes(this)
 								.then(
-										Commands.argument("rewardType[:argument]", StringArgumentType.greedyString())
+										Commands.argument("rewardType", StringArgumentType.greedyString())
 												.executes(this)
 								)
 				);
@@ -46,7 +46,7 @@ public class RewardsCommand implements Command<CommandSource> {
 			return 0;
 		}
 
-		String choice = getOptArgument(context, "choice", String.class).orElse(null);
+		String choice = getOptArgument(context, "action", String.class).orElse(null);
 		if (choice == null) {
 			PlayerEntity player = context.getSource().getEntity() instanceof PlayerEntity ? context.getSource().asPlayer() : null;
 
@@ -69,7 +69,7 @@ public class RewardsCommand implements Command<CommandSource> {
 			return 0;
 		}
 
-		String rewardType = getOptArgument(context, "rewardType[:argument]", String.class).orElse(null);
+		String rewardType = getOptArgument(context, "rewardType", String.class).orElse(null);
 		if (rewardType == null && choice.equals("add")) {
 			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Missing argument. Usage: /tournaments rewards add/remove rewardType[:argument]"), true);
 			return 0;

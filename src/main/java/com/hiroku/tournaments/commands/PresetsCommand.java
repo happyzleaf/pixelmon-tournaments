@@ -39,7 +39,7 @@ public class PresetsCommand implements Command<CommandSource> {
                 .requires(source -> User.hasPermission(source, "tournaments.command.admin.presets"))
                 .executes(this)
                 .then(
-                        Commands.argument("choice", ChoiceSetArgument.choiceSet(CHOICES))
+                        Commands.argument("action", ChoiceSetArgument.choiceSet(CHOICES))
                                 .executes(this)
                                 .then(
                                         Commands.argument("preset", StringArgumentType.greedyString())
@@ -51,7 +51,7 @@ public class PresetsCommand implements Command<CommandSource> {
     @Override
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
         CommandSource source = context.getSource();
-        String choice = getOptArgument(context, "choice", String.class).orElse("check");
+        String choice = getOptArgument(context, "action", String.class).orElse("check");
         String presetName = getOptArgument(context, "preset", String.class).orElse(null);
         if (!choice.equals("check") && presetName == null) {
             source.sendFeedback(Text.of(TextFormatting.RED, "Missing argument: preset-name"), true);

@@ -36,7 +36,7 @@ public class TextAction {
     public static String register(@Nullable PlayerEntity recipient, Callback action) {
         UUID id = UUID.randomUUID();
         ACTIONS.put(id, new Controller(recipient, action));
-        return "/" + id;
+        return "/" + KEY + " " + id;
     }
 
     public static LiteralArgumentBuilder<CommandSource> build() {

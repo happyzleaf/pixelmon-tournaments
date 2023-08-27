@@ -46,6 +46,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.function.Supplier;
 
 /**
  * Base plugin class for the Tournaments plugin/API
@@ -82,12 +83,12 @@ public class Tournaments {
 		MinecraftForge.EVENT_BUS.addListener(this::onCommands);
 
 		ArgumentTypes.register("user", UserArgument.class, new ArgumentSerializer<>(UserArgument::user));
-		ArgumentTypes.register("choiceset", ChoiceSetArgument.class, new ChoiceSetArgument.Serializer());
+		ArgumentTypes.register("choiceset", ChoiceSetArgument.class, new ArgumentSerializer<>(() -> ChoiceSetArgument.choiceSet(Collections.emptySet())));
 	}
 
 	private void onStart(FMLServerAboutToStartEvent event) {
 		log("Initializing Tournaments version " + VERSION + ", last updated for Pixelmon " + Pixelmon.VERSION + "...");
-		log("This platform was written by Hiroku!");
+		log("This platform was written by Hiroku and happyz!");
 
 		TournamentUtils.createDir("config/tournaments");
 		TournamentUtils.createDir("data/tournaments");

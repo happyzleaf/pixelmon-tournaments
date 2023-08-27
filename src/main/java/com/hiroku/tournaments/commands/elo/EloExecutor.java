@@ -51,7 +51,7 @@ public class EloExecutor implements Command<CommandSource> {
 			user = new User(context.getSource().asPlayer());
 		}
 
-		if (!user.is(context.getSource()) && !User.hasPermission(context.getSource(), "landlord.command.common.elo.other")) {
+		if (!user.is(context.getSource()) && !User.hasPermission(context.getSource(), "tournaments.command.common.elo.other")) {
 			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You don't have permission to check the Elo of other players!"), true);
 			return 0;
 		}
