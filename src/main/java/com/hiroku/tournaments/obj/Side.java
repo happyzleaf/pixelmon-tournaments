@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.obj;
 
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import net.minecraft.util.text.TextFormatting;
 
 import java.util.ArrayList;

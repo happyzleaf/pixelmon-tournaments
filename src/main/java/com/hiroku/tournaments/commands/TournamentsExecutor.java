@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.commands;
 
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.happyzleaf.tournaments.User;
 import com.happyzleaf.tournaments.args.ChoiceSetArgument;
 import com.hiroku.tournaments.api.Tournament;
@@ -29,8 +29,8 @@ import static com.hiroku.tournaments.util.CommandUtils.getOptArgument;
 public class TournamentsExecutor implements Command<CommandSource> {
 	private static final Set<String> CHOICES = new HashSet<>(Arrays.asList("open", "close", "start"));
 
-	public LiteralArgumentBuilder<CommandSource> create(String base) {
-		return Commands.literal(base)
+	public LiteralArgumentBuilder<CommandSource> create() {
+		return Commands.literal("tournaments")
 //				.description(Text.of("Base tournament command"))
 				.requires(source -> User.hasPermission(source, "tournaments.command.common.tournament"))
 				.executes(this)

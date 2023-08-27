@@ -4,10 +4,6 @@ import com.google.common.base.Charsets;
 import com.hiroku.tournaments.util.GsonUtils;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * JSON object for storing all configurable elements for tournaments
@@ -18,8 +14,6 @@ public class TournamentConfig {
 	public static final String PATH = "config/tournaments/tournaments.json";
 	public static TournamentConfig INSTANCE;
 
-	public List<String> baseCommandAliases = new ArrayList<>(Arrays.asList("tournaments", "tournament", "tourneys", "tourney"));
-	public List<String> baseEloCommandAliases = new ArrayList<>(Collections.singletonList("elo"));
 	public int timeBeforeMatch = 30;
 
 	private int nextZoneID = 0;

@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.commands.elo;
 
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.happyzleaf.tournaments.User;
 import com.happyzleaf.tournaments.args.UserArgument;
 import com.hiroku.tournaments.elo.EloStorage;
@@ -18,8 +18,8 @@ import net.minecraftforge.server.command.EnumArgument;
 import static com.hiroku.tournaments.util.CommandUtils.getOptArgument;
 
 public class EloExecutor implements Command<CommandSource> {
-	public LiteralArgumentBuilder<CommandSource> create(String base) {
-		return Commands.literal(base)
+	public LiteralArgumentBuilder<CommandSource> create() {
+		return Commands.literal("elo")
 //				.description(Text.of("Base Elo command"))
 				.requires(source -> User.hasPermission(source, "tournaments.command.common.elo.base"))
 				.executes(this)

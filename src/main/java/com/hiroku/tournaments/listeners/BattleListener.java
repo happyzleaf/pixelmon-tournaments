@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.listeners;
 
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.archetypes.pokemon.PokemonMatch;
 import com.hiroku.tournaments.obj.Side;

@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.commands;
 
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.Match;
 import com.hiroku.tournaments.api.Tournament;
@@ -17,7 +17,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.pixelmonmod.pixelmon.Pixelmon;
 import com.pixelmonmod.pixelmon.api.storage.StorageProxy;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;

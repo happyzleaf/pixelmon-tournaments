@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.rewards;
 
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.hiroku.tournaments.api.reward.RewardBase;
 import com.hiroku.tournaments.util.GsonUtils;
 import com.hiroku.tournaments.util.TournamentUtils;
@@ -14,7 +14,6 @@ import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**

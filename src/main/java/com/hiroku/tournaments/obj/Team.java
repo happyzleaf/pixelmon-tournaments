@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.obj;
 
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.commands.JoinCommand;
 import net.minecraft.entity.player.PlayerEntity;

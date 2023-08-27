@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.rules.general;
 
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.rule.types.GeneralRule;
 import com.hiroku.tournaments.api.rule.types.RuleBase;

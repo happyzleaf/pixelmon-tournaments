@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.util;
 
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.hiroku.tournaments.api.Match;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.reward.RewardBase;

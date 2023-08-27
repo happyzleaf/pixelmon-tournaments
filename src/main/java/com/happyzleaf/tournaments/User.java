@@ -1,5 +1,6 @@
 package com.happyzleaf.tournaments;
 
+import com.happyzleaf.tournaments.text.Text;
 import com.mojang.authlib.GameProfile;
 import com.pixelmonmod.pixelmon.api.storage.PCStorage;
 import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;

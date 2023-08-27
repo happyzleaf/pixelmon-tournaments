@@ -2,6 +2,7 @@ package com.hiroku.tournaments;
 
 import com.happyzleaf.tournaments.args.ChoiceSetArgument;
 import com.happyzleaf.tournaments.args.UserArgument;
+import com.happyzleaf.tournaments.text.TextAction;
 import com.hiroku.tournaments.api.reward.RewardTypeRegistrar;
 import com.hiroku.tournaments.api.rule.RuleTypeRegistrar;
 import com.hiroku.tournaments.api.tiers.TierLoader;
@@ -27,14 +28,11 @@ import com.hiroku.tournaments.rules.team.PartyMax;
 import com.hiroku.tournaments.rules.team.PartyMin;
 import com.hiroku.tournaments.util.PluginLogger;
 import com.hiroku.tournaments.util.TournamentUtils;
-import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.pixelmonmod.api.pokemon.PokemonSpecificationProxy;
 import com.pixelmonmod.api.pokemon.requirement.impl.HasSpecFlagRequirement;
 import com.pixelmonmod.pixelmon.Pixelmon;
 import com.pixelmonmod.pixelmon.api.config.ForceBattleEndResult;
 import com.pixelmonmod.pixelmon.api.config.PixelmonConfigProxy;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.ArgumentSerializer;
 import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraftforge.common.MinecraftForge;
@@ -122,23 +120,9 @@ public class Tournaments {
 	}
 
 	public void onCommands(RegisterCommandsEvent event) {
-		if (TournamentConfig.INSTANCE.baseCommandAliases.isEmpty()) {
-			Tournaments.log("Could not register base command! Alias list is empty.");
-		} else {
-			LiteralCommandNode<CommandSource> node = event.getDispatcher().register(TournamentsExecutor.create(TournamentConfig.INSTANCE.baseCommandAliases.get(0)));
-			for (String other : TournamentConfig.INSTANCE.baseCommandAliases.subList(1, TournamentConfig.INSTANCE.baseCommandAliases.size())) {
-				event.getDispatcher().register(Commands.literal(other).redirect(node));
-			}
-		}
-
-		if (TournamentConfig.INSTANCE.baseEloCommandAliases.isEmpty()) {
-			Tournaments.log("Could not register elo command! Alias list is empty.");
-		} else {
-			LiteralCommandNode<CommandSource> node = event.getDispatcher().register(new EloExecutor().create(TournamentConfig.INSTANCE.baseEloCommandAliases.get(0)));
-			for (String other : TournamentConfig.INSTANCE.baseEloCommandAliases.subList(1, TournamentConfig.INSTANCE.baseEloCommandAliases.size())) {
-				event.getDispatcher().register(Commands.literal(other).redirect(node));
-			}
-		}
+		event.getDispatcher().register(TextAction.build());
+		event.getDispatcher().register(new TournamentsExecutor().create());
+		event.getDispatcher().register(new EloExecutor().create());
 	}
 
 	public void registerDefaultRules() {

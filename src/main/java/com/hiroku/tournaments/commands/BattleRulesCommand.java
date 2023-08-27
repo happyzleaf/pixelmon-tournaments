@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.commands;
 
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.Tournament;
 import com.mojang.brigadier.Command;

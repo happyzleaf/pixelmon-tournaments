@@ -1,7 +1,7 @@
 package com.hiroku.tournaments.api;
 
 import com.google.common.collect.ImmutableList;
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.obj.Side;

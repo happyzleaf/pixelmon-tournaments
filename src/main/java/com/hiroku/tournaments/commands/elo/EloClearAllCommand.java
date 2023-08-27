@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.commands.elo;
 
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.elo.EloStorage;
 import com.hiroku.tournaments.elo.EloTypes;

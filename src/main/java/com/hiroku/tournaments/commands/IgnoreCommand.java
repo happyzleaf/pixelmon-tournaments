@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.commands;
 
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.happyzleaf.tournaments.User;
 import com.happyzleaf.tournaments.args.ChoiceSetArgument;
 import com.hiroku.tournaments.api.Tournament;

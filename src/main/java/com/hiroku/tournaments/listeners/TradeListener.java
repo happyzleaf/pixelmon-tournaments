@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.listeners;
 
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.hiroku.tournaments.util.PokemonUtils;
 import com.pixelmonmod.pixelmon.api.events.PixelmonTradeEvent;
 import com.pixelmonmod.pixelmon.api.events.PokegiftEvent;

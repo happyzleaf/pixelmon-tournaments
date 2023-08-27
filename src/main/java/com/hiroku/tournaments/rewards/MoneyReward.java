@@ -1,7 +1,6 @@
 package com.hiroku.tournaments.rewards;
 
-import com.happyzleaf.tournaments.Text;
-import com.hiroku.tournaments.Tournaments;
+import com.happyzleaf.tournaments.text.Text;
 import com.hiroku.tournaments.api.reward.RewardBase;
 import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
 import com.pixelmonmod.pixelmon.api.storage.StorageProxy;
@@ -16,7 +15,6 @@ import java.math.BigDecimal;
  *
  * @author Hiroku
  */
-// TODO: economy
 public class MoneyReward extends RewardBase {
 	/**
 	 * How much money should be given

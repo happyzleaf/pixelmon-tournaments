@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.rules.player;
 
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.hiroku.tournaments.api.rule.types.PlayerRule;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.pixelmonmod.pixelmon.api.config.PixelmonConfigProxy;

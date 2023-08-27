@@ -1,7 +1,7 @@
 package com.hiroku.tournaments.commands;
 
 import com.happyzleaf.tournaments.Scheduler;
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.Tournaments;
 import com.hiroku.tournaments.api.Tournament;

@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.api;
 
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.hiroku.tournaments.obj.Side;
 import com.hiroku.tournaments.obj.Team;
 import net.minecraft.util.text.TextFormatting;

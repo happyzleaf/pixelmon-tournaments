@@ -1,6 +1,6 @@
 package com.hiroku.tournaments.commands;
 
-import com.happyzleaf.tournaments.Text;
+import com.happyzleaf.tournaments.text.Text;
 import com.happyzleaf.tournaments.User;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.enums.TournamentStates;
@@ -134,10 +134,11 @@ public class JoinCommand implements Command<CommandSource> {
 	}
 
 	public static void invitePlayer(PlayerEntity inviter, PlayerEntity invitee) {
-		invitee.sendMessage(Text.of(TextFormatting.DARK_AQUA, inviter.getName(), TextFormatting.YELLOW, " has invited you to join the tournament with them. "
-				// TODO: textactions
-//				, Text.of(TextFormatting.DARK_GREEN, TextActions.executeCallback(src -> acceptInvitation(inviter, invitee)), "Accept"), TextFormatting.DARK_GRAY,
-//				" | ", Text.of(TextFormatting.RED, TextActions.executeCallback(src -> rejectInvitation(inviter, invitee)), "Decline")
+		invitee.sendMessage(Text.of(
+				TextFormatting.DARK_AQUA, inviter.getName(), TextFormatting.YELLOW, " has invited you to join the tournament with them. ",
+				Text.of(TextFormatting.DARK_GREEN, "Accept").onClick(invitee, (src, ctx) -> acceptInvitation(inviter, src)),
+				TextFormatting.DARK_GRAY, " | ",
+				Text.of(TextFormatting.RED, "Decline").onClick(invitee, (src, ctx) -> rejectInvitation(inviter, src))
 		), Util.DUMMY_UUID);
 
 		teamInvitations.put(inviter.getUniqueID(), invitee.getUniqueID());
