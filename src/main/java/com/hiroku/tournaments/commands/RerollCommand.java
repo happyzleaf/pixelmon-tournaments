@@ -34,20 +34,20 @@ public class RerollCommand implements Command<CommandSource> {
 		PlayerEntity player = context.getSource().asPlayer();
 
 		if (Tournament.instance() == null || Tournament.instance().state != TournamentStates.OPEN) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There must be a tournament in the open state for you to use this command!"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There must be a tournament in the open state for you to use this command!"), false);
 			return 0;
 		}
 
 		Team team = Tournament.instance().getTeam(player.getUniqueID());
 		User user = team == null ? null : team.getUser(player.getUniqueID());
 		if (team == null) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You aren't even in the tournament!"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You aren't even in the tournament!"), false);
 			return 0;
 		}
 
 		RandomPokemon rule = Tournament.instance().getRuleSet().getRule(RandomPokemon.class);
 		if (rule == null) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "This tournament isn't a random Pokémon tournament!"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "This tournament isn't a random Pokémon tournament!"), false);
 			return 0;
 		}
 

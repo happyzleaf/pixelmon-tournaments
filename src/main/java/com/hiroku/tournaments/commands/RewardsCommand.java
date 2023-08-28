@@ -43,7 +43,7 @@ public class RewardsCommand implements Command<CommandSource> {
 	@Override
 	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
 		if (Tournament.instance() == null) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament to change rewards for. Try /tournament create"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament to change rewards for. Try /tournament create"), false);
 			return 0;
 		}
 
@@ -65,13 +65,13 @@ public class RewardsCommand implements Command<CommandSource> {
 		}
 
 		if (!User.hasPermission(context.getSource(), "tournaments.command.common.rewards")) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You do not have permission to add, remove, or test rewards!"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You do not have permission to add, remove, or test rewards!"), false);
 			return 0;
 		}
 
 		String rewardType = getOptArgument(context, "rewardType", String.class).orElse(null);
 		if (rewardType == null && choice.equals("add")) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Missing argument. Usage: /tournament rewards add/remove rewardType[:argument]"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Missing argument. Usage: /tournament rewards add/remove rewardType[:argument]"), false);
 			return 0;
 		}
 
@@ -89,17 +89,17 @@ public class RewardsCommand implements Command<CommandSource> {
 		if (choice.equals("add")) {
 			try {
 				Tournament.instance().rewards.add(RewardTypeRegistrar.parse(key, arg));
-				context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully added reward: ", TextFormatting.DARK_AQUA, key, ":", arg), true);
+				context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully added reward: ", TextFormatting.DARK_AQUA, key, ":", arg), false);
 				return 1;
 			} catch (Exception e) {
-				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Error parsing reward: ", e.getMessage()), true);
+				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Error parsing reward: ", e.getMessage()), false);
 				e.printStackTrace();
 				return 1;
 			}
 		} else if (choice.equals("remove")) {
 			Class<? extends RewardBase> rewardTypeClass = RewardTypeRegistrar.getRewardTypeForKey(key);
 			if (rewardTypeClass == null) {
-				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Invalid reward type: ", key), true);
+				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Invalid reward type: ", key), false);
 				return 0;
 			}
 
@@ -113,10 +113,10 @@ public class RewardsCommand implements Command<CommandSource> {
 			}
 
 			if (removed == 0) {
-				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No rewards present of type: ", TextFormatting.DARK_AQUA, key), true);
+				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No rewards present of type: ", TextFormatting.DARK_AQUA, key), false);
 				return 0;
 			} else {
-				context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully removed all ", removed, " rule/s of type ", key), true);
+				context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully removed all ", removed, " rule/s of type ", key), false);
 				return 1;
 			}
 		} else if (choice.equals("test")) {
@@ -126,12 +126,12 @@ public class RewardsCommand implements Command<CommandSource> {
 				target = context.getSource().asPlayer();
 			} else {
 				if (arg == null) {
-					context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Missing argument: player"), true);
+					context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Missing argument: player"), false);
 					return 0;
 				} else {
 					target = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUsername(arg);
 					if (target == null) {
-						context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Invalid player: ", TextFormatting.DARK_AQUA, arg), true);
+						context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Invalid player: ", TextFormatting.DARK_AQUA, arg), false);
 						return 0;
 					}
 				}
@@ -139,7 +139,7 @@ public class RewardsCommand implements Command<CommandSource> {
 			}
 
 			if (target != null) {
-				context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Giving ", TextFormatting.DARK_AQUA, target.getName(), TextFormatting.GRAY, " the current rewards..."), true);
+				context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Giving ", TextFormatting.DARK_AQUA, target.getName(), TextFormatting.GRAY, " the current rewards..."), false);
 				for (RewardBase reward : Tournament.instance().rewards)
 					reward.give(target);
 			}

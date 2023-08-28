@@ -37,7 +37,7 @@ public class IgnoreCommand implements Command<CommandSource> {
 	@Override
 	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
 		if (Tournament.instance() == null || Tournament.instance().state == TournamentStates.CLOSED) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There's nothing to ignore; there's no tournament open"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There's nothing to ignore; there's no tournament open"), false);
 			return 0;
 		}
 
@@ -53,7 +53,7 @@ public class IgnoreCommand implements Command<CommandSource> {
 		if (ignore)
 			Tournament.instance().ignoreList.add(player.getUniqueID());
 
-		context.getSource().sendFeedback(Tournament.instance().getMessageProvider().getIgnoreToggleMessage(ignore), true);
+		context.getSource().sendFeedback(Tournament.instance().getMessageProvider().getIgnoreToggleMessage(ignore), false);
 
 		return 1;
 	}

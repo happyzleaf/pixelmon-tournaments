@@ -31,29 +31,29 @@ public class ReloadCommand implements Command<CommandSource> {
 
 	@Override
 	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Beginning reload..."), true);
+		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Beginning reload..."), false);
 
 		TournamentUtils.createDir("config/tournaments");
 		TournamentUtils.createDir("data/tournaments");
-		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Consolidated config and data directories"), true);
+		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Consolidated config and data directories"), false);
 
 		Tournaments.INSTANCE.registerDefaultRules();
 		Tournaments.INSTANCE.registerDefaultRewards();
-		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Reloaded default rules and rewards"), true);
+		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Reloaded default rules and rewards"), false);
 
 		TournamentConfig.load();
-		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Reloaded tournament config"), true);
+		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Reloaded tournament config"), false);
 
 		TierLoader.load();
-		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Reloaded default and custom tiers"), true);
+		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Reloaded default and custom tiers"), false);
 
 		Zones.load();
-		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Reloaded zones"), true);
+		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Reloaded zones"), false);
 
 		Presets.load();
-		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Reloaded presets"), true);
+		context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Reloaded presets"), false);
 
-		context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Reload successful."), true);
+		context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Reload successful."), false);
 
 		return 1;
 	}

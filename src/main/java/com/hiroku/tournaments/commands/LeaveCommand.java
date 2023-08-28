@@ -32,22 +32,22 @@ public class LeaveCommand implements Command<CommandSource> {
 	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
 		PlayerEntity player = context.getSource().asPlayer();
 		if (Tournament.instance() == null || Tournament.instance().state == TournamentStates.CLOSED) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no tournament to leave"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no tournament to leave"), false);
 			return 0;
 		}
 		Team team = Tournament.instance().getTeam(player.getUniqueID());
 		if (team == null) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You aren't even in the tournament!"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You aren't even in the tournament!"), false);
 			return 0;
 		}
 		if (!team.alive) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Why do you want to leave? You're already knocked out!"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Why do you want to leave? You're already knocked out!"), false);
 			return 0;
 		}
 
 		Match match = Tournament.instance().getMatch(team);
 		if (match != null) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You are assigned to a match. You should use ", TextFormatting.DARK_AQUA, "/tournament forfeit", TextFormatting.RED, " instead"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You are assigned to a match. You should use ", TextFormatting.DARK_AQUA, "/tournament forfeit", TextFormatting.RED, " instead"), false);
 			return 0;
 		}
 

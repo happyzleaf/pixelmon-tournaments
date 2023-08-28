@@ -598,14 +598,14 @@ public class Tournament extends Mode {
     }
 
     public void showTournament(CommandSource source) {
-        source.sendFeedback(Text.of(TextFormatting.GOLD, "---------- Tournament -----------"), true);
+        source.sendFeedback(Text.of(TextFormatting.GOLD, "---------- Tournament -----------"), false);
         if (state == TournamentStates.CLOSED) {
-            source.sendFeedback(Text.of(TextFormatting.GOLD, "State: ", TextFormatting.RED, "CLOSED"), true);
+            source.sendFeedback(Text.of(TextFormatting.GOLD, "State: ", TextFormatting.RED, "CLOSED"), false);
         } else if (state == TournamentStates.OPEN) {
-            source.sendFeedback(Text.of(TextFormatting.GOLD, "State: ", TextFormatting.GREEN, "OPEN"), true);
+            source.sendFeedback(Text.of(TextFormatting.GOLD, "State: ", TextFormatting.GREEN, "OPEN"), false);
         } else {
-            source.sendFeedback(Text.of(TextFormatting.GOLD, "State: ", TextFormatting.YELLOW, "ACTIVE"), true);
-            source.sendFeedback(Text.of(TextFormatting.GOLD, "Round: ", TextFormatting.DARK_AQUA, roundNum), true);
+            source.sendFeedback(Text.of(TextFormatting.GOLD, "State: ", TextFormatting.YELLOW, "ACTIVE"), false);
+            source.sendFeedback(Text.of(TextFormatting.GOLD, "Round: ", TextFormatting.DARK_AQUA, roundNum), false);
         }
 
         source.sendFeedback(Text.of(TextFormatting.GOLD, "Rules: ",
@@ -623,7 +623,7 @@ public class Tournament extends Mode {
                                     .contents(contents)
                                     .sendTo(src);
                         })
-        ), true);
+        ), false);
 
         if (!getRuleSet().br.exportText().isEmpty()) {
             source.sendFeedback(Text.of(TextFormatting.GOLD, "Battle Rules: ",
@@ -644,7 +644,7 @@ public class Tournament extends Mode {
                                         .contents(contents)
                                         .sendTo(src);
                             })
-            ), true);
+            ), false);
         }
         source.sendFeedback(Text.of(TextFormatting.GOLD, "Rewards: ",
                 Text.of(TextFormatting.GRAY, "[Hover to preview, click for full list]")
@@ -661,7 +661,7 @@ public class Tournament extends Mode {
                                     .contents(contents)
                                     .sendTo(src);
                         })
-        ), true);
+        ), false);
 
         source.sendFeedback(Text.of(TextFormatting.GOLD, "Teams: ",
                 Text.of(TextFormatting.GRAY, "[Hover to preview, click for full list]")
@@ -700,7 +700,7 @@ public class Tournament extends Mode {
                                     .contents(contents)
                                     .sendTo(src);
                         })
-        ), true);
+        ), false);
 
         source.sendFeedback(Text.of(TextFormatting.GOLD, "Current Matches: ",
                 Text.of(TextFormatting.GRAY, "[Hover to preview, click for full list]")
@@ -717,9 +717,9 @@ public class Tournament extends Mode {
                                     .contents(contents)
                                     .sendTo(src);
                         })
-        ), true);
+        ), false);
 
-        source.sendFeedback(Text.of(TextFormatting.GOLD, "--------------------------------"), true);
+        source.sendFeedback(Text.of(TextFormatting.GOLD, "--------------------------------"), false);
     }
 
     public ImmutableList<Mode> getModes() {

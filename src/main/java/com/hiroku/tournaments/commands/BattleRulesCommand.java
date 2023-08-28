@@ -33,25 +33,25 @@ public class BattleRulesCommand implements Command<CommandSource> {
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
         // Clear and default
         if (Tournament.instance() == null) {
-            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament to set battle rules for. Try /tournament create"), true);
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament to set battle rules for. Try /tournament create"), false);
             return 0;
         }
 
         Tournament.instance().getRuleSet().br = new BattleRules();
-        context.getSource().sendFeedback(Text.of(TextFormatting.GREEN, "Cleared the battle rules."), true);
+        context.getSource().sendFeedback(Text.of(TextFormatting.GREEN, "Cleared the battle rules."), false);
 
         return 1;
     }
 
     private int load(CommandContext<CommandSource> context) throws CommandSyntaxException {
         if (Tournament.instance() == null) {
-            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament to set battle rules for. Try /tournament create"), true);
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament to set battle rules for. Try /tournament create"), false);
             return 0;
         }
 
         String args = context.getArgument("args", String.class).replaceAll(",", "\n");
         Tournament.instance().getRuleSet().br.importText(args);
-        context.getSource().sendFeedback(Text.of(TextFormatting.GREEN, "Imported battle rules text. Use /tournament to check them."), true);
+        context.getSource().sendFeedback(Text.of(TextFormatting.GREEN, "Imported battle rules text. Use /tournament to check them."), false);
 
         return 1;
     }

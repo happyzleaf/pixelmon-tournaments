@@ -81,15 +81,15 @@ public class JoinCommand implements Command<CommandSource> {
 
 		Tournament tournament = Tournament.instance();
 		if (tournament == null || tournament.state == TournamentStates.CLOSED) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no tournament to join."), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no tournament to join."), false);
 			return 0;
 		}
 		if (tournament.state == TournamentStates.ACTIVE) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "The tournament is active! You cannot join while it is in motion!"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "The tournament is active! You cannot join while it is in motion!"), false);
 			return 0;
 		}
 		if (tournament.getTeam(player.getUniqueID()) != null) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You're already in the tournament!"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You're already in the tournament!"), false);
 			return 0;
 		}
 
@@ -97,12 +97,12 @@ public class JoinCommand implements Command<CommandSource> {
 		String arg = getOptArgument(context, ".", String.class).orElse(null);
 		if (partner == null && arg != null) {
 			// This doesn't make sense. Might be because of old sponge's optional weakness.
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Invalid player: ", TextFormatting.DARK_AQUA, arg), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Invalid player: ", TextFormatting.DARK_AQUA, arg), false);
 			return 0;
 		}
 
 		if (partner == player) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Nice try, but you can't invite yourself."), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Nice try, but you can't invite yourself."), false);
 			return 0;
 		}
 
@@ -114,7 +114,7 @@ public class JoinCommand implements Command<CommandSource> {
 			composition = rule.composition;
 
 		if ((composition == TeamsComposition.SINGLE || composition == TeamsComposition.DOUBLE_1_PLAYER) && partner != null) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "The tournament is for single-player teams only!"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "The tournament is for single-player teams only!"), false);
 			return 0;
 		}
 

@@ -35,7 +35,7 @@ public class ForfeitCommand implements Command<CommandSource> {
 	@Override
 	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
 		if (Tournament.instance() == null || Tournament.instance().state == TournamentStates.CLOSED) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no tournament dummy"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no tournament dummy"), false);
 			return 0;
 		}
 
@@ -44,11 +44,11 @@ public class ForfeitCommand implements Command<CommandSource> {
 		User user = UserArgument.getOptUser(context, "user").orElse(null);
 		if (user != null) {
 			if (!User.hasPermission(context.getSource(), "tournaments.command.admin.forfeit")) {
-				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You don't have permission to forfeit others"), true);
+				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You don't have permission to forfeit others"), false);
 				return 0;
 			}
 		} else if (!(context.getSource().getEntity() instanceof PlayerEntity)) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "What? You're forfeiting? You're the CONSOLE"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "What? You're forfeiting? You're the CONSOLE"), false);
 			return 0;
 		} else {
 			user = new User(context.getSource().asPlayer());
@@ -59,7 +59,7 @@ public class ForfeitCommand implements Command<CommandSource> {
 		Team team = Tournament.instance().getTeam(user.id);
 
 		if (team == null) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.DARK_AQUA, user.getName(), TextFormatting.RED, " isn't even in the tournament"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.DARK_AQUA, user.getName(), TextFormatting.RED, " isn't even in the tournament"), false);
 			return 0;
 		} else if (!isActive) {
 			Tournament.instance().removeTeams(forced, team);

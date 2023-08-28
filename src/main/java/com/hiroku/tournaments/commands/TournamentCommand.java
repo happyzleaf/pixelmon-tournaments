@@ -58,24 +58,24 @@ public class TournamentCommand implements Command<CommandSource> {
         String choice = getOptArgument(context, "action", String.class).orElse(null);
         if (choice != null) {
             if (!User.hasPermission(context.getSource(), "tournaments.command.admin.tournament")) {
-                context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You don't have permission to do any of the tournament options!"), true);
+                context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You don't have permission to do any of the tournament options!"), false);
                 return 0;
             }
 
             if (choice.equals("open")) {
                 if (Tournament.instance() == null)
-                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no tournament to open. Try /tournament create"), true);
+                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no tournament to open. Try /tournament create"), false);
                 else if (Tournament.instance().state == TournamentStates.OPEN)
-                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "The tournament is already open. Pay attention."), true);
+                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "The tournament is already open. Pay attention."), false);
                 else if (Tournament.instance().state == TournamentStates.ACTIVE)
-                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "I mean, the tournament is up and running, so dunno what you're trying to do"), true);
+                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "I mean, the tournament is up and running, so dunno what you're trying to do"), false);
                 else {
                     Tournament.instance().open();
                     return 1;
                 }
             } else if (choice.equals("close")) {
                 if (Tournament.instance() == null)
-                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "It's a tad difficult to close a tournament that doesn't exist"), true);
+                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "It's a tad difficult to close a tournament that doesn't exist"), false);
                 else {
                     if (Tournament.instance().teams != null)
                         for (Team team : Tournament.instance().teams)
@@ -84,15 +84,15 @@ public class TournamentCommand implements Command<CommandSource> {
                                 //      make sure this logic is solid when player is offline
                                 RandomPokemon.removeRentalPokemon(user, true);
                     Tournament.instance().close();
-                    context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Tournament closed."), true);
+                    context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Tournament closed."), false);
                     return 1;
                 }
             } else if (choice.equals("start")) {
                 if (Tournament.instance() == null || Tournament.instance().state == TournamentStates.CLOSED) {
-                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no open tournament to start. Have you tried /tournament open?"), true);
+                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no open tournament to start. Have you tried /tournament open?"), false);
                     return 0;
                 } else if (Tournament.instance().state == TournamentStates.ACTIVE) {
-                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "A tournament is already active. Close it if you want to make a new one."), true);
+                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "A tournament is already active. Close it if you want to make a new one."), false);
                     return 0;
                 }
 
@@ -101,7 +101,7 @@ public class TournamentCommand implements Command<CommandSource> {
         }
 
         if (Tournament.instance() == null) {
-            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament"), true);
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament"), false);
         } else {
             Tournament.instance().showTournament(context.getSource());
         }

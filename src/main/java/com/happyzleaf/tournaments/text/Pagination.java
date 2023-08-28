@@ -150,13 +150,9 @@ public class Pagination {
         }
 
         public void sendTo(CommandSource source) {
-            try {
-                Text firstPage = build().get(0);
-                if (firstPage != null) {
-                    source.sendFeedback(firstPage, false);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+            Text firstPage = build().get(0);
+            if (firstPage != null) {
+                source.sendFeedback(firstPage, false);
             }
         }
     }

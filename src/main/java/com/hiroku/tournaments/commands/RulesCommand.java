@@ -56,7 +56,7 @@ public class RulesCommand implements Command<CommandSource> {
     @Override
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
         if (Tournament.instance() == null) {
-            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament."), true);
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament."), false);
             return 0;
         }
 
@@ -66,18 +66,18 @@ public class RulesCommand implements Command<CommandSource> {
 
     private int modify(boolean add, CommandContext<CommandSource> context) {
         if (Tournament.instance() == null) {
-            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament."), true);
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament."), false);
             return 0;
         }
 
         String[] argsArr = context.getArgument("type", String.class).split(" ");
         if (!User.hasPermission(context.getSource(), "tournaments.command.admin.rules")) {
-            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "'Stop right there'! You don't have permission to modify the rules!"), true);
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "'Stop right there'! You don't have permission to modify the rules!"), false);
             return 0;
         }
 
         if (argsArr.length < 1) {
-            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Not enough arguments. Missing: rule"), true);
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Not enough arguments. Missing: rule"), false);
             return 0;
         }
 
@@ -94,28 +94,28 @@ public class RulesCommand implements Command<CommandSource> {
                     RuleBase rule = RuleTypeRegistrar.parse(key, arg);
                     if (rule != null) {
                         if (Tournament.instance().getRuleSet().addRule(rule))
-                            context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully added rule: ", s), true);
+                            context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully added rule: ", s), false);
                         else
-                            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Unable to add rule"), true);
+                            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Unable to add rule"), false);
                     }
                 } catch (Exception e) {
-                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, e.getMessage()), true);
+                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, e.getMessage()), false);
                 }
             }
         } else {
             for (String s : argsArr) {
                 Class<? extends RuleBase> ruleType = RuleTypeRegistrar.getRuleTypeMatchingKey(s);
                 if (ruleType == null) {
-                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Invalid rule type: ", TextFormatting.DARK_AQUA, s), true);
+                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Invalid rule type: ", TextFormatting.DARK_AQUA, s), false);
                     return 0;
                 }
                 if (Tournament.instance().getRuleSet().rules.stream().noneMatch(ruleType::isInstance)) {
-                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No rules of type: ", TextFormatting.DARK_AQUA, s, TextFormatting.RED, " are present in the tournament."), true);
+                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No rules of type: ", TextFormatting.DARK_AQUA, s, TextFormatting.RED, " are present in the tournament."), false);
                     return 0;
                 }
 
                 Tournament.instance().getRuleSet().removeRuleType(ruleType);
-                context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully removed all rules of type: ", s.toLowerCase()), true);
+                context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully removed all rules of type: ", s.toLowerCase()), false);
             }
         }
 
@@ -124,7 +124,7 @@ public class RulesCommand implements Command<CommandSource> {
 
     private int test(CommandContext<CommandSource> context) throws CommandSyntaxException {
         if (Tournament.instance() == null) {
-            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament."), true);
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament."), false);
             return 0;
         }
 
@@ -134,14 +134,14 @@ public class RulesCommand implements Command<CommandSource> {
         boolean brokeRule = false;
 
         if (playerRule != null) {
-            context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Rule broken: ", playerRule.getBrokenRuleText(player)), true);
+            context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Rule broken: ", playerRule.getBrokenRuleText(player)), false);
             brokeRule = true;
         }
         Team team = Tournament.instance().getTeam(player.getUniqueID());
         if (team != null) {
             TeamRule teamRule = ruleSet.getBrokenRule(team);
             if (teamRule != null) {
-                context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Rule broken: ", teamRule.getBrokenRuleText(team)), true);
+                context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Rule broken: ", teamRule.getBrokenRuleText(team)), false);
                 brokeRule = true;
             }
             Match match = Tournament.instance().getMatch(team);
@@ -149,16 +149,16 @@ public class RulesCommand implements Command<CommandSource> {
                 Side side = match.getSide(team);
                 SideRule sideRule = ruleSet.getBrokenRule(side);
                 if (sideRule != null) {
-                    context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Rule broken: ", sideRule.getBrokenRuleText(side)), true);
+                    context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Rule broken: ", sideRule.getBrokenRuleText(side)), false);
                     brokeRule = true;
                 }
             }
         }
 
         if (brokeRule)
-            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "FAIL."), true);
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "FAIL."), false);
         else
-            context.getSource().sendFeedback(Text.of(TextFormatting.GREEN, "PASS."), true);
+            context.getSource().sendFeedback(Text.of(TextFormatting.GREEN, "PASS."), false);
         return 0;
     }
 }

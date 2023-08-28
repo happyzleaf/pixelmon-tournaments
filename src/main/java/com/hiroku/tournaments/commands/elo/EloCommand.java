@@ -44,7 +44,7 @@ public class EloCommand implements Command<CommandSource> {
 
 		if (user == null) {
 			if (!(context.getSource().getEntity() instanceof PlayerEntity)) {
-				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You must specify a player!"), true);
+				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You must specify a player!"), false);
 				return 0;
 			}
 
@@ -52,7 +52,7 @@ public class EloCommand implements Command<CommandSource> {
 		}
 
 		if (!user.is(context.getSource()) && !User.hasPermission(context.getSource(), "tournaments.command.common.elo.other")) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You don't have permission to check the Elo of other players!"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You don't have permission to check the Elo of other players!"), false);
 			return 0;
 		}
 
@@ -64,9 +64,9 @@ public class EloCommand implements Command<CommandSource> {
 		}
 
 		if (user.is(context.getSource())) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.GOLD, type == null ? "Average" : type, " Elo: " + elo), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.GOLD, type == null ? "Average" : type, " Elo: " + elo), false);
 		} else {
-			context.getSource().sendFeedback(Text.of(TextFormatting.DARK_AQUA, user.getName() + "'s ", TextFormatting.GOLD, type == null ? "Average" : type, " Elo: " + elo), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.DARK_AQUA, user.getName() + "'s ", TextFormatting.GOLD, type == null ? "Average" : type, " Elo: " + elo), false);
 		}
 
 		return 1;

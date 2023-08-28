@@ -45,7 +45,7 @@ public class FlagCommand implements Command<CommandSource> {
 				|| (Tournament.instance().getMatch(player.getUniqueID())) == null
 				|| !(Tournament.instance().getMatch(player.getUniqueID()) instanceof PokemonMatch)
 				|| (match = (PokemonMatch) Tournament.instance().getMatch(player.getUniqueID())).battle == null) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No match to flag."), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No match to flag."), false);
 			return 0;
 		}
 

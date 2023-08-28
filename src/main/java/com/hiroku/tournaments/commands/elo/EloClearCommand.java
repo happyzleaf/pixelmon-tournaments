@@ -40,7 +40,7 @@ public class EloClearCommand implements Command<CommandSource> {
 
 		if (user == null) {
 			if (!(context.getSource().getEntity() instanceof PlayerEntity)) {
-				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You must specify a player!"), true);
+				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You must specify a player!"), false);
 				return 0;
 			}
 
@@ -48,7 +48,7 @@ public class EloClearCommand implements Command<CommandSource> {
 		}
 
 		if (!user.is(context.getSource()) && !User.hasPermission(context.getSource(), "tournaments.command.admin.elo.clear.other")) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You don't have permission to clear the Elo of others!"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You don't have permission to clear the Elo of others!"), false);
 			return 0;
 		}
 
@@ -58,7 +58,7 @@ public class EloClearCommand implements Command<CommandSource> {
 			EloStorage.clearElo(user.id, type);
 		}
 
-		context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully cleared " + (type == null ? "" : (type + " ")) + "Elo" + (user.is(context.getSource()) ? "" : (" from " + user.getName()))), true);
+		context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully cleared " + (type == null ? "" : (type + " ")) + "Elo" + (user.is(context.getSource()) ? "" : (" from " + user.getName()))), false);
 
 		return 1;
 	}

@@ -35,11 +35,11 @@ public class CreateCommand implements Command<CommandSource> {
 	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
 		if (Tournament.instance() != null && Tournament.instance().state != TournamentStates.CLOSED) {
 			if (Tournament.instance().state == TournamentStates.ACTIVE) {
-				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is a tournament that's ACTIVE man"), true);
+				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is a tournament that's ACTIVE man"), false);
 				return 0;
 			}
 			if (Tournament.instance().state == TournamentStates.OPEN) {
-				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is a tournament that's open"), true);
+				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is a tournament that's open"), false);
 				return 0;
 			}
 		}
@@ -64,11 +64,11 @@ public class CreateCommand implements Command<CommandSource> {
 					zone.engaged = preset.zones.contains(zone);
 				}
 			}
-			context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Started a new tournament with preset: ", TextFormatting.DARK_AQUA, presetName), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Started a new tournament with preset: ", TextFormatting.DARK_AQUA, presetName), false);
 		} else if (arg == null) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Started a new tournament."), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Started a new tournament."), false);
 		} else {
-			context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Started a new tournament, but the preset given was unknown"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Started a new tournament, but the preset given was unknown"), false);
 		}
 
 		return 1;

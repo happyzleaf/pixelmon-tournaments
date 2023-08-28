@@ -298,7 +298,7 @@ public class PokemonMatch extends Match {
 
 			tournament.tasks.add(Scheduler.delay(TournamentConfig.INSTANCE.timeBeforeMatch - 5, TimeUnit.SECONDS, () -> {
 				if (Tournament.instance().round.contains(this))
-					start(Tournament.instance(), true);
+					start(Tournament.instance(), false);
 			}));
 		} else {
 			Tournament.instance().matchEnds(this, winningSide, getOtherSide(winningSide));

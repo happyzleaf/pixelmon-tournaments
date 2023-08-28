@@ -46,8 +46,8 @@ public class ZoneCommand implements Command<CommandSource> {
         String[] argArr = argStr.split(" ");
         if (argArr[0].equalsIgnoreCase("remove")) {
             if (argArr.length < 2) {
-                context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Not enough arguments. Missing: Zone number/s"), true);
-                context.getSource().sendFeedback(Text.of(TextFormatting.RED, "/tournament zones [remove <zoneNumbers...>]"), true);
+                context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Not enough arguments. Missing: Zone number/s"), false);
+                context.getSource().sendFeedback(Text.of(TextFormatting.RED, "/tournament zones [remove <zoneNumbers...>]"), false);
                 return 0;
             }
             for (int i = 1; i < argArr.length; i++) {
@@ -57,9 +57,9 @@ public class ZoneCommand implements Command<CommandSource> {
                         throw new NumberFormatException();
                     Zones.INSTANCE.removeZone(Zones.INSTANCE.getZones().get(zoneIndex - 1));
                     Zones.INSTANCE.save();
-                    context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Removed zone ", argArr[i]), true);
+                    context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Removed zone ", argArr[i]), false);
                 } catch (NumberFormatException nfe) {
-                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Invalid zone number: ", TextFormatting.DARK_AQUA, argArr[i]), true);
+                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Invalid zone number: ", TextFormatting.DARK_AQUA, argArr[i]), false);
                 }
             }
             return 1;
@@ -69,29 +69,29 @@ public class ZoneCommand implements Command<CommandSource> {
                 if (context.getSource().getEntity() instanceof PlayerEntity) {
                     Zones.INSTANCE.leaveZone = new LocationWrapper(context.getSource().asPlayer());
                     Zones.INSTANCE.save();
-                    context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully set tournament leave zone"), true);
+                    context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully set tournament leave zone"), false);
                     return 1;
                 }
 
-                context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You're not a player! Jeez."), true);
+                context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You're not a player! Jeez."), false);
                 return 0;
             }
 
             if (Zones.INSTANCE.leaveZone == null) {
-                context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no leave zone set. Use /tournament zones leavezone set"), true);
+                context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no leave zone set. Use /tournament zones leavezone set"), false);
                 return 0;
             }
             if (context.getSource().getEntity() instanceof PlayerEntity) {
                 Zones.INSTANCE.leaveZone.sendPlayer(context.getSource().asPlayer());
-                context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "You've been warped to the tournament leave zone"), true);
+                context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "You've been warped to the tournament leave zone"), false);
                 return 1;
             }
-            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You aren't a player!"), true);
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You aren't a player!"), false);
         }
         if (argArr[0].equalsIgnoreCase("leavezoneremove")) {
             Zones.INSTANCE.leaveZone = null;
             Zones.INSTANCE.save();
-            context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Leavezone was removed!"), true);
+            context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Leavezone was removed!"), false);
             return 1;
         }
         return 0;

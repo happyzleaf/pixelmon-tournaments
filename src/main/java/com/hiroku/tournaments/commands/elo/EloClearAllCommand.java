@@ -29,7 +29,7 @@ public class EloClearAllCommand implements Command<CommandSource> {
 	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
 		EloTypes type = context.getArgument("type", EloTypes.class);
 		EloStorage.clearAllElos(type);
-		context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Wiped all ", type == null ? "" : (type + " "), "Elo ratings."), true);
+		context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Wiped all ", type == null ? "" : (type + " "), "Elo ratings."), false);
 		return 1;
 	}
 }

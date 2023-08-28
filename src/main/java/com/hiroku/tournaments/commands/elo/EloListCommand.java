@@ -46,7 +46,7 @@ public class EloListCommand implements Command<CommandSource> {
 		List<UUID> top = EloStorage.getTopXElo(x, type);
 
 		if (top.isEmpty()) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Nobody has an Elo rating yet."), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Nobody has an Elo rating yet."), false);
 			return 0;
 		}
 
