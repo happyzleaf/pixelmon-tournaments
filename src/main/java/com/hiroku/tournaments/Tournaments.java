@@ -6,8 +6,8 @@ import com.happyzleaf.tournaments.text.TextAction;
 import com.hiroku.tournaments.api.reward.RewardTypeRegistrar;
 import com.hiroku.tournaments.api.rule.RuleTypeRegistrar;
 import com.hiroku.tournaments.api.tiers.TierLoader;
-import com.hiroku.tournaments.commands.TournamentsExecutor;
-import com.hiroku.tournaments.commands.elo.EloExecutor;
+import com.hiroku.tournaments.commands.TournamentCommand;
+import com.hiroku.tournaments.commands.elo.EloCommand;
 import com.hiroku.tournaments.config.TournamentConfig;
 import com.hiroku.tournaments.elo.EloStorage;
 import com.hiroku.tournaments.listeners.*;
@@ -46,7 +46,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.function.Supplier;
 
 /**
  * Base plugin class for the Tournaments plugin/API
@@ -122,8 +121,8 @@ public class Tournaments {
 
 	public void onCommands(RegisterCommandsEvent event) {
 		event.getDispatcher().register(TextAction.build());
-		event.getDispatcher().register(new TournamentsExecutor().create());
-		event.getDispatcher().register(new EloExecutor().create());
+		event.getDispatcher().register(new TournamentCommand().create());
+		event.getDispatcher().register(new EloCommand().create());
 	}
 
 	public void registerDefaultRules() {

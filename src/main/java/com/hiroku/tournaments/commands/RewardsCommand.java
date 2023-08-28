@@ -71,7 +71,7 @@ public class RewardsCommand implements Command<CommandSource> {
 
 		String rewardType = getOptArgument(context, "rewardType", String.class).orElse(null);
 		if (rewardType == null && choice.equals("add")) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Missing argument. Usage: /tournaments rewards add/remove rewardType[:argument]"), true);
+			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Missing argument. Usage: /tournament rewards add/remove rewardType[:argument]"), true);
 			return 0;
 		}
 

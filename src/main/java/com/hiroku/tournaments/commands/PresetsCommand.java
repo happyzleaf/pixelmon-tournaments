@@ -87,7 +87,7 @@ public class PresetsCommand implements Command<CommandSource> {
         } else if (choice.equals("rename")) {
             String[] splits = presetName.split(" ");
             if (splits.length < 2) {
-                source.sendFeedback(Text.of(TextFormatting.RED, "Not enough arguments: /tournaments presets rename <oldName> <newName>"), true);
+                source.sendFeedback(Text.of(TextFormatting.RED, "Not enough arguments: /tournament presets rename <oldName> <newName>"), true);
                 return 0;
             }
             String oldName = Presets.getMatchingKey(splits[0]);

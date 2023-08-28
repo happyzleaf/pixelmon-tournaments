@@ -17,7 +17,7 @@ import net.minecraftforge.server.command.EnumArgument;
 
 import static com.hiroku.tournaments.util.CommandUtils.getOptArgument;
 
-public class EloExecutor implements Command<CommandSource> {
+public class EloCommand implements Command<CommandSource> {
 	public LiteralArgumentBuilder<CommandSource> create() {
 		return Commands.literal("elo")
 //				.description(Text.of("Base Elo command"))

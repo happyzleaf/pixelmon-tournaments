@@ -6,6 +6,7 @@ import net.minecraft.command.ICommandSource;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.TextFormatting;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,14 +24,14 @@ public class Pagination {
     private final int pages;
     private final List<Text> contents;
 
-    private Pagination(Text title, Text header, Text footer, Text padding, List<Text> contents, int linesPerPage) {
+    private Pagination(Text title, Text padding, Text header, Text footer, List<Text> contents, int linesPerPage) {
         this.title = title;
+        this.padding = padding;
         this.header = header;
         this.footer = footer;
-        this.padding = padding;
         this.linesPerPage = linesPerPage;
 
-        this.pages = (int) ((double) contents.size() / linesPerPage);
+        this.pages = Math.max(1, (int) ((double) contents.size() / linesPerPage));
         this.contents = contents;
     }
 
@@ -40,16 +41,18 @@ public class Pagination {
         }
     }
 
-    private static void centered(Text.Builder builder, Text padding, Text text) {
+    private static Text.Builder centered(Text.Builder builder, Text padding, Text text) {
         int textLen = text.toPlain().length();
         int paddingLen = padding.toPlain().length();
-        int paddingAmountTop = (int) ((MAX_LINE_CHARS - textLen - 2d) / (paddingLen * 2d));
+        int paddingAmountTop = (int) ((50 - textLen - 2d) / (paddingLen * 2d));
 
         repeat(builder, padding, paddingAmountTop);
         builder.append(SPACE);
         builder.append(text);
         builder.append(SPACE);
         repeat(builder, padding, paddingAmountTop);
+
+        return builder;
     }
 
     private Text get(int page) {
@@ -62,28 +65,32 @@ public class Pagination {
 
         Text.Builder builder = Text.builder();
 
-        centered(builder, this.padding, this.title);
-        builder.append(this.header);
-        this.contents.forEach(builder::append);
-        builder.append(this.footer);
+        centered(builder, this.padding, this.title).append(NEWLINE);
+        if (this.header != null) builder.append(this.header).append(NEWLINE);
+        lines.forEach(line -> builder.append(line).append(NEWLINE));
+        if (this.footer != null) builder.append(this.footer).append(NEWLINE);
 
         Text backArrow = Text.of("<");
         if (page > 0) {
-            backArrow.onClick((src, ctx) -> {
-                ctx.keepAlive();
-                src.sendMessage(get(page - 1), Util.DUMMY_UUID);
-            });
+            backArrow
+                    .onHover(Text.of(TextFormatting.LIGHT_PURPLE, "Previous page"))
+                    .onClick((src, ctx) -> {
+                        ctx.keepAlive();
+                        src.sendMessage(get(page - 1), Util.DUMMY_UUID);
+                    });
         }
 
         Text nextArrow = Text.of(">");
-        if (page < this.pages) {
-            nextArrow.onClick((src, ctx) -> {
-                ctx.keepAlive();
-                src.sendMessage(get(page + 1), Util.DUMMY_UUID);
-            });
+        if (page < this.pages - 1) {
+            nextArrow
+                    .onHover(Text.of(TextFormatting.LIGHT_PURPLE, "Next page"))
+                    .onClick((src, ctx) -> {
+                        ctx.keepAlive();
+                        src.sendMessage(get(page + 1), Util.DUMMY_UUID);
+                    });
         }
 
-        centered(builder, padding, Text.of(backArrow, " " + (page + 1) + "/" + pages + " ", nextArrow));
+        centered(builder, padding, Text.of(backArrow, " " + (page + 1) + "/" + pages + " ", nextArrow)).append(NEWLINE);
 
         return builder.build();
     }
@@ -93,12 +100,12 @@ public class Pagination {
     }
 
     public static class Builder {
-        private Text title = Text.of(TextFormatting.GREEN, "Title");
-        private Text padding = Text.of(TextFormatting.DARK_GREEN, "-");
-        private Text header = Text.of(TextFormatting.GREEN, "Header");
-        private Text footer = Text.of(TextFormatting.GREEN, "Footer");
+        private Text title = Text.of(TextFormatting.GOLD, "Title");
+        private Text padding = Text.of(TextFormatting.GOLD, "-");
+        private Text header = null;
+        private Text footer = null;
         private int linesPerPage = 10;
-        private List<Text> contents = new ArrayList<>();
+        private final List<Text> contents = new ArrayList<>();
 
         public Builder title(Text title) {
             this.title = title;
@@ -110,12 +117,12 @@ public class Pagination {
             return this;
         }
 
-        public Builder header(Text header) {
+        public Builder header(@Nullable Text header) {
             this.header = header;
             return this;
         }
 
-        public Builder footer(Text footer) {
+        public Builder footer(@Nullable Text footer) {
             this.footer = footer;
             return this;
         }
@@ -126,6 +133,7 @@ public class Pagination {
         }
 
         public Builder contents(List<Text> contents) {
+            this.contents.clear();
             this.contents.addAll(contents);
             return this;
         }
@@ -142,9 +150,13 @@ public class Pagination {
         }
 
         public void sendTo(CommandSource source) {
-            Text firstPage = build().get(0);
-            if (firstPage != null) {
-                source.sendFeedback(firstPage, true);
+            try {
+                Text firstPage = build().get(0);
+                if (firstPage != null) {
+                    source.sendFeedback(firstPage, false);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

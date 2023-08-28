@@ -78,7 +78,7 @@ public class ZoneCommand implements Command<CommandSource> {
             }
 
             if (Zones.INSTANCE.leaveZone == null) {
-                context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no leave zone set. Use /tournaments zones leavezone set"), true);
+                context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no leave zone set. Use /tournament zones leavezone set"), true);
                 return 0;
             }
             if (context.getSource().getEntity() instanceof PlayerEntity) {

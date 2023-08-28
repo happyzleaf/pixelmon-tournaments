@@ -18,9 +18,11 @@ public class Text extends StringTextComponent {
     public static final Text ERROR = of(TextFormatting.RED, "ERROR");
 
     private final List<Object> objs;
+    private final String plain;
 
     private Text(List<Object> objs) {
         super("");
+
         this.objs = objs.stream()
                 .map(obj -> {
                     if (obj instanceof TextFormatting) {
@@ -29,16 +31,22 @@ public class Text extends StringTextComponent {
 
                     return obj instanceof ITextComponent ? obj : new StringTextComponent(obj.toString());
                 })
-                .peek(obj -> {
-                    if (obj instanceof ITextComponent) {
-                        appendSibling((ITextComponent) obj);
-                    }
-                })
                 .collect(Collectors.toList());
-        deepWalk(this.getStyle());
+
+        // Apparently peek is not supposed to be used lol
+        this.objs.forEach(obj -> {
+            if (obj instanceof ITextComponent) {
+                appendSibling((ITextComponent) obj);
+            }
+        });
+
+        StringBuilder plain = new StringBuilder();
+        deepWalk(plain, this.getStyle());
+        this.plain = plain.toString();
     }
 
-    private Style deepWalk(Style current) {
+    private Style deepWalk(StringBuilder plain, Style current) {
+        plain.append(this.getText());
         this.setStyle(this.getStyle().mergeStyle(current));
 
         for (Object obj : this.objs) {
@@ -47,9 +55,10 @@ public class Text extends StringTextComponent {
                 current = current.applyFormatting(formatting);
             } else if (obj instanceof Text) {
                 Text text = (Text) obj;
-                current = text.deepWalk(current);
+                current = text.deepWalk(plain, current);
             } else {
                 TextComponent component = (TextComponent) obj;
+                plain.append(component.getString());
                 current = component.getStyle().mergeStyle(current);
                 component.setStyle(current);
             }
@@ -79,20 +88,12 @@ public class Text extends StringTextComponent {
         return this;
     }
 
-    // TODO this MIGHT not account for the siblings... do that???
-    //      test and make sure
-    //      also make sure that textformatting don't appear. They shouldn't
     public String toPlain() {
-//		StringBuilder result = new StringBuilder(getText());
-//		for (ITextComponent sibling : getSiblings()) {
-//			result.append(sibling.toString())
-//		}
-//		return result.toString();
-        return getString();
+        return this.plain;
     }
 
     public String serialize() {
-        return getText().replace("\u00A7", "&");
+        return this.plain.replace("\u00A7", "&");
     }
 
     public static Text of(Object... texts) {

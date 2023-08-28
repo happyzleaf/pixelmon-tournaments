@@ -26,11 +26,11 @@ import static com.hiroku.tournaments.util.CommandUtils.getOptArgument;
  *
  * @author Hiroku
  */
-public class TournamentsExecutor implements Command<CommandSource> {
+public class TournamentCommand implements Command<CommandSource> {
     private static final Set<String> CHOICES = new HashSet<>(Arrays.asList("open", "close", "start"));
 
     public LiteralArgumentBuilder<CommandSource> create() {
-        return Commands.literal("tournaments")
+        return Commands.literal("tournament")
 //				.description(Text.of("Base tournament command"))
                 .requires(source -> User.hasPermission(source, "tournaments.command.common.tournament"))
                 .executes(this)
