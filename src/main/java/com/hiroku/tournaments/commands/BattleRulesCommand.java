@@ -18,7 +18,6 @@ public class BattleRulesCommand implements Command<CommandSource> {
         return Commands.literal("rules")
 //				.description(Text.of("Sets the Pixelmon battle rules. The battle rule argument should be the exported battle rules but instead of new lines, use commas"))
                 .requires(source -> User.hasPermission(source, "tournaments.command.admin.battlerules"))
-                .executes(this)
                 .then(
                         Commands.literal("clear")
                                 .executes(this)
@@ -31,7 +30,7 @@ public class BattleRulesCommand implements Command<CommandSource> {
 
     @Override
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        // Clear and default
+        // Clear
         if (Tournament.instance() == null) {
             context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament to set battle rules for. Try /tournament create"), false);
             return 0;

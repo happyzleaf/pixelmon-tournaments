@@ -108,8 +108,7 @@ public class Tournaments {
 		EloStorage.load();
 
 		if (PixelmonConfigProxy.getBattle().getForceEndBattleResult() != ForceBattleEndResult.ABNORMAL) {
-			// TODO: check if this is still in pixelmon.hocon
-			log("WARNING: forceEndBattleResult in pixelmon.hocon should be set to 2. Ending bugged tournament battles will not go well!");
+			log("WARNING: force-end-battle-result in pixelmon.hocon should be set to ABNORMAL. Ending bugged tournament battles will not go well!");
 		}
 
 		// TODO: placeholder?

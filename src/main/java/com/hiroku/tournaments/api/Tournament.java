@@ -26,17 +26,22 @@ import com.hiroku.tournaments.obj.Zone;
 import com.hiroku.tournaments.rules.general.EloType;
 import com.hiroku.tournaments.util.TournamentUtils;
 import com.pixelmonmod.pixelmon.api.util.helpers.RandomHelper;
+import com.pixelmonmod.pixelmon.battles.api.rules.BattleRuleRegistry;
+import com.pixelmonmod.pixelmon.battles.api.rules.BattleRules;
+import com.pixelmonmod.pixelmon.battles.api.rules.PropertyValue;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Object representation of a tournament. Various of the contained functions can be
@@ -612,6 +617,8 @@ public class Tournament extends Mode {
                 Text.of(TextFormatting.GRAY, "[Hover to see, click for full list]")
                         .onHover(getRuleSet().getDisplayText())
                         .onClick((src, ctx) -> {
+                            ctx.keepAlive();
+
                             List<Text> contents = new ArrayList<>();
                             for (RuleBase rule : getRuleSet().rules)
                                 if (rule.canShow(src))
@@ -630,19 +637,30 @@ public class Tournament extends Mode {
                     Text.of(TextFormatting.GRAY, "[Hover to see, click for full list]")
                             .onHover(Text.of(getRuleSet().br.exportText()))
                             .onClick((src, ctx) -> {
-                                boolean clause = false;
+                                ctx.keepAlive();
+
+                                // TODO: this is an NPE!! Also do the same for ^^^^^ onHover
                                 List<Text> contents = new ArrayList<>();
-                                for (String line : getRuleSet().br.exportText().split("\n")) {
-                                    contents.add(Text.of((clause ? "- " : "") + line));
-                                    if (line.equals("Clauses"))
-                                        clause = true;
-                                }
+                                contents.addAll(
+                                        BattleRuleRegistry.getAllProperties().stream()
+                                                .filter(bp -> !bp.getId().equals(BattleRuleRegistry.CLAUSES.getId()))
+                                                .map(bp -> Pair.of(bp, (PropertyValue<?>) this.ruleSet.br.get(bp).orElse(null)))
+                                                .filter(bp -> bp.getValue() != null)
+                                                .map(bp -> Text.of(TextFormatting.LIGHT_PURPLE, bp.getLeft().getId(), ": ", bp.getRight().get().toString()))
+                                                .collect(Collectors.toList())
+                                );
+                                contents.addAll(
+                                        this.ruleSet.br.getClauseList().stream()
+                                                .map(c -> Text.of(TextFormatting.DARK_PURPLE, "[C] ", c.getID(), ": ", TextFormatting.LIGHT_PURPLE, c.getDescription()))
+                                                .collect(Collectors.toList())
+                                );
+
                                 Pagination.builder()
                                         .title(Text.of(TextFormatting.GOLD, "Battle Rules"))
                                         .padding(Text.of(TextFormatting.GOLD, "-"))
                                         .linesPerPage(10)
                                         .contents(contents)
-                                        .sendTo(src);
+                                        .sendTo(source);
                             })
             ), false);
         }
@@ -650,6 +668,7 @@ public class Tournament extends Mode {
                 Text.of(TextFormatting.GRAY, "[Hover to preview, click for full list]")
                         .onHover(TournamentUtils.showRewards(source))
                         .onClick((src, ctx) -> {
+                            ctx.keepAlive();
                             List<Text> contents = new ArrayList<>();
                             for (RewardBase reward : rewards)
                                 if (reward.canShow(src))
@@ -667,6 +686,8 @@ public class Tournament extends Mode {
                 Text.of(TextFormatting.GRAY, "[Hover to preview, click for full list]")
                         .onHover(TournamentUtils.showTeams(source))
                         .onClick((src, ctx) -> {
+                            ctx.keepAlive();
+
                             List<Text> contents = new ArrayList<>();
 
                             List<Team> liveTeams = new ArrayList<>();
@@ -692,7 +713,7 @@ public class Tournament extends Mode {
                                     contents.add(Text.of(TextFormatting.RED, "*", team.getDisplayText()));
                             }
 
-			        		Pagination.builder()
+                            Pagination.builder()
                                     .title(Text.of(TextFormatting.GOLD, "Teams"))
                                     .padding(Text.of(TextFormatting.GOLD, "-"))
                                     .header(Text.of(TextFormatting.GREEN, "*", TextFormatting.GOLD, " = alive, ", TextFormatting.RED, "*", TextFormatting.GOLD, " = knocked out, "))
@@ -706,10 +727,12 @@ public class Tournament extends Mode {
                 Text.of(TextFormatting.GRAY, "[Hover to preview, click for full list]")
                         .onHover(TournamentUtils.showMatches(source))
                         .onClick((src, ctx) -> {
+                            ctx.keepAlive();
+
                             List<Text> contents = new ArrayList<>();
                             for (Match match : round)
                                 contents.add(Text.of(match.getStateText(), match.getDisplayText()));
-				        	Pagination.builder()
+                            Pagination.builder()
                                     .title(Text.of(TextFormatting.GOLD, "Upcoming Matches"))
                                     .padding(Text.of(TextFormatting.GOLD, "-"))
                                     .header(Text.of(TextFormatting.GRAY, "*", TextFormatting.GOLD, " = waiting, ", TextFormatting.YELLOW, "*", TextFormatting.GOLD, " = starting, ", TextFormatting.RED, "*", TextFormatting.GOLD, " = active"))
