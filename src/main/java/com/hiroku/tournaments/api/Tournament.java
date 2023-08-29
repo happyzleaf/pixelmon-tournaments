@@ -27,7 +27,6 @@ import com.hiroku.tournaments.rules.general.EloType;
 import com.hiroku.tournaments.util.TournamentUtils;
 import com.pixelmonmod.pixelmon.api.util.helpers.RandomHelper;
 import com.pixelmonmod.pixelmon.battles.api.rules.BattleRuleRegistry;
-import com.pixelmonmod.pixelmon.battles.api.rules.BattleRules;
 import com.pixelmonmod.pixelmon.battles.api.rules.PropertyValue;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
