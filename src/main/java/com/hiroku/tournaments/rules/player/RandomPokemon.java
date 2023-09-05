@@ -8,7 +8,7 @@ import com.hiroku.tournaments.api.rule.types.PlayerRule;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.api.tiers.Tier;
 import com.hiroku.tournaments.obj.Team;
-import com.hiroku.tournaments.util.PokemonUtils;
+import com.hiroku.tournaments.util.PixelmonUtils;
 import com.hiroku.tournaments.util.TournamentUtils;
 import com.pixelmonmod.api.pokemon.PokemonSpecification;
 import com.pixelmonmod.api.pokemon.PokemonSpecificationProxy;
@@ -97,7 +97,7 @@ public class RandomPokemon extends PlayerRule {
 		if (!this.rentalOnly)
 			return true;
 
-		return storage.findOne(pokemon -> !pokemon.isEgg() && !PokemonUtils.isRental(pokemon)) == null;
+		return storage.findOne(pokemon -> !pokemon.isEgg() && !PixelmonUtils.isRental(pokemon)) == null;
 	}
 
 	@Override
@@ -221,7 +221,7 @@ public class RandomPokemon extends PlayerRule {
 		PCStorage pc = user.getPC();
 		List<Pokemon> toRemove = new ArrayList<>();
 		for (Pokemon pokemon : pc.getAll()) {
-			if (pokemon != null && PokemonUtils.isRental(pokemon)) {
+			if (pokemon != null && PixelmonUtils.isRental(pokemon)) {
 				toRemove.add(pokemon);
 			}
 		}
@@ -235,7 +235,7 @@ public class RandomPokemon extends PlayerRule {
 		// Party
 		PlayerPartyStorage party = user.getParty();
 		for (Pokemon pokemon : party.getTeam()) {
-			if (PokemonUtils.isRental(pokemon)) {
+			if (PixelmonUtils.isRental(pokemon)) {
 				TournamentUtils.giveItemsToPlayer(player, pokemon.getHeldItem());
 				Tournaments.log("Took rental Pokémon: " + pokemon.getSpecies().getLocalizedName() + " from " + user.getName() + "'s party");
 				party.set(pokemon.getPosition(), null);
@@ -249,7 +249,7 @@ public class RandomPokemon extends PlayerRule {
 				if (!party.hasSpace())
 					pc.transfer(party, party.findOne(Pokemon::isEgg).getPosition(), pc.getFirstEmptyPosition());
 
-				Pokemon replacement = pc.findOne(pokemon -> !pokemon.isEgg() && !PokemonUtils.isRental(pokemon));
+				Pokemon replacement = pc.findOne(pokemon -> !pokemon.isEgg() && !PixelmonUtils.isRental(pokemon));
 
 				if (replacement != null) {
 					party.transfer(pc, replacement.getPosition(), party.getFirstEmptyPosition());

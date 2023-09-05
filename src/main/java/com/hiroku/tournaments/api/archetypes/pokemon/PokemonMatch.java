@@ -17,7 +17,7 @@ import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.obj.Zone;
 import com.hiroku.tournaments.rules.general.BattleType;
 import com.hiroku.tournaments.rules.general.BattleType.TeamsComposition;
-import com.hiroku.tournaments.util.PokemonUtils;
+import com.hiroku.tournaments.util.PixelmonUtils;
 import com.pixelmonmod.pixelmon.api.battles.BattleEndCause;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
@@ -172,7 +172,7 @@ public class PokemonMatch extends Match {
 			List<BattleParticipant> side1Participants = new ArrayList<>();
 			List<BattleParticipant> side2Participants = new ArrayList<>();
 
-			BattleRules br = new BattleRules(PokemonUtils.exportBRText(Tournament.instance().getRuleSet().br));
+			BattleRules br = new BattleRules(PixelmonUtils.exportBRText(Tournament.instance().getRuleSet().br));
 			br.set(BattleRuleRegistry.BATTLE_TYPE, composition == TeamsComposition.SINGLE ? com.pixelmonmod.pixelmon.api.battles.BattleType.SINGLE : com.pixelmonmod.pixelmon.api.battles.BattleType.DOUBLE);
 
 			for (int sideIndex = 0; sideIndex < 2; sideIndex++) {

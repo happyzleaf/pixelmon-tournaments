@@ -4,7 +4,7 @@ import com.happyzleaf.tournaments.text.Text;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.archetypes.pokemon.PokemonMatch;
 import com.hiroku.tournaments.obj.Side;
-import com.hiroku.tournaments.util.PokemonUtils;
+import com.hiroku.tournaments.util.PixelmonUtils;
 import com.pixelmonmod.pixelmon.api.battles.BattleResults;
 import com.pixelmonmod.pixelmon.api.events.battles.BattleEndEvent;
 import com.pixelmonmod.pixelmon.api.events.battles.BattleStartedEvent;
@@ -56,7 +56,7 @@ public class BattleListener {
 				boolean individualHadRentals = false;
 				PlayerParticipant pp = (PlayerParticipant) bp;
 				for (int i = 0; i < 6; i++) {
-					if (pp.getStorage().get(i) != null && PokemonUtils.isRental(pp.getStorage().get(i))) {
+					if (pp.getStorage().get(i) != null && PixelmonUtils.isRental(pp.getStorage().get(i))) {
 						pp.getStorage().set(i, null);
 						individualHadRentals = hadRentals = true;
 					}

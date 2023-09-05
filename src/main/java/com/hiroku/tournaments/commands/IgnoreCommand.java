@@ -30,6 +30,7 @@ public class IgnoreCommand implements Command<CommandSource> {
 				.executes(this)
 				.then(
 						Commands.argument("choice", ChoiceSetArgument.choiceSet(CHOICES))
+//								.suggests(ChoiceSetArgument.suggest(CHOICES))
 								.executes(this)
 				);
 	}

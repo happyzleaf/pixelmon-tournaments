@@ -8,7 +8,7 @@ import com.hiroku.tournaments.api.rule.RuleSet;
 import com.hiroku.tournaments.api.rule.RuleTypeRegistrar;
 import com.hiroku.tournaments.api.rule.types.RuleBase;
 import com.hiroku.tournaments.obj.Zone;
-import com.hiroku.tournaments.util.PokemonUtils;
+import com.hiroku.tournaments.util.PixelmonUtils;
 import com.pixelmonmod.pixelmon.battles.api.rules.BattleRules;
 
 import java.io.*;
@@ -59,7 +59,7 @@ public class Presets {
 					pw.println(zone.uid);
 				pw.println("}");
 				if (preset.battleRules != null)
-					pw.println("battlerules=" + PokemonUtils.exportBRText(preset.battleRules).replaceAll("\n", ","));
+					pw.println("battlerules=" + PixelmonUtils.exportBRText(preset.battleRules).replaceAll("\n", ","));
 				pw.flush();
 			} else
 				Tournaments.log("Unknown error while saving preset: " + name);

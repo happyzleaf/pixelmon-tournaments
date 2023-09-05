@@ -28,6 +28,7 @@ public class ForfeitCommand implements Command<CommandSource> {
 				.executes(this)
 				.then(
 						Commands.argument("user", UserArgument.user())
+//								.suggests(UserArgument.suggest())
 								.executes(this)
 				);
 	}

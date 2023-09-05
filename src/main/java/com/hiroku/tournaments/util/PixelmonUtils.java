@@ -10,7 +10,7 @@ import com.pixelmonmod.pixelmon.battles.api.rules.PropertyValue;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-public class PokemonUtils {
+public class PixelmonUtils {
     private static Field properties_f = null;
     private static PokemonSpecification rental = null;
 
@@ -36,6 +36,11 @@ public class PokemonUtils {
         }
     }
 
+    /**
+     * Bug fix for weird pixelmon regression in {@link BattleRules#exportText()}
+     * @param br The {@link BattleRules} to export.
+     * @return The exported {@link BattleRules} as {@link String}.
+     */
     public static String exportBRText(BattleRules br) {
         StringBuilder builder = new StringBuilder();
         for (Map.Entry<BattleProperty<?>, PropertyValue<?>> entry : getBRProperties(br).entrySet()) {

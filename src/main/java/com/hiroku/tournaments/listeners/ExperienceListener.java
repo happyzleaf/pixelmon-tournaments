@@ -3,7 +3,7 @@ package com.hiroku.tournaments.listeners;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.enums.TournamentStates;
 import com.hiroku.tournaments.rules.general.SetParty;
-import com.hiroku.tournaments.util.PokemonUtils;
+import com.hiroku.tournaments.util.PixelmonUtils;
 import com.pixelmonmod.pixelmon.api.enums.ExperienceGainType;
 import com.pixelmonmod.pixelmon.api.events.ExperienceGainEvent;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
@@ -23,7 +23,7 @@ public class ExperienceListener {
         }
 
 		Pokemon pokemon = event.pokemon.getPokemon();
-		if (PokemonUtils.isRental(pokemon) || pokemon.getPersistentData().contains(SetParty.OLD_LEVEL_KEY)) {
+		if (PixelmonUtils.isRental(pokemon) || pokemon.getPersistentData().contains(SetParty.OLD_LEVEL_KEY)) {
 			event.setExperience(0);
 		}
 

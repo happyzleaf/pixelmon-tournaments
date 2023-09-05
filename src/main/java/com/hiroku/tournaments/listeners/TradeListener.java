@@ -1,7 +1,7 @@
 package com.hiroku.tournaments.listeners;
 
 import com.happyzleaf.tournaments.text.Text;
-import com.hiroku.tournaments.util.PokemonUtils;
+import com.hiroku.tournaments.util.PixelmonUtils;
 import com.pixelmonmod.pixelmon.api.events.PixelmonTradeEvent;
 import com.pixelmonmod.pixelmon.api.events.PokegiftEvent;
 import net.minecraft.util.Util;
@@ -15,7 +15,7 @@ public class TradeListener {
 			return;
 		}
 
-		if (PokemonUtils.isRental(event.getPokemon1()) || PokemonUtils.isRental(event.getPokemon2())) {
+		if (PixelmonUtils.isRental(event.getPokemon1()) || PixelmonUtils.isRental(event.getPokemon2())) {
 			event.setCanceled(true);
 			event.getPlayer1().sendMessage(Text.of(TextFormatting.RED, "Trade cancelled; one of the Pokémon was rented for a tournament!"), Util.DUMMY_UUID);
 			event.getPlayer2().sendMessage(Text.of(TextFormatting.RED, "Trade cancelled; one of the Pokémon was rented for a tournament!"), Util.DUMMY_UUID);
@@ -28,7 +28,7 @@ public class TradeListener {
 			return;
 		}
 
-		if (PokemonUtils.isRental(event.getPokemon())) {
+		if (PixelmonUtils.isRental(event.getPokemon())) {
 			event.setCanceled(true);
 			event.getGiver().sendMessage(Text.of(TextFormatting.RED, "Trade cancelled; the Pokémon was rented for a tournament!"), Util.DUMMY_UUID);
 			event.getReceiver().sendMessage(Text.of(TextFormatting.RED, "Trade cancelled; the Pokémon was rented for a tournament!"), Util.DUMMY_UUID);

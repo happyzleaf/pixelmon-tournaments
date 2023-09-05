@@ -36,6 +36,7 @@ public class TournamentCommand implements Command<CommandSource> {
                 .executes(this)
                 .then(
                         Commands.argument("action", ChoiceSetArgument.choiceSet(CHOICES))
+//                                .suggests(ChoiceSetArgument.suggest(CHOICES))
                                 .executes(this)
                 )
                 .then(new ReloadCommand().create())

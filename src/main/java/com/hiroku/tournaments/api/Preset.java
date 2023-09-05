@@ -4,7 +4,7 @@ import com.happyzleaf.tournaments.text.Text;
 import com.hiroku.tournaments.api.reward.RewardBase;
 import com.hiroku.tournaments.api.rule.RuleSet;
 import com.hiroku.tournaments.obj.Zone;
-import com.hiroku.tournaments.util.PokemonUtils;
+import com.hiroku.tournaments.util.PixelmonUtils;
 import com.pixelmonmod.pixelmon.battles.api.rules.BattleProperty;
 import com.pixelmonmod.pixelmon.battles.api.rules.BattleRules;
 import com.pixelmonmod.pixelmon.battles.api.rules.PropertyValue;
@@ -56,7 +56,7 @@ public class Preset {
             builder.append("\n", TextFormatting.GOLD, "Zones: ", TextFormatting.DARK_AQUA, zones.size());
         }
 
-        for (Map.Entry<BattleProperty<?>, PropertyValue<?>> entry : PokemonUtils.getBRProperties(battleRules).entrySet()) {
+        for (Map.Entry<BattleProperty<?>, PropertyValue<?>> entry : PixelmonUtils.getBRProperties(battleRules).entrySet()) {
             builder.append("\n", TextFormatting.DARK_AQUA, entry.getKey().getId()).append(": ").append(entry.getValue().get());
         }
 

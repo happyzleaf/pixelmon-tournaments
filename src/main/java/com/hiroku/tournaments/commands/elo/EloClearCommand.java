@@ -25,6 +25,7 @@ public class EloClearCommand implements Command<CommandSource> {
 				.executes(this)
 				.then(
 						Commands.argument("user", UserArgument.user())
+//								.suggests(UserArgument.suggest())
 								.executes(this)
 								.then(
 										Commands.argument("type", EnumArgument.enumArgument(EloTypes.class))

@@ -24,24 +24,22 @@ import com.hiroku.tournaments.obj.Side;
 import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.obj.Zone;
 import com.hiroku.tournaments.rules.general.EloType;
-import com.hiroku.tournaments.util.PokemonUtils;
+import com.hiroku.tournaments.util.PixelmonUtils;
 import com.hiroku.tournaments.util.TournamentUtils;
 import com.pixelmonmod.pixelmon.api.util.helpers.RandomHelper;
-import com.pixelmonmod.pixelmon.battles.api.rules.BattleRuleRegistry;
+import com.pixelmonmod.pixelmon.battles.api.rules.BattleProperty;
 import com.pixelmonmod.pixelmon.battles.api.rules.PropertyValue;
+import com.pixelmonmod.pixelmon.battles.api.rules.clauses.BattleClause;
+import com.pixelmonmod.pixelmon.battles.api.rules.property.ClausesProperty;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 /**
  * Object representation of a tournament. Various of the contained functions can be
@@ -632,33 +630,36 @@ public class Tournament extends Mode {
                         })
         ), false);
 
+        Text.Builder brText = Text.builder();
+        List<Text> brList = new ArrayList<>();
+        for (Map.Entry<BattleProperty<?>, PropertyValue<?>> entry : PixelmonUtils.getBRProperties(getRuleSet().br).entrySet()) {
+            if (!brList.isEmpty()) {
+                brText.append("\n");
+            }
+
+            BattleProperty<?> property = entry.getKey();
+            if (property instanceof ClausesProperty) {
+                Set<BattleClause> clauses = getRuleSet().br.get((ClausesProperty) property).orElse(Collections.emptySet());
+                for (BattleClause clause : clauses) {
+                    brList.add(Text.of(TextFormatting.DARK_GREEN, "[C] ", clause.getID(), ": ", TextFormatting.GREEN, clause.getDescription()));
+                }
+            } else {
+                brList.add(Text.of(TextFormatting.DARK_GREEN, property.getId(), ": ", TextFormatting.GREEN, entry.getValue().get()));
+            }
+
+            brText.append(brList.get(brList.size() - 1));
+        }
         source.sendFeedback(Text.of(TextFormatting.GOLD, "Battle Rules: ",
                 Text.of(TextFormatting.GRAY, "[Hover to see, click for full list]")
-                        .onHover(Text.of(PokemonUtils.exportBRText(getRuleSet().br)))
+                        .onHover(brText.build())
                         .onClick((src, ctx) -> {
                             ctx.keepAlive();
-
-                            // TODO: this is an NPE!! Also do the same for ^^^^^ onHover
-                            List<Text> contents = new ArrayList<>();
-                            contents.addAll(
-                                    BattleRuleRegistry.getAllProperties().stream()
-                                            .filter(bp -> !bp.getId().equals(BattleRuleRegistry.CLAUSES.getId()))
-                                            .map(bp -> Pair.of(bp, (PropertyValue<?>) this.ruleSet.br.get(bp).orElse(null)))
-                                            .filter(bp -> bp.getValue() != null)
-                                            .map(bp -> Text.of(TextFormatting.LIGHT_PURPLE, bp.getLeft().getId(), ": ", bp.getRight().get().toString()))
-                                            .collect(Collectors.toList())
-                            );
-                            contents.addAll(
-                                    this.ruleSet.br.getClauseList().stream()
-                                            .map(c -> Text.of(TextFormatting.DARK_PURPLE, "[C] ", c.getID(), ": ", TextFormatting.LIGHT_PURPLE, c.getDescription()))
-                                            .collect(Collectors.toList())
-                            );
 
                             Pagination.builder()
                                     .title(Text.of(TextFormatting.GOLD, "Battle Rules"))
                                     .padding(Text.of(TextFormatting.GOLD, "-"))
                                     .linesPerPage(10)
-                                    .contents(contents)
+                                    .contents(brList)
                                     .sendTo(source);
                         })
         ), false);
