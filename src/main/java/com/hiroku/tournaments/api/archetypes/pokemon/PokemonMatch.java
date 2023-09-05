@@ -17,6 +17,7 @@ import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.obj.Zone;
 import com.hiroku.tournaments.rules.general.BattleType;
 import com.hiroku.tournaments.rules.general.BattleType.TeamsComposition;
+import com.hiroku.tournaments.util.PokemonUtils;
 import com.pixelmonmod.pixelmon.api.battles.BattleEndCause;
 import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 import com.pixelmonmod.pixelmon.api.storage.PlayerPartyStorage;
@@ -93,13 +94,12 @@ public class PokemonMatch extends Match {
 			for (Team team : side.teams) {
 				for (User user : team.users) {
 					PlayerEntity player = user.getPlayer();
-					BattleController spectatedBattle = BattleRegistry.getSpectatedBattle(player);
-					if (spectatedBattle != null) {
-						spectatedBattle.removeSpectator((ServerPlayerEntity) player);
-					}
-
 					BattleController battle = BattleRegistry.getBattle(player);
-					if (battle != null) {
+					if (battle == null) continue;
+
+					if (battle.hasSpectator(player)) {
+						battle.removeSpectator((ServerPlayerEntity) player);
+					} else {
 						battle.endBattle(BattleEndCause.FORCE);
 					}
 				}
@@ -172,7 +172,7 @@ public class PokemonMatch extends Match {
 			List<BattleParticipant> side1Participants = new ArrayList<>();
 			List<BattleParticipant> side2Participants = new ArrayList<>();
 
-			BattleRules br = new BattleRules(Tournament.instance().getRuleSet().br.exportText());
+			BattleRules br = new BattleRules(PokemonUtils.exportBRText(Tournament.instance().getRuleSet().br));
 			br.set(BattleRuleRegistry.BATTLE_TYPE, composition == TeamsComposition.SINGLE ? com.pixelmonmod.pixelmon.api.battles.BattleType.SINGLE : com.pixelmonmod.pixelmon.api.battles.BattleType.DOUBLE);
 
 			for (int sideIndex = 0; sideIndex < 2; sideIndex++) {

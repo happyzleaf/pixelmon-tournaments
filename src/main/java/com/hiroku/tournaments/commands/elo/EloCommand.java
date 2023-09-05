@@ -25,7 +25,6 @@ public class EloCommand implements Command<CommandSource> {
 				.executes(this)
 				.then(
 						Commands.argument("user", UserArgument.user())
-								// TODO: requires??? (for all children also?)
 								.executes(this)
 								.then(
 										Commands.argument("type", EnumArgument.enumArgument(EloTypes.class))

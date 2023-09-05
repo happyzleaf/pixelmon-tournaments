@@ -24,6 +24,7 @@ import com.hiroku.tournaments.obj.Side;
 import com.hiroku.tournaments.obj.Team;
 import com.hiroku.tournaments.obj.Zone;
 import com.hiroku.tournaments.rules.general.EloType;
+import com.hiroku.tournaments.util.PokemonUtils;
 import com.hiroku.tournaments.util.TournamentUtils;
 import com.pixelmonmod.pixelmon.api.util.helpers.RandomHelper;
 import com.pixelmonmod.pixelmon.battles.api.rules.BattleRuleRegistry;
@@ -631,38 +632,37 @@ public class Tournament extends Mode {
                         })
         ), false);
 
-        if (!getRuleSet().br.exportText().isEmpty()) {
-            source.sendFeedback(Text.of(TextFormatting.GOLD, "Battle Rules: ",
-                    Text.of(TextFormatting.GRAY, "[Hover to see, click for full list]")
-                            .onHover(Text.of(getRuleSet().br.exportText()))
-                            .onClick((src, ctx) -> {
-                                ctx.keepAlive();
+        source.sendFeedback(Text.of(TextFormatting.GOLD, "Battle Rules: ",
+                Text.of(TextFormatting.GRAY, "[Hover to see, click for full list]")
+                        .onHover(Text.of(PokemonUtils.exportBRText(getRuleSet().br)))
+                        .onClick((src, ctx) -> {
+                            ctx.keepAlive();
 
-                                // TODO: this is an NPE!! Also do the same for ^^^^^ onHover
-                                List<Text> contents = new ArrayList<>();
-                                contents.addAll(
-                                        BattleRuleRegistry.getAllProperties().stream()
-                                                .filter(bp -> !bp.getId().equals(BattleRuleRegistry.CLAUSES.getId()))
-                                                .map(bp -> Pair.of(bp, (PropertyValue<?>) this.ruleSet.br.get(bp).orElse(null)))
-                                                .filter(bp -> bp.getValue() != null)
-                                                .map(bp -> Text.of(TextFormatting.LIGHT_PURPLE, bp.getLeft().getId(), ": ", bp.getRight().get().toString()))
-                                                .collect(Collectors.toList())
-                                );
-                                contents.addAll(
-                                        this.ruleSet.br.getClauseList().stream()
-                                                .map(c -> Text.of(TextFormatting.DARK_PURPLE, "[C] ", c.getID(), ": ", TextFormatting.LIGHT_PURPLE, c.getDescription()))
-                                                .collect(Collectors.toList())
-                                );
+                            // TODO: this is an NPE!! Also do the same for ^^^^^ onHover
+                            List<Text> contents = new ArrayList<>();
+                            contents.addAll(
+                                    BattleRuleRegistry.getAllProperties().stream()
+                                            .filter(bp -> !bp.getId().equals(BattleRuleRegistry.CLAUSES.getId()))
+                                            .map(bp -> Pair.of(bp, (PropertyValue<?>) this.ruleSet.br.get(bp).orElse(null)))
+                                            .filter(bp -> bp.getValue() != null)
+                                            .map(bp -> Text.of(TextFormatting.LIGHT_PURPLE, bp.getLeft().getId(), ": ", bp.getRight().get().toString()))
+                                            .collect(Collectors.toList())
+                            );
+                            contents.addAll(
+                                    this.ruleSet.br.getClauseList().stream()
+                                            .map(c -> Text.of(TextFormatting.DARK_PURPLE, "[C] ", c.getID(), ": ", TextFormatting.LIGHT_PURPLE, c.getDescription()))
+                                            .collect(Collectors.toList())
+                            );
 
-                                Pagination.builder()
-                                        .title(Text.of(TextFormatting.GOLD, "Battle Rules"))
-                                        .padding(Text.of(TextFormatting.GOLD, "-"))
-                                        .linesPerPage(10)
-                                        .contents(contents)
-                                        .sendTo(source);
-                            })
-            ), false);
-        }
+                            Pagination.builder()
+                                    .title(Text.of(TextFormatting.GOLD, "Battle Rules"))
+                                    .padding(Text.of(TextFormatting.GOLD, "-"))
+                                    .linesPerPage(10)
+                                    .contents(contents)
+                                    .sendTo(source);
+                        })
+        ), false);
+
         source.sendFeedback(Text.of(TextFormatting.GOLD, "Rewards: ",
                 Text.of(TextFormatting.GRAY, "[Hover to preview, click for full list]")
                         .onHover(TournamentUtils.showRewards(source))

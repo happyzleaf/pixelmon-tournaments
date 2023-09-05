@@ -116,6 +116,10 @@ public class Text extends StringTextComponent {
             return this;
         }
 
+        public Builder append(Object... objs) {
+            return append(Text.of(objs));
+        }
+
         public Text build() {
             return new Text(texts);
         }
