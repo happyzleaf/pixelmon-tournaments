@@ -2,8 +2,15 @@ package com.hiroku.tournaments.util;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ParsedArgument;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.command.CommandSource;
+import net.minecraft.command.arguments.EntityArgument;
+import net.minecraft.command.arguments.EntitySelector;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -52,5 +59,21 @@ public class CommandUtils {
         } else {
             throw new IllegalArgumentException("Argument '" + name + "' is defined as " + result.getClass().getSimpleName() + ", not " + clazz);
         }
+    }
+
+    public static <S extends CommandSource> Optional<PlayerEntity> getOptPlayer(CommandContext<S> context, final String name) throws CommandSyntaxException {
+        EntitySelector selector = getOptArgument(context, name, EntitySelector.class).orElse(null);
+        if (selector == null) {
+            return Optional.empty();
+        }
+
+        List<ServerPlayerEntity> players = selector.selectPlayers(context.getSource());
+        if (players.isEmpty()) {
+            return Optional.empty();
+        } else if (players.size() > 1) {
+            throw EntityArgument.TOO_MANY_PLAYERS.create();
+        }
+
+        return Optional.of(players.get(0));
     }
 }

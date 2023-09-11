@@ -1,7 +1,6 @@
 package com.hiroku.tournaments.commands;
 
 import com.happyzleaf.tournaments.User;
-import com.happyzleaf.tournaments.args.ChoiceSetArgument;
 import com.happyzleaf.tournaments.text.Text;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.enums.TournamentStates;
@@ -15,29 +14,31 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.util.text.TextFormatting;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import static com.hiroku.tournaments.util.CommandUtils.getOptArgument;
-
 /**
  * Base command executor for all tournament commands
  *
  * @author Hiroku
  */
 public class TournamentCommand implements Command<CommandSource> {
-    private static final Set<String> CHOICES = new HashSet<>(Arrays.asList("open", "close", "start"));
-
     public LiteralArgumentBuilder<CommandSource> create() {
         return Commands.literal("tournament")
 //				.description(Text.of("Base tournament command"))
                 .requires(source -> User.hasPermission(source, "tournaments.command.common.tournament"))
                 .executes(this)
                 .then(
-                        Commands.argument("action", ChoiceSetArgument.choiceSet(CHOICES))
-//                                .suggests(ChoiceSetArgument.suggest(CHOICES))
-                                .executes(this)
+                        Commands.literal("open")
+                                .requires(source -> User.hasPermission(source, "tournaments.command.admin.tournament"))
+                                .executes(this::open)
+                )
+                .then(
+                        Commands.literal("close")
+                                .requires(source -> User.hasPermission(source, "tournaments.command.admin.tournament"))
+                                .executes(this::close)
+                )
+                .then(
+                        Commands.literal("start")
+                                .requires(source -> User.hasPermission(source, "tournaments.command.admin.tournament"))
+                                .executes(this::start)
                 )
                 .then(new ReloadCommand().create())
                 .then(new RerollCommand().create())
@@ -56,57 +57,60 @@ public class TournamentCommand implements Command<CommandSource> {
 
     @Override
     public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-        String choice = getOptArgument(context, "action", String.class).orElse(null);
-        if (choice != null) {
-            if (!User.hasPermission(context.getSource(), "tournaments.command.admin.tournament")) {
-                context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You don't have permission to do any of the tournament options!"), false);
-                return 0;
-            }
-
-            if (choice.equals("open")) {
-                if (Tournament.instance() == null)
-                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no tournament to open. Try /tournament create"), false);
-                else if (Tournament.instance().state == TournamentStates.OPEN)
-                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "The tournament is already open. Pay attention."), false);
-                else if (Tournament.instance().state == TournamentStates.ACTIVE)
-                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "I mean, the tournament is up and running, so dunno what you're trying to do"), false);
-                else {
-                    Tournament.instance().open();
-                    return 1;
-                }
-            } else if (choice.equals("close")) {
-                if (Tournament.instance() == null)
-                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "It's a tad difficult to close a tournament that doesn't exist"), false);
-                else {
-                    if (Tournament.instance().teams != null)
-                        for (Team team : Tournament.instance().teams)
-                            for (User user : team.users)
-                                // TODO logic changed and now removeRentalPokemon only works with online players and does nothing.
-                                //      make sure this logic is solid when player is offline
-                                RandomPokemon.removeRentalPokemon(user, true);
-                    Tournament.instance().close();
-                    context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Tournament closed."), false);
-                    return 1;
-                }
-            } else if (choice.equals("start")) {
-                if (Tournament.instance() == null || Tournament.instance().state == TournamentStates.CLOSED) {
-                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no open tournament to start. Have you tried /tournament open?"), false);
-                    return 0;
-                } else if (Tournament.instance().state == TournamentStates.ACTIVE) {
-                    context.getSource().sendFeedback(Text.of(TextFormatting.RED, "A tournament is already active. Close it if you want to make a new one."), false);
-                    return 0;
-                }
-
-                Tournament.instance().start();
-            }
-        }
-
         if (Tournament.instance() == null) {
             context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament"), false);
-        } else {
-            Tournament.instance().showTournament(context.getSource());
+            return 0;
         }
 
+        Tournament.instance().showTournament(context.getSource());
+        return 1;
+    }
+
+    private int open(CommandContext<CommandSource> context) throws CommandSyntaxException {
+        if (Tournament.instance() == null) {
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no tournament to open. Try /tournament create"), false);
+            return 0;
+        } else if (Tournament.instance().state == TournamentStates.OPEN) {
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "The tournament is already open. Pay attention."), false);
+            return 0;
+        } else if (Tournament.instance().state == TournamentStates.ACTIVE) {
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "I mean, the tournament is up and running, so dunno what you're trying to do"), false);
+            return 0;
+        }
+
+        Tournament.instance().open();
+        return 1;
+    }
+
+    private int close(CommandContext<CommandSource> context) throws CommandSyntaxException {
+        if (Tournament.instance() == null) {
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "It's a tad difficult to close a tournament that doesn't exist"), false);
+            return 0;
+        }
+
+        if (Tournament.instance().teams != null) {
+            for (Team team : Tournament.instance().teams) {
+                for (User user : team.users) {
+                    RandomPokemon.removeRentalPokemon(user, true);
+                }
+            }
+        }
+
+        Tournament.instance().close();
+        context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Tournament closed."), false);
+        return 1;
+    }
+
+    private int start(CommandContext<CommandSource> context) throws CommandSyntaxException {
+        if (Tournament.instance() == null || Tournament.instance().state == TournamentStates.CLOSED) {
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There is no open tournament to start. Have you tried /tournament open?"), false);
+            return 0;
+        } else if (Tournament.instance().state == TournamentStates.ACTIVE) {
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "A tournament is already active. Close it if you want to make a new one."), false);
+            return 0;
+        }
+
+        Tournament.instance().start();
         return 1;
     }
 }

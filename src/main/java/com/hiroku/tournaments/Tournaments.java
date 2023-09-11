@@ -1,6 +1,5 @@
 package com.hiroku.tournaments;
 
-import com.happyzleaf.tournaments.args.ChoiceSetArgument;
 import com.happyzleaf.tournaments.args.UserArgument;
 import com.happyzleaf.tournaments.text.TextAction;
 import com.hiroku.tournaments.api.reward.RewardTypeRegistrar;
@@ -55,7 +54,7 @@ import java.util.Collections;
  */
 @Mod("tournaments")
 public class Tournaments {
-	public static final String VERSION = "3.0.3";
+	public static final String VERSION = "3.0.4";
 
 	public static Tournaments INSTANCE;
 	public static final PluginLogger LOGGER = new PluginLogger("tournaments");
@@ -82,7 +81,6 @@ public class Tournaments {
 		MinecraftForge.EVENT_BUS.addListener(this::onCommands);
 
 		ArgumentTypes.register("user", UserArgument.class, new ArgumentSerializer<>(UserArgument::user));
-		ArgumentTypes.register("choiceset", ChoiceSetArgument.class, new ArgumentSerializer<>(() -> ChoiceSetArgument.choiceSet(Collections.emptySet())));
 	}
 
 	private void onStart(FMLServerAboutToStartEvent event) {

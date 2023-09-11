@@ -1,8 +1,7 @@
 package com.hiroku.tournaments.commands;
 
-import com.happyzleaf.tournaments.text.Text;
 import com.happyzleaf.tournaments.User;
-import com.happyzleaf.tournaments.args.ChoiceSetArgument;
+import com.happyzleaf.tournaments.text.Text;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.enums.TournamentStates;
 import com.mojang.brigadier.Command;
@@ -14,48 +13,37 @@ import net.minecraft.command.Commands;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.text.TextFormatting;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-
-import static com.hiroku.tournaments.util.CommandUtils.getOptArgument;
-
 public class IgnoreCommand implements Command<CommandSource> {
-	private static final Set<String> CHOICES = new HashSet<>(Arrays.asList("yes", "no"));
-
-	public LiteralArgumentBuilder<CommandSource> create() {
-		return Commands.literal("ignore")
+    public LiteralArgumentBuilder<CommandSource> create() {
+        return Commands.literal("ignore")
 //				.description(Text.of("Toggles tournament messages"))
-				.requires(source -> User.hasPermission(source, "tournaments.command.common.ignore"))
-				.executes(this)
-				.then(
-						Commands.argument("choice", ChoiceSetArgument.choiceSet(CHOICES))
-//								.suggests(ChoiceSetArgument.suggest(CHOICES))
-								.executes(this)
-				);
-	}
+                .requires(source -> User.hasPermission(source, "tournaments.command.common.ignore"))
+                .executes(this)
+                .then(Commands.literal("yes").executes(context -> ignore(context, true)))
+                .then(Commands.literal("no").executes(context -> ignore(context, false)));
+    }
 
-	@Override
-	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-		if (Tournament.instance() == null || Tournament.instance().state == TournamentStates.CLOSED) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There's nothing to ignore; there's no tournament open"), false);
-			return 0;
-		}
+    @Override
+    public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
+        return ignore(context, null);
+    }
 
-		PlayerEntity player = context.getSource().asPlayer();
-		boolean ignore = !Tournament.instance().ignoreList.contains(player.getUniqueID());
+    private int ignore(CommandContext<CommandSource> context, Boolean ignore) throws CommandSyntaxException {
+        if (Tournament.instance() == null || Tournament.instance().state == TournamentStates.CLOSED) {
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "There's nothing to ignore; there's no tournament open"), false);
+            return 0;
+        }
 
-		Boolean choice = getOptArgument(context, "choice", String.class).map(s -> s.equals("yes")).orElse(null);
-		if (choice != null) {
-			ignore = choice;
-		}
+        PlayerEntity player = context.getSource().asPlayer();
+        ignore = ignore == null ? !Tournament.instance().ignoreList.contains(player.getUniqueID()) : ignore;
 
-		Tournament.instance().ignoreList.remove(player.getUniqueID());
-		if (ignore)
-			Tournament.instance().ignoreList.add(player.getUniqueID());
+        if (ignore) {
+            Tournament.instance().ignoreList.add(player.getUniqueID());
+        } else {
+            Tournament.instance().ignoreList.remove(player.getUniqueID());
+        }
 
-		context.getSource().sendFeedback(Tournament.instance().getMessageProvider().getIgnoreToggleMessage(ignore), false);
-
-		return 1;
-	}
+        context.getSource().sendFeedback(Tournament.instance().getMessageProvider().getIgnoreToggleMessage(ignore), false);
+        return 1;
+    }
 }

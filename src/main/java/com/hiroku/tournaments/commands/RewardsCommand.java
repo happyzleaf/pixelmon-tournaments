@@ -1,9 +1,9 @@
 package com.hiroku.tournaments.commands;
 
+import com.happyzleaf.tournaments.User;
 import com.happyzleaf.tournaments.text.Pagination;
 import com.happyzleaf.tournaments.text.Text;
-import com.happyzleaf.tournaments.User;
-import com.happyzleaf.tournaments.args.ChoiceSetArgument;
+import com.hiroku.tournaments.api.Mode;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.api.reward.RewardBase;
 import com.hiroku.tournaments.api.reward.RewardTypeRegistrar;
@@ -14,139 +14,138 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
+import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
-import java.util.*;
+import java.util.stream.Collectors;
 
-import static com.hiroku.tournaments.util.CommandUtils.getOptArgument;
+import static com.hiroku.tournaments.util.CommandUtils.getOptPlayer;
 
 public class RewardsCommand implements Command<CommandSource> {
-	private static final Set<String> CHOICES = new HashSet<>(Arrays.asList("add", "remove", "test"));
-
-	public LiteralArgumentBuilder<CommandSource> create() {
-		return Commands.literal("rewards")
+    public LiteralArgumentBuilder<CommandSource> create() {
+        return Commands.literal("rewards")
 //				.description(Text.of("Handles adding or removing rewards for a tournament"))
-				.requires(source -> User.hasPermission(source, "tournaments.command.common.rewards"))
-				.executes(this)
-				.then(
-						Commands.argument("action", ChoiceSetArgument.choiceSet(CHOICES))
-//								.suggests(ChoiceSetArgument.suggest(CHOICES))
-								.executes(this)
-								.then(
-										Commands.argument("rewardType", StringArgumentType.greedyString())
-												.executes(this)
-								)
-				);
-	}
+                .requires(source -> User.hasPermission(source, "tournaments.command.common.rewards"))
+                .executes(this)
+                .then(
+                        Commands.literal("add")
+                                .requires(source -> User.hasPermission(source, "tournaments.command.common.rewards"))
+                                .then(
+                                        Commands.argument("reward", StringArgumentType.greedyString())
+                                                .executes(this::add)
+                                )
+                )
+                .then(
+                        Commands.literal("remove")
+                                .requires(source -> User.hasPermission(source, "tournaments.command.common.rewards"))
+                                .then(
+                                        Commands.argument("reward", StringArgumentType.greedyString())
+                                                .executes(this::remove)
+                                )
+                )
+                .then(
+                        Commands.literal("test")
+                                .requires(source -> User.hasPermission(source, "tournaments.command.common.rewards"))
+                                .executes(this::test)
+                                .then(
+                                        Commands.argument("player", EntityArgument.player())
+                                                .executes(this::test)
+                                )
+                );
+    }
 
-	@Override
-	public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
-		if (Tournament.instance() == null) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament to change rewards for. Try /tournament create"), false);
-			return 0;
-		}
+    @Override
+    public int run(CommandContext<CommandSource> context) throws CommandSyntaxException {
+        if (Tournament.instance() == null) {
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament to change rewards for. Try /tournament create"), false);
+            return 0;
+        }
 
-		String choice = getOptArgument(context, "action", String.class).orElse(null);
-		if (choice == null) {
-			PlayerEntity player = context.getSource().getEntity() instanceof PlayerEntity ? context.getSource().asPlayer() : null;
+        PlayerEntity player = context.getSource().getEntity() instanceof PlayerEntity ? context.getSource().asPlayer() : null;
+        Pagination.builder()
+                .title(Text.of(TextFormatting.GOLD, "Rewards"))
+                .padding(Text.of(TextFormatting.GOLD, "-"))
+                .linesPerPage(10)
+                .contents(Tournament.instance().rewards.stream().filter(r -> r.canShow(player)).map(Mode::getDisplayText).collect(Collectors.toList()))
+                .sendTo(context.getSource());
+        return 1;
+    }
 
-			List<Text> contents = new ArrayList<>();
-			for (RewardBase reward : Tournament.instance().rewards)
-				if (reward.canShow(player))
-					contents.add(Text.of(reward.getDisplayText()));
-			Pagination.builder()
-					.title(Text.of(TextFormatting.GOLD, "Rewards"))
-					.padding(Text.of(TextFormatting.GOLD, "-"))
-					.linesPerPage(10)
-					.contents(contents)
-					.sendTo(context.getSource());
-			return 1;
-		}
+    private int add(CommandContext<CommandSource> context) throws CommandSyntaxException {
+        if (Tournament.instance() == null) {
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament to change rewards for. Try /tournament create"), false);
+            return 0;
+        }
 
-		if (!User.hasPermission(context.getSource(), "tournaments.command.common.rewards")) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "You do not have permission to add, remove, or test rewards!"), false);
-			return 0;
-		}
+        String[] args = context.getArgument("reward", String.class).split(":", 2);
+        String key = args[0];
+        String value = args.length > 1 ? args[1] : "";
 
-		String rewardType = getOptArgument(context, "rewardType", String.class).orElse(null);
-		if (rewardType == null && choice.equals("add")) {
-			context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Missing argument. Usage: /tournament rewards add/remove rewardType[:argument]"), false);
-			return 0;
-		}
+        try {
+            Tournament.instance().rewards.add(RewardTypeRegistrar.parse(key, value));
+            context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully added reward: ", TextFormatting.DARK_AQUA, key, ":", value), false);
+            return 1;
+        } catch (Exception e) {
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Error parsing reward: ", e.getMessage()), false);
+            e.printStackTrace();
+            return 1;
+        }
+    }
 
-		String arg = rewardType;
+    private int remove(CommandContext<CommandSource> context) throws CommandSyntaxException {
+        if (Tournament.instance() == null) {
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament to change rewards for. Try /tournament create"), false);
+            return 0;
+        }
 
-		String key = null;
-		if (arg != null && arg.contains(":")) {
-			key = arg.split(":")[0];
-			arg = arg.substring(arg.indexOf(":") + 1);
-		} else if (arg != null && !arg.contains(":")) {
-			key = arg;
-			arg = "";
-		}
+        String key = context.getArgument("reward", String.class).split(":", 2)[0];
 
-		if (choice.equals("add")) {
-			try {
-				Tournament.instance().rewards.add(RewardTypeRegistrar.parse(key, arg));
-				context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully added reward: ", TextFormatting.DARK_AQUA, key, ":", arg), false);
-				return 1;
-			} catch (Exception e) {
-				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Error parsing reward: ", e.getMessage()), false);
-				e.printStackTrace();
-				return 1;
-			}
-		} else if (choice.equals("remove")) {
-			Class<? extends RewardBase> rewardTypeClass = RewardTypeRegistrar.getRewardTypeForKey(key);
-			if (rewardTypeClass == null) {
-				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Invalid reward type: ", key), false);
-				return 0;
-			}
+        Class<? extends RewardBase> rewardTypeClass = RewardTypeRegistrar.getRewardTypeForKey(key);
+        if (rewardTypeClass == null) {
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Invalid reward type: ", key), false);
+            return 0;
+        }
 
-			int removed = 0;
-			for (int i = 0; i < Tournament.instance().rewards.size(); i++) {
-				if (Tournament.instance().rewards.get(i).getClass() == rewardTypeClass) {
-					Tournament.instance().rewards.remove(i);
-					i--;
-					removed++;
-				}
-			}
+        int removed = 0;
+        for (int i = 0; i < Tournament.instance().rewards.size(); i++) {
+            if (Tournament.instance().rewards.get(i).getClass() == rewardTypeClass) {
+                Tournament.instance().rewards.remove(i);
+                i--;
+                removed++;
+            }
+        }
 
-			if (removed == 0) {
-				context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No rewards present of type: ", TextFormatting.DARK_AQUA, key), false);
-				return 0;
-			} else {
-				context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully removed all ", removed, " rule/s of type ", key), false);
-				return 1;
-			}
-		} else if (choice.equals("test")) {
-			PlayerEntity target;
+        if (removed == 0) {
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No rewards present of type: ", TextFormatting.DARK_AQUA, key), false);
+            return 0;
+        }
 
-			if (context.getSource().getEntity() instanceof PlayerEntity) {
-				target = context.getSource().asPlayer();
-			} else {
-				if (arg == null) {
-					context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Missing argument: player"), false);
-					return 0;
-				} else {
-					target = ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayerByUsername(arg);
-					if (target == null) {
-						context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Invalid player: ", TextFormatting.DARK_AQUA, arg), false);
-						return 0;
-					}
-				}
-				return 0;
-			}
+        context.getSource().sendFeedback(Text.of(TextFormatting.DARK_GREEN, "Successfully removed all ", removed, " rule/s of type ", key), false);
+        return 1;
+    }
 
-			if (target != null) {
-				context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Giving ", TextFormatting.DARK_AQUA, target.getName(), TextFormatting.GRAY, " the current rewards..."), false);
-				for (RewardBase reward : Tournament.instance().rewards)
-					reward.give(target);
-			}
-			return 1;
-		}
+    private int test(CommandContext<CommandSource> context) throws CommandSyntaxException {
+        if (Tournament.instance() == null) {
+            context.getSource().sendFeedback(Text.of(TextFormatting.RED, "No tournament to change rewards for. Try /tournament create"), false);
+            return 0;
+        }
 
-		return 0;
-	}
+        PlayerEntity target = getOptPlayer(context, "player").orElse(null);
+        if (target == null) {
+            if (!(context.getSource().getEntity() instanceof PlayerEntity)) {
+                context.getSource().sendFeedback(Text.of(TextFormatting.RED, "Missing argument: player"), false);
+                return 0;
+            }
+
+            target = context.getSource().asPlayer();
+        }
+
+        context.getSource().sendFeedback(Text.of(TextFormatting.GRAY, "Giving ", TextFormatting.DARK_AQUA, target.getName(), TextFormatting.GRAY, " the current rewards..."), false);
+        for (RewardBase reward : Tournament.instance().rewards) {
+            reward.give(target);
+        }
+
+        return 1;
+    }
 }

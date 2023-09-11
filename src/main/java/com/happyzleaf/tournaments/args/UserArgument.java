@@ -6,8 +6,8 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.ISuggestionProvider;
 import net.minecraft.command.arguments.EntityArgument;
@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import static com.hiroku.tournaments.util.CommandUtils.getOptArgument;
 
@@ -71,8 +72,9 @@ public class UserArgument implements ArgumentType<UserArgument.IUserProvider> {
         }
     }
 
-    public static <S> SuggestionProvider<S> suggest() {
-        return (context, builder) -> ISuggestionProvider.suggest(
+    @Override
+    public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
+        return ISuggestionProvider.suggest(
                 ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers()
                         .stream()
                         .map((player) -> player.getGameProfile().getName()),

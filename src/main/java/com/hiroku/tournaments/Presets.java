@@ -16,6 +16,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Static manager of all the rule+reward+zone presets. These are located: ./config/tournaments/presets/*.txt
@@ -198,10 +199,10 @@ public class Presets {
 	}
 
 	/**
-	 * Gets all of the current presets. (Immutable. To change a preset, you must use Presets.setPreset(String, Preset) ).
+	 * Gets all the current presets. (Immutable. To change a preset, you must use Presets.setPreset(String, Preset) ).
 	 * This is to ensure edits are saved. Nothing personal, I just don't trust you.
 	 */
-	public static ImmutableMap<String, Preset> getPresets() {
+	public static Map<String, Preset> getPresets() {
 		return ImmutableMap.copyOf(presets);
 	}
 
