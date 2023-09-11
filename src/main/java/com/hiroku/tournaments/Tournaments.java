@@ -2,6 +2,7 @@ package com.hiroku.tournaments;
 
 import com.happyzleaf.tournaments.args.UserArgument;
 import com.happyzleaf.tournaments.text.TextAction;
+import com.hiroku.tournaments.api.requirements.RentalRequirement;
 import com.hiroku.tournaments.api.reward.RewardTypeRegistrar;
 import com.hiroku.tournaments.api.rule.RuleTypeRegistrar;
 import com.hiroku.tournaments.api.tiers.TierLoader;
@@ -28,7 +29,6 @@ import com.hiroku.tournaments.rules.team.PartyMin;
 import com.hiroku.tournaments.util.PluginLogger;
 import com.hiroku.tournaments.util.TournamentUtils;
 import com.pixelmonmod.api.pokemon.PokemonSpecificationProxy;
-import com.pixelmonmod.api.pokemon.requirement.impl.HasSpecFlagRequirement;
 import com.pixelmonmod.pixelmon.Pixelmon;
 import com.pixelmonmod.pixelmon.api.config.ForceBattleEndResult;
 import com.pixelmonmod.pixelmon.api.config.PixelmonConfigProxy;
@@ -113,7 +113,7 @@ public class Tournaments {
 //		if (Sponge.getPluginManager().isLoaded("placeholderapi"))
 //			EloPlaceholder.addPlaceholder();
 
-		PokemonSpecificationProxy.register(new HasSpecFlagRequirement("rental"));
+		PokemonSpecificationProxy.register(new RentalRequirement());
 	}
 
 	public void onCommands(RegisterCommandsEvent event) {

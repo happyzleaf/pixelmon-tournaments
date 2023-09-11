@@ -1,8 +1,5 @@
 package com.hiroku.tournaments.util;
 
-import com.pixelmonmod.api.pokemon.PokemonSpecification;
-import com.pixelmonmod.api.pokemon.PokemonSpecificationProxy;
-import com.pixelmonmod.pixelmon.api.pokemon.Pokemon;
 import com.pixelmonmod.pixelmon.battles.api.rules.BattleProperty;
 import com.pixelmonmod.pixelmon.battles.api.rules.BattleRules;
 import com.pixelmonmod.pixelmon.battles.api.rules.PropertyValue;
@@ -12,15 +9,6 @@ import java.util.Map;
 
 public class PixelmonUtils {
     private static Field properties_f = null;
-    private static PokemonSpecification rental = null;
-
-    public static boolean isRental(Pokemon pokemon) {
-        if (rental == null) {
-            rental = PokemonSpecificationProxy.create("rental");
-        }
-
-        return rental.matches(pokemon);
-    }
 
     public static Map<BattleProperty<?>, PropertyValue<?>> getBRProperties(BattleRules br) {
         try {
