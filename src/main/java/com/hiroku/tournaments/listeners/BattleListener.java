@@ -61,7 +61,7 @@ public class BattleListener {
             PlayerPartyStorage storage = pp.getStorage();
             for (int i = 0; i < PlayerPartyStorage.MAX_PARTY; i++) {
                 Pokemon pokemon = storage.get(i);
-                if (pokemon == null || RentalRequirement.is(pokemon)) continue;
+                if (pokemon == null || !RentalRequirement.is(pokemon)) continue;
 
                 storage.set(i, null);
                 rentals = true;
