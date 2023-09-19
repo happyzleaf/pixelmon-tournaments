@@ -1,8 +1,8 @@
 package com.hiroku.tournaments.commands.elo;
 
-import com.happyzleaf.tournaments.text.Text;
 import com.happyzleaf.tournaments.User;
 import com.happyzleaf.tournaments.args.UserArgument;
+import com.happyzleaf.tournaments.text.Text;
 import com.hiroku.tournaments.elo.EloStorage;
 import com.hiroku.tournaments.elo.EloTypes;
 import com.mojang.brigadier.Command;
@@ -25,7 +25,7 @@ public class EloCommand implements Command<CommandSource> {
 				.executes(this)
 				.then(
 						Commands.argument("user", UserArgument.user())
-//								.suggests(UserArgument.suggest())
+								.suggests(UserArgument.suggest())
 								.executes(this)
 								.then(
 										Commands.argument("type", EnumArgument.enumArgument(EloTypes.class))

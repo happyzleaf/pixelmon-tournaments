@@ -1,6 +1,5 @@
 package com.hiroku.tournaments;
 
-import com.happyzleaf.tournaments.args.UserArgument;
 import com.happyzleaf.tournaments.text.TextAction;
 import com.hiroku.tournaments.api.requirements.RentalRequirement;
 import com.hiroku.tournaments.api.reward.RewardTypeRegistrar;
@@ -32,8 +31,6 @@ import com.pixelmonmod.api.pokemon.PokemonSpecificationProxy;
 import com.pixelmonmod.pixelmon.Pixelmon;
 import com.pixelmonmod.pixelmon.api.config.ForceBattleEndResult;
 import com.pixelmonmod.pixelmon.api.config.PixelmonConfigProxy;
-import net.minecraft.command.arguments.ArgumentSerializer;
-import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.BusBuilder;
@@ -54,8 +51,6 @@ import java.util.Collections;
  */
 @Mod("tournaments")
 public class Tournaments {
-	public static final String VERSION = "3.0.5";
-
 	public static Tournaments INSTANCE;
 	public static final PluginLogger LOGGER = new PluginLogger("tournaments");
 	public static final IEventBus EVENT_BUS = BusBuilder.builder().build();
@@ -79,12 +74,10 @@ public class Tournaments {
 	private void onSetup(FMLCommonSetupEvent event) {
 		MinecraftForge.EVENT_BUS.addListener(this::onStart);
 		MinecraftForge.EVENT_BUS.addListener(this::onCommands);
-
-		ArgumentTypes.register("user", UserArgument.class, new ArgumentSerializer<>(UserArgument::user));
 	}
 
 	private void onStart(FMLServerAboutToStartEvent event) {
-		log("Initializing Tournaments version " + VERSION + ", last updated for Pixelmon " + Pixelmon.VERSION + "...");
+		log("Initializing Tournaments...");
 		log("This platform was written by Hiroku and happyz!");
 
 		TournamentUtils.createDir("config/tournaments");

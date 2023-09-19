@@ -1,8 +1,8 @@
 package com.hiroku.tournaments.commands;
 
+import com.happyzleaf.tournaments.args.UserArgument;
 import com.happyzleaf.tournaments.text.Text;
 import com.happyzleaf.tournaments.User;
-import com.happyzleaf.tournaments.args.UserArgument;
 import com.hiroku.tournaments.api.Tournament;
 import com.hiroku.tournaments.enums.TournamentStates;
 import com.hiroku.tournaments.obj.Team;
@@ -28,7 +28,7 @@ public class ForfeitCommand implements Command<CommandSource> {
 				.executes(this)
 				.then(
 						Commands.argument("user", UserArgument.user())
-//								.suggests(UserArgument.suggest())
+								.suggests(UserArgument.suggest())
 								.executes(this)
 				);
 	}
