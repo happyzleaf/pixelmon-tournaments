@@ -30,7 +30,7 @@ public class TournamentUtils {
 	 * @param stack  - The SpongeAPI ItemStack to give to the player
 	 */
 	public static void giveItemsToPlayer(PlayerEntity player, ItemStack stack) {
-		if (!stack.isEmpty()) return;
+		if (stack.isEmpty()) return;
 
 		player.addItemStackToInventory(stack);
 
